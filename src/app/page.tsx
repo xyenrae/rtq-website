@@ -11,7 +11,7 @@ export default function Home() {
         </h1>
         <div className="relative h-64 md:h-96 rounded-xl overflow-hidden">
           <Image
-            src="/images/hero.jpg"
+            src="/images/gallery-1.png"
             alt="Kegiatan Belajar"
             fill
             className="object-cover"

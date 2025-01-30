@@ -12,6 +12,10 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      fontFamily: {
+        sans: ['var(--font-fredoka)', 'sans-serif'], // default font
+        'noto-sans': ['var(--font-noto-sans)', 'sans-serif'],
+      },
     },
   },
   plugins: [],

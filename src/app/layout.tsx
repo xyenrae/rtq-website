@@ -1,10 +1,23 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import Navigation from "@/components/layout/Navigation";
 import Footer from "@/components/layout/Footer";
 
-const inter = Inter({ subsets: ["latin"] });
+import { Fredoka, Noto_Sans } from "next/font/google";
+import Banner from "@/components/layout/Banner";
+
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  variable: "--font-fredoka",
+  display: "swap",
+});
+
+const notoSans = Noto_Sans({
+  subsets: ["latin"],
+  variable: "--font-noto-sans",
+  display: "swap",
+  weight: ["400", "500", "600", "700"], // sesuaikan dengan kebutuhan
+});
 
 export const metadata: Metadata = {
   title: "RTQ Al-Ikhlas",
@@ -17,8 +30,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id">
-      <body className={`${inter.className} bg-gray-50`}>
+    <html lang="id" className={`${fredoka.variable} ${notoSans.variable}`}>
+      <body className={`bg-gray-50`}>
+        <Banner />
         <Navigation />
         <main className="min-h-[calc(100vh-160px)]">{children}</main>
         <Footer />

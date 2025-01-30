@@ -8,3 +8,7 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 }
+
+.font-noto-sans {
+  font-family: var(--font-noto-sans), system-ui, sans-serif;
+}

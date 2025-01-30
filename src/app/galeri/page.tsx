@@ -1,12 +1,12 @@
 import Image from "next/image";
 
 const images = [
-  "/images/gallery-1.jpg",
-  "/images/gallery-2.jpg",
-  "/images/gallery-3.jpg",
-  "/images/gallery-4.jpg",
-  "/images/gallery-5.jpg",
-  "/images/gallery-6.jpg",
+  "/images/gallery-1.png",
+  "/images/gallery-2.png",
+  "/images/gallery-3.png",
+  "/images/gallery-4.png",
+  "/images/gallery-5.png",
+  "/images/gallery-6.png",
 ];
 
 export default function GaleriPage() {
