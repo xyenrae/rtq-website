@@ -25,7 +25,7 @@ export default function BeritaPage() {
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam
               voluptates, quod, quia, voluptatibus quae...
             </p>
-            <button className="mt-4 text-blue-600 hover:text-blue-700 font-medium">
+            <button className="mt-4 text-green-500 hover:text-green-700 font-medium">
               Baca Selengkapnya →
             </button>
           </article>

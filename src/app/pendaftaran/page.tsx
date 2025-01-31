@@ -113,7 +113,7 @@ export default function RegistrationPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+          className="w-full bg-green-500 text-white px-4 py-2 rounded hover:bg-green-500 disabled:bg-gray-400"
         >
           {isSubmitting ? "Mendaftarkan..." : "Daftar Sekarang"}
         </button>

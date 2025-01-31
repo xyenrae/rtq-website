@@ -26,7 +26,7 @@ export default function Navigation() {
       <div className="container mx-auto px-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Image
-            src="/images/logo-rtq.svg"
+            src="/images/logo-rtq.png"
             alt="Logo RTQ"
             width={isScrolled ? 80 : 100}
             height={isScrolled ? 80 : 100}

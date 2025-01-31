@@ -1,69 +1,48 @@
 import Image from "next/image";
-import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mt-16">
       {/* Hero Section */}
-      <section className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4">
-          Selamat Datang di RTQ Al-Ikhlas
-        </h1>
-        <div className="relative h-64 md:h-96 rounded-xl overflow-hidden">
-          <Image
-            src="/images/gallery-1.png"
-            alt="Kegiatan Belajar"
-            fill
-            className="object-cover"
-            priority
-          />
+      <section>
+        <div className="flex w-full items-center">
+          <div className="flex-1 grid gap-4">
+            <p className="text-green-500 font-semibold text-xl">
+              Yanbu&#39;a Islami
+            </p>
+            <p className="text-5xl font-bold">
+              Membentuk Santri <br /> Cinta Al-Qur&#39;an <br /> Sejak Dini
+            </p>
+            <p className="text-gray-600 text-lg">
+              Yuk, Bergabung Bersama Kami!
+            </p>
+            <button className="bg-yellow-400 text-black rounded-full w-fit p-3 px-6 hover:bg-yellow-500 transition-colors">
+              Daftar Sekarang
+            </button>
+          </div>
+
+          <div className="flex-1 relative w-full h-full min-h-[400px]">
+            <Image
+              src="/images/hero.svg"
+              alt=""
+              fill
+              className="object-contain object-center"
+              priority
+            />
+          </div>
         </div>
       </section>
-
-      {/* Menu CTA */}
-      <div className="grid md:grid-cols-3 gap-8 mb-16">
-        <CTACard
-          title="Pendaftaran Santri"
-          href="/pendaftaran"
-          image="/images/cta-register.jpg"
-        />
-        <CTACard
-          title="Berita Terkini"
-          href="/berita"
-          image="/images/cta-news.jpg"
-        />
-        <CTACard
-          title="Galeri Kegiatan"
-          href="/galeri"
-          image="/images/cta-gallery.jpg"
-        />
-      </div>
+      <section className="mt-32">
+        <div className="flex w-full flex-col items-center">
+          <p className="font-semibold text-2xl">Program Unggulan</p>
+          <p className="w-1/2 text-center mt-4">
+            Program RTQ Kami mencakup berbagai tingkatan untuk anak-anak usia
+            3-12 tahun, dengan kurikulum berbasis Metode Yanbu&#39;a dan
+            pembentukan akhlak Islami.
+          </p>
+        </div>
+        <div>card slider</div>
+      </section>
     </div>
-  );
-}
-
-function CTACard({
-  title,
-  href,
-  image,
-}: {
-  title: string;
-  href: string;
-  image: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group relative block rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow"
-    >
-      <div className="relative h-48">
-        <Image src={image} alt={title} fill className="object-cover" />
-      </div>
-      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-        <h2 className="text-white text-2xl font-bold group-hover:text-blue-300 transition-colors">
-          {title}
-        </h2>
-      </div>
-    </Link>
   );
 }
