@@ -12,3 +12,29 @@
 .font-noto-sans {
   font-family: var(--font-noto-sans), system-ui, sans-serif;
 }
+
+/* Hide scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+.swiper-pagination-bullet {
+  opacity: 1 !important;
+  margin: 0 4px !important;
+  transition: all 0.3s ease !important;
+  border-radius: 100px !important;
+}
+
+.swiper {
+  overflow: visible !important;
+}

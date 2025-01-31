@@ -1,3 +1,4 @@
+import CardSlider from "@/components/card/CardSlider";
 import Image from "next/image";
 
 export default function Home() {
@@ -32,16 +33,18 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="mt-32">
-        <div className="flex w-full flex-col items-center">
-          <p className="font-semibold text-2xl">Program Unggulan</p>
-          <p className="w-1/2 text-center mt-4">
-            Program RTQ Kami mencakup berbagai tingkatan untuk anak-anak usia
-            3-12 tahun, dengan kurikulum berbasis Metode Yanbu&#39;a dan
-            pembentukan akhlak Islami.
-          </p>
+      <section className="mt-32 overflow-hidden">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold mb-4">Program Unggulan</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Program pembelajaran Al-Qur&#39;an terstruktur untuk berbagai usia
+              dengan kurikulum berbasis Metode Yanbu&#39;a
+            </p>
+          </div>
+
+          <CardSlider />
         </div>
-        <div>card slider</div>
       </section>
     </div>
   );
