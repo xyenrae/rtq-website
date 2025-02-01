@@ -11,7 +11,7 @@ const programs = [
   {
     id: 1,
     title: "Kelas Tahfidz",
-    desc: "Program hafalan Al-Qur’an untuk anak-anak, dimulai dengan surat-surat pendek!",
+    desc: "Program hafalan Al-Qur’an untuk anak-anak santri, dimulai dengan surat-surat pendek!",
   },
   {
     id: 2,
@@ -26,7 +26,7 @@ const programs = [
   {
     id: 4,
     title: "Kelas Doa Harian",
-    desc: "Mengajarkan doa sehari-hari untuk membentuk kebiasaan Islami sejak dini.",
+    desc: "Mengajarkan doa sehari-hari untuk membentuk kebiasaan yang Islami sejak dini.",
   },
   {
     id: 5,
@@ -36,7 +36,7 @@ const programs = [
   {
     id: 6,
     title: "Kelas Ibadah",
-    desc: "Pembelajaran tata cara shalat, wudhu, dan ibadah lainnya sesuai tuntunan.",
+    desc: "Pembelajaran tata cara shalat, wudhu, dan ibadah lainnya sesuai tuntunan nabi Muhammad SAW.",
   },
   {
     id: 7,
@@ -82,12 +82,13 @@ export default function CardSlider() {
             freeMode: true,
           },
         }}
+        wrapperClass="items-stretch"
         className="!pb-12 !overflow-visible"
       >
         {programs.map((program) => (
           <SwiperSlide key={program.id}>
-            <div className="rounded-xl border-2 border-yellow-200 border-dotted overflow-hidden h-full py-6">
-              <div className="relative h-fit flex justify-center">
+            <div className="rounded-xl border-2 border-yellow-200 border-dotted overflow-hidden h-200 py-6">
+              <div className="relative flex justify-center">
                 <div className="bg-yellow-50 p-6 w-fit rounded-full">
                   <Image
                     src={`/images/program-${program.id}.png`}
@@ -99,11 +100,11 @@ export default function CardSlider() {
                   />
                 </div>
               </div>
-              <div className="px-6 mt-6">
+              <div className="px-6 mt-6 flex flex-col flex-1">
                 <h3 className="text-xl font-semibold mb-2 text-center">
                   {program.title}
                 </h3>
-                <p className="text-gray-600 line-clamp-3 text-center">
+                <p className="text-gray-600 line-clamp-3 text-center flex-1">
                   {program.desc}
                 </p>
                 <div className="flex justify-center">
