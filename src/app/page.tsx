@@ -1,4 +1,5 @@
-import CardSlider from "@/components/card/CardSlider";
+import CardSliderProgram from "@/components/card/CardSliderProgram";
+import CardSliderJilid from "@/components/card/CardSliderJilid";
 import Image from "next/image";
 
 export default function Home() {
@@ -43,7 +44,7 @@ export default function Home() {
             </p>
           </div>
 
-          <CardSlider />
+          <CardSliderProgram />
         </div>
       </section>
       <section className="mt-32">
@@ -109,6 +110,19 @@ export default function Home() {
               Lihat Detail
             </button>
           </div>
+        </div>
+      </section>
+      <section className="mt-32 overflow-hidden">
+        <div className="container">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold mb-4">Program Kami</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              RTQ Al-Hikmah didirikan pada 1974 dengan visi untuk membimbing
+              generasi Qur&#39;ani melalui pendidikan Islami yang berkualitas.
+            </p>
+          </div>
+
+          <CardSliderJilid />
         </div>
       </section>
     </div>

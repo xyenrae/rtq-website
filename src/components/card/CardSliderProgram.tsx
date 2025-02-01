@@ -50,7 +50,7 @@ const programs = [
   },
 ];
 
-export default function CardSlider() {
+export default function CardSliderProgram() {
   return (
     <div className="relative px-4">
       <Swiper
@@ -65,7 +65,7 @@ export default function CardSlider() {
         pagination={{
           clickable: true,
           bulletClass:
-            "swiper-pagination-bullet !bg-gray-300 !h-2 !w-8 !rounded-sm",
+            "swiper-pagination-bullet !bg-gray-300 !h-1 !w-8 !rounded-sm",
           bulletActiveClass: "!bg-green-500",
         }}
         breakpoints={{
