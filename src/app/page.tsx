@@ -7,9 +7,9 @@ import VisiMisi from "@/components/section/home/VisiMisi";
 
 export default function Home() {
   return (
-    <div className="container mt-16">
+    <div className="mt-16">
       {/* Hero Section */}
-      <section>
+      <section className="container">
         <div className="flex w-full items-center">
           <div className="flex-1 grid gap-4">
             <p className="text-green-500 font-semibold text-xl">
@@ -37,19 +37,19 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="mt-32 overflow-hidden">
+      <section className="container mt-32 overflow-hidden">
         <ProgramUnggulan />
       </section>
-      <section className="mt-32">
+      <section className="container mt-32">
         <ProgramKami />
       </section>
-      <section className="mt-32">
+      <section className="container mt-32">
         <ProgramMembaca />
       </section>
-      <section className="mt-32">
+      <section className="container mt-32">
         <KenaliKami />
       </section>
-      <section className="mt-32">
+      <section className="mt-32 relative">
         <VisiMisi />
       </section>
     </div>

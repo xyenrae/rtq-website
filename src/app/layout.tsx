@@ -31,7 +31,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={`${fredoka.variable} ${notoSans.variable}`}>
-      <body className={`bg-gray-50`}>
+      <body className={`bg-gray-50 w-screen overflow-x-hidden`}>
         <Banner />
         <Navigation />
         <main className="min-h-[calc(100vh-160px)]">{children}</main>
