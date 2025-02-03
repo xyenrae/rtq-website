@@ -5,6 +5,7 @@ import KenaliKami from "@/components/section/home/KenaliKami";
 import ProgramUnggulan from "@/components/section/home/ProgramUnggulan";
 import VisiMisi from "@/components/section/home/VisiMisi";
 import Guru from "@/components/section/home/Guru";
+import Testimoni from "@/components/section/home/Testimoni";
 
 export default function Home() {
   return (
@@ -55,6 +56,9 @@ export default function Home() {
       </section>
       <section className="container mt-32">
         <Guru />
+      </section>
+      <section className="mt-32">
+        <Testimoni />
       </section>
     </div>
   );
