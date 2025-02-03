@@ -4,6 +4,7 @@ import ProgramKami from "@/components/section/home/ProgramKami";
 import KenaliKami from "@/components/section/home/KenaliKami";
 import ProgramUnggulan from "@/components/section/home/ProgramUnggulan";
 import VisiMisi from "@/components/section/home/VisiMisi";
+import Guru from "@/components/section/home/Guru";
 
 export default function Home() {
   return (
@@ -49,8 +50,11 @@ export default function Home() {
       <section className="container mt-32">
         <KenaliKami />
       </section>
-      <section className="mt-32 relative">
+      <section className="mt-32">
         <VisiMisi />
+      </section>
+      <section className="container mt-32">
+        <Guru />
       </section>
     </div>
   );
