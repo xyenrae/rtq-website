@@ -6,6 +6,7 @@ import ProgramUnggulan from "@/components/section/home/ProgramUnggulan";
 import VisiMisi from "@/components/section/home/VisiMisi";
 import Guru from "@/components/section/home/Guru";
 import Testimoni from "@/components/section/home/Testimoni";
+import Berita from "@/components/section/home/Berita";
 
 export default function Home() {
   return (
@@ -59,6 +60,9 @@ export default function Home() {
       </section>
       <section className="mt-32">
         <Testimoni />
+      </section>
+      <section className="mt-32">
+        <Berita />
       </section>
     </div>
   );
