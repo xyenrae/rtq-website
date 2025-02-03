@@ -9,7 +9,7 @@ export default function Berita() {
         setiap anak, sesuai dengan kebutuhan dan <br /> tahap perkembangannya.
       </p>
       <div className="grid grid-cols-3 gap-5 mt-4">
-        <div className="border border-2 rounded-t-3xl pb-4">
+        <div className="border-2 rounded-t-3xl pb-4">
           <Image
             src="/images/gallery-1.png"
             alt="Ilustrasi pembelajaran"
@@ -41,7 +41,7 @@ export default function Berita() {
             Pendaftaran TPQ Al-Hikmah 2025 Kini Dibuka!
           </p>
         </div>
-        <div className="border border-2 rounded-t-3xl pb-4">
+        <div className="border-2 rounded-t-3xl pb-4">
           <Image
             src="/images/gallery-1.png"
             alt="Ilustrasi pembelajaran"
@@ -73,7 +73,7 @@ export default function Berita() {
             Pendaftaran TPQ Al-Hikmah 2025 Kini Dibuka!
           </p>
         </div>
-        <div className="border border-2 rounded-t-3xl pb-4">
+        <div className="border-2 rounded-t-3xl pb-4">
           <Image
             src="/images/gallery-1.png"
             alt="Ilustrasi pembelajaran"

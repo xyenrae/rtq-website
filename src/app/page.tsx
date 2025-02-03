@@ -7,6 +7,7 @@ import VisiMisi from "@/components/section/home/VisiMisi";
 import Guru from "@/components/section/home/Guru";
 import Testimoni from "@/components/section/home/Testimoni";
 import Berita from "@/components/section/home/Berita";
+import Newsletter from "@/components/section/home/Newsletter";
 
 export default function Home() {
   return (
@@ -63,6 +64,9 @@ export default function Home() {
       </section>
       <section className="mt-32">
         <Berita />
+      </section>
+      <section className="my-32">
+        <Newsletter />
       </section>
     </div>
   );
