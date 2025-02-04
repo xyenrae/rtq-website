@@ -11,7 +11,7 @@ export default function FormPendaftaran() {
   const [alamatData, setAlamatData] = useState({});
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md font-noto-sans">
+    <div className="mx-auto p-6 bg-white rounded-lg shadow-md font-noto-sans">
       {/* Tabs */}
       <div className="flex mb-8 border-b">
         {["Santri", "Orang Tua", "Alamat"].map((tab, index) => (

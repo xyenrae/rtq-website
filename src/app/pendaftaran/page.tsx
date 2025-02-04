@@ -3,7 +3,7 @@ import FormPendaftaran from "@/components/form/FormPendaftaran";
 
 export default function RegistrationPage() {
   return (
-    <div className="w-screen mx-auto p-4">
+    <div className="w-full container mt-12">
       <FormPendaftaran />
     </div>
   );

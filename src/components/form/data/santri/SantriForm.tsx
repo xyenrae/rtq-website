@@ -25,7 +25,7 @@ export default function SantriForm({
             type="text"
             required
             placeholder="Masukkan nama lengkap"
-            className="p-2 mt-1 block w-full outline-none rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400"
+            className="p-2 mt-1 block w-full outline-none rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
             value={santriData.nama_lengkap}
             onChange={(e) =>
               setSantriData({ ...santriData, nama_lengkap: e.target.value })
@@ -35,12 +35,14 @@ export default function SantriForm({
 
         {/* NIK */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">NIK</label>
+          <label className="block text-sm font-medium text-gray-700">
+            NIK*
+          </label>
           <input
             type="text"
             required
             placeholder="Masukkan NIK"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 outline-none p-2 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
             value={santriData.nik}
             onChange={(e) =>
               setSantriData({ ...santriData, nik: e.target.value })
@@ -51,13 +53,13 @@ export default function SantriForm({
         {/* Tempat Lahir */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Tempat Lahir
+            Tempat Lahir*
           </label>
           <input
             type="text"
             required
             placeholder="Masukkan tempat lahir"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 p-2 outline-none block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
             value={santriData.tempat_lahir}
             onChange={(e) =>
               setSantriData({ ...santriData, tempat_lahir: e.target.value })
@@ -68,14 +70,14 @@ export default function SantriForm({
         {/* Tanggal Lahir */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Tanggal Lahir
+            Tanggal Lahir*
           </label>
           <DatePicker
             selected={santriData.tanggal_lahir}
             onChange={(date) =>
               setSantriData({ ...santriData, tanggal_lahir: date! })
             }
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 outline-none p-2 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
             placeholderText="Pilih tanggal lahir"
           />
         </div>
@@ -87,13 +89,12 @@ export default function SantriForm({
           </label>
           <select
             required
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.jenis_kelamin}
             onChange={(e) =>
               setSantriData({ ...santriData, jenis_kelamin: e.target.value })
             }
           >
-            <option value="">Pilih Jenis Kelamin</option>
             <option value="Laki-laki">Laki-laki</option>
             <option value="Perempuan">Perempuan</option>
           </select>
@@ -102,13 +103,13 @@ export default function SantriForm({
         {/* Jumlah Saudara */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Jumlah Saudara
+            Jumlah Saudara*
           </label>
           <input
             type="number"
             required
             placeholder="Masukkan jumlah saudara"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.jumlah_saudara}
             onChange={(e) =>
               setSantriData({
@@ -122,13 +123,13 @@ export default function SantriForm({
         {/* Anak Ke */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Anak Ke
+            Anak Ke*
           </label>
           <input
             type="number"
             required
             placeholder="Masukkan urutan anak"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.anak_ke}
             onChange={(e) =>
               setSantriData({
@@ -144,16 +145,25 @@ export default function SantriForm({
           <label className="block text-sm font-medium text-gray-700">
             Cita-cita
           </label>
-          <input
-            type="text"
+          <select
             required
-            placeholder="Masukkan cita-cita"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.cita_cita}
             onChange={(e) =>
               setSantriData({ ...santriData, cita_cita: e.target.value })
             }
-          />
+          >
+            <option value="Dokter">Dokter</option>
+            <option value="PNS">PNS</option>
+            <option value="TNI/POLRI">TNI/POLRI</option>
+            <option value="Guru/Dosen">Guru/Dosen</option>
+            <option value="Politikus">Politikus</option>
+            <option value="Wiraswasta">Wiraswasta</option>
+            <option value="Seniman/Artis">Seniman/Artis</option>
+            <option value="Ilmuwan">Ilmuwan</option>
+            <option value="Agamawan">Agamawan</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
         </div>
 
         {/* Nomor HP */}
@@ -161,17 +171,6 @@ export default function SantriForm({
           <label className="block text-sm font-medium text-gray-700">
             Nomor HP
           </label>
-          <input
-            type="text"
-            required={!santriData.has_no_hp}
-            disabled={santriData.has_no_hp}
-            placeholder="Masukkan nomor HP"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={santriData.nomor_hp}
-            onChange={(e) =>
-              setSantriData({ ...santriData, nomor_hp: e.target.value })
-            }
-          />
           <div className="flex items-center mt-2">
             <input
               type="checkbox"
@@ -187,6 +186,24 @@ export default function SantriForm({
           </div>
         </div>
 
+        {/* Nomor HP */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Nomor HP
+          </label>
+          <input
+            type="text"
+            required={!santriData.has_no_hp}
+            disabled={santriData.has_no_hp}
+            placeholder="Masukkan nomor HP"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={santriData.nomor_hp}
+            onChange={(e) =>
+              setSantriData({ ...santriData, nomor_hp: e.target.value })
+            }
+          />
+        </div>
+
         {/* Email */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
@@ -196,7 +213,7 @@ export default function SantriForm({
             type="email"
             required
             placeholder="Masukkan email"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.email}
             onChange={(e) =>
               setSantriData({ ...santriData, email: e.target.value })
@@ -211,13 +228,12 @@ export default function SantriForm({
           </label>
           <select
             required
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.hobi}
             onChange={(e) =>
               setSantriData({ ...santriData, hobi: e.target.value })
             }
           >
-            <option value=""></option>
             <option value="Olahraga">Olahraga</option>
             <option value="Kesenian">Kesenian</option>
             <option value="Membaca">Membaca</option>
@@ -225,19 +241,6 @@ export default function SantriForm({
             <option value="Jalan-jalan">Jalan-jalan</option>
             <option value="Lainnya">Lainnya</option>
           </select>
-          {/* <input
-            type="text"
-            required
-            placeholder="Masukkan hobi (pisahkan dengan koma)"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={santriData.hobi.join(", ")}
-            onChange={(e) =>
-              setSantriData({
-                ...santriData,
-                hobi: e.target.value.split(",").map((h) => h.trim()),
-              })
-            }
-          /> */}
         </div>
 
         {/* Sumber Pembiayaan */}
@@ -247,7 +250,7 @@ export default function SantriForm({
           </label>
           <select
             required
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.sumber_pembiayaan}
             onChange={(e) =>
               setSantriData({
@@ -256,7 +259,6 @@ export default function SantriForm({
               })
             }
           >
-            <option value="">Pilih Sumber Pembiayaan</option>
             <option value="Orang Tua">Orang Tua</option>
             <option value="Beasiswa">Beasiswa</option>
             <option value="Lainnya">Lainnya</option>
@@ -271,7 +273,7 @@ export default function SantriForm({
           <input
             type="text"
             placeholder="Masukkan nomor KIP"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.nomor_kip}
             onChange={(e) =>
               setSantriData({ ...santriData, nomor_kip: e.target.value })
@@ -284,15 +286,28 @@ export default function SantriForm({
           <label className="block text-sm font-medium text-gray-700">
             Kebutuhan Khusus
           </label>
-          <input
-            type="text"
-            placeholder="Masukkan kebutuhan khusus"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          <select
+            required
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.kebutuhan_khusus}
             onChange={(e) =>
-              setSantriData({ ...santriData, kebutuhan_khusus: e.target.value })
+              setSantriData({
+                ...santriData,
+                kebutuhan_khusus: e.target.value,
+              })
             }
-          />
+          >
+            <option value="Tidak Ada">Tidak Ada</option>
+            <option value="Lamban Belajar">Lamban Belajar</option>
+            <option value="Kesulitan Belajar Spesifik">
+              Kesulitan Belajar Spesifik
+            </option>
+            <option value="Gangguan Komunikasi">Gangguan Komunikasi</option>
+            <option value="Berbakat / Memiliki Kecerdasan Luar Biasa">
+              Berbakat / Memiliki Kecerdasan Luar Biasa
+            </option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
         </div>
 
         {/* Kebutuhan Disabilitas */}
@@ -300,10 +315,9 @@ export default function SantriForm({
           <label className="block text-sm font-medium text-gray-700">
             Kebutuhan Disabilitas
           </label>
-          <input
-            type="text"
-            placeholder="Masukkan kebutuhan disabilitas"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          <select
+            required
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.kebutuhan_disabilitas}
             onChange={(e) =>
               setSantriData({
@@ -311,19 +325,28 @@ export default function SantriForm({
                 kebutuhan_disabilitas: e.target.value,
               })
             }
-          />
+          >
+            <option value="Tidak Ada">Tidak Ada</option>
+            <option value="Tuna Netra">Tuna Netra</option>
+            <option value="Tuna Rungu">Tuna Rungu</option>
+            <option value="Tuna Daksa">Tuna Daksa</option>
+            <option value="Tuna Grahita">Tuna Grahita</option>
+            <option value="Tuna Laras">Tuna Laras</option>
+            <option value="Tuna Wicara">Tuna Wicara</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
         </div>
 
         {/* Nomor KK */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Nomor KK
+            Nomor KK*
           </label>
           <input
             type="text"
             required
             placeholder="Masukkan nomor KK"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.nomor_kk}
             onChange={(e) =>
               setSantriData({ ...santriData, nomor_kk: e.target.value })
@@ -334,13 +357,13 @@ export default function SantriForm({
         {/* Nama Kepala Keluarga */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            Nama Kepala Keluarga
+            Nama Kepala Keluarga*
           </label>
           <input
             type="text"
             required
             placeholder="Masukkan nama kepala keluarga"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             value={santriData.nama_kepala_keluarga}
             onChange={(e) =>
               setSantriData({
@@ -359,7 +382,7 @@ export default function SantriForm({
           <input
             type="file"
             required
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             onChange={(e) =>
               setSantriData({
                 ...santriData,
@@ -376,7 +399,7 @@ export default function SantriForm({
           </label>
           <input
             type="file"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             onChange={(e) =>
               setSantriData({
                 ...santriData,
