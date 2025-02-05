@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navigation from "@/components/layout/Navigation";
 import Footer from "@/components/layout/Footer";
-
 import { Fredoka, Noto_Sans } from "next/font/google";
 import Banner from "@/components/layout/Banner";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -32,6 +33,18 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${fredoka.variable} ${notoSans.variable}`}>
       <body className={`bg-gray-50 w-screen overflow-x-hidden`}>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
         <Banner />
         <Navigation />
         <main className="min-h-[calc(100vh-160px)]">{children}</main>

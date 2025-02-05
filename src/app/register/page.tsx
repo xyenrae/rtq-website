@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
+import { toast } from "react-toastify";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -27,8 +28,10 @@ export default function Register() {
     if (error) {
       console.error("Error during registration:", error.message);
       setError(error.message);
+      toast.error("Registrasi gagal. Silakan coba lagi.");
     } else {
       console.log("Registration successful. Data:", data);
+      toast.success("Registrasi berhasil! Silakan login.");
       router.push("/"); // Redirect ke halaman utama santri
     }
   };

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
+import { toast } from "react-toastify";
 
 // Fungsi untuk memformat nama menjadi huruf besar pada setiap kata
 const formatName = (name: string): string => {
@@ -62,7 +63,8 @@ export default function Navigation() {
   // Fungsi untuk logout
   const handleLogout = async () => {
     await supabase.auth.signOut(); // Logout pengguna
-    setIsDropdownOpen(false); // Tutup dropdown setelah logout
+    setIsDropdownOpen(false);
+    toast.success("Anda telah berhasil logout.");
   };
 
   // Event listener untuk menutup dropdown jika diklik di luar
