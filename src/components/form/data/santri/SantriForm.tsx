@@ -171,6 +171,17 @@ export default function SantriForm({
           <label className="block text-sm font-medium text-gray-700">
             Nomor HP
           </label>
+          <input
+            type="text"
+            required={!santriData.has_no_hp}
+            disabled={santriData.has_no_hp}
+            placeholder="Masukkan nomor HP"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={santriData.nomor_hp}
+            onChange={(e) =>
+              setSantriData({ ...santriData, nomor_hp: e.target.value })
+            }
+          />
           <div className="flex items-center mt-2">
             <input
               type="checkbox"
@@ -184,24 +195,6 @@ export default function SantriForm({
               Tidak memiliki nomor HP
             </span>
           </div>
-        </div>
-
-        {/* Nomor HP */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Nomor HP
-          </label>
-          <input
-            type="text"
-            required={!santriData.has_no_hp}
-            disabled={santriData.has_no_hp}
-            placeholder="Masukkan nomor HP"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
-            value={santriData.nomor_hp}
-            onChange={(e) =>
-              setSantriData({ ...santriData, nomor_hp: e.target.value })
-            }
-          />
         </div>
 
         {/* Email */}

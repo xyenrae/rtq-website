@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -14,6 +14,36 @@ export default function OrangTuaForm({
   setOrangTuaData,
   setActiveTab,
 }: OrangTuaFormProps) {
+  // Fungsi untuk memperbarui nilai field tertentu
+  const handleInputChange = (
+    field: string,
+    value: any,
+    type: "ayah" | "ibu" | "wali"
+  ) => {
+    setOrangTuaData((prevData: any) => ({
+      ...prevData,
+      [type]: {
+        ...prevData[type],
+        [field]: value,
+      },
+    }));
+  };
+
+  // Fungsi untuk memperbarui nilai checkbox
+  const handleCheckboxChange = (
+    field: string,
+    checked: boolean,
+    type: "ayah" | "ibu" | "wali"
+  ) => {
+    setOrangTuaData((prevData: any) => ({
+      ...prevData,
+      [type]: {
+        ...prevData[type],
+        [field]: checked,
+      },
+    }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Data Ayah */}
@@ -28,14 +58,9 @@ export default function OrangTuaForm({
             type="text"
             required
             placeholder="Masukkan nama ayah"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.nama}
-            onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, nama: e.target.value },
-              })
-            }
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.nama || ""}
+            onChange={(e) => handleInputChange("nama", e.target.value, "ayah")}
           />
         </div>
 
@@ -48,14 +73,9 @@ export default function OrangTuaForm({
             type="text"
             required
             placeholder="Masukkan NIK ayah"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.nik}
-            onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, nik: e.target.value },
-              })
-            }
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.nik || ""}
+            onChange={(e) => handleInputChange("nik", e.target.value, "ayah")}
           />
         </div>
 
@@ -66,13 +86,10 @@ export default function OrangTuaForm({
           </label>
           <select
             required
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.kewarganegaraan}
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.kewarganegaraan || ""}
             onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, kewarganegaraan: e.target.value },
-              })
+              handleInputChange("kewarganegaraan", e.target.value, "ayah")
             }
           >
             <option value="">Pilih Kewarganegaraan</option>
@@ -90,13 +107,10 @@ export default function OrangTuaForm({
             type="text"
             required
             placeholder="Masukkan tempat lahir ayah"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.tempat_lahir}
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.tempat_lahir || ""}
             onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, tempat_lahir: e.target.value },
-              })
+              handleInputChange("tempat_lahir", e.target.value, "ayah")
             }
           />
         </div>
@@ -107,14 +121,11 @@ export default function OrangTuaForm({
             Tanggal Lahir Ayah
           </label>
           <DatePicker
-            selected={orangTuaData.ayah.tanggal_lahir}
+            selected={orangTuaData.ayah.tanggal_lahir || null}
             onChange={(date) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, tanggal_lahir: date! },
-              })
+              handleInputChange("tanggal_lahir", date, "ayah")
             }
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
             placeholderText="Pilih tanggal lahir ayah"
           />
         </div>
@@ -126,13 +137,10 @@ export default function OrangTuaForm({
           </label>
           <select
             required
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.status}
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.status || ""}
             onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, status: e.target.value },
-              })
+              handleInputChange("status", e.target.value, "ayah")
             }
           >
             <option value="">Pilih Status</option>
@@ -148,16 +156,10 @@ export default function OrangTuaForm({
           </label>
           <select
             required
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.pendidikan_terakhir}
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.pendidikan_terakhir || ""}
             onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: {
-                  ...orangTuaData.ayah,
-                  pendidikan_terakhir: e.target.value,
-                },
-              })
+              handleInputChange("pendidikan_terakhir", e.target.value, "ayah")
             }
           >
             <option value="">Pilih Pendidikan Terakhir</option>
@@ -178,13 +180,10 @@ export default function OrangTuaForm({
           </label>
           <select
             required
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.penghasilan}
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.penghasilan || ""}
             onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, penghasilan: e.target.value },
-              })
+              handleInputChange("penghasilan", e.target.value, "ayah")
             }
           >
             <option value="">Pilih Penghasilan</option>
@@ -204,13 +203,10 @@ export default function OrangTuaForm({
             type="text"
             required
             placeholder="Masukkan pekerjaan ayah"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.pekerjaan}
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.pekerjaan || ""}
             onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, pekerjaan: e.target.value },
-              })
+              handleInputChange("pekerjaan", e.target.value, "ayah")
             }
           />
         </div>
@@ -225,24 +221,18 @@ export default function OrangTuaForm({
             required={!orangTuaData.ayah.has_no_hp}
             disabled={orangTuaData.ayah.has_no_hp}
             placeholder="Masukkan nomor HP ayah"
-            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            value={orangTuaData.ayah.nomor_hp}
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ayah.nomor_hp || ""}
             onChange={(e) =>
-              setOrangTuaData({
-                ...orangTuaData,
-                ayah: { ...orangTuaData.ayah, nomor_hp: e.target.value },
-              })
+              handleInputChange("nomor_hp", e.target.value, "ayah")
             }
           />
           <div className="flex items-center mt-2">
             <input
               type="checkbox"
-              checked={orangTuaData.ayah.has_no_hp}
+              checked={orangTuaData.ayah.has_no_hp || false}
               onChange={(e) =>
-                setOrangTuaData({
-                  ...orangTuaData,
-                  ayah: { ...orangTuaData.ayah, has_no_hp: e.target.checked },
-                })
+                handleCheckboxChange("has_no_hp", e.target.checked, "ayah")
               }
               className="mr-2"
             />
@@ -258,8 +248,194 @@ export default function OrangTuaForm({
         Data Ibu
       </h2>
       <div className="grid grid-cols-2 gap-6">
-        {/* Field-field untuk Ibu mirip dengan Ayah */}
-        {/* Anda dapat mengulangi field-field di atas untuk Ibu */}
+        {/* Nama Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Nama Ibu
+          </label>
+          <input
+            type="text"
+            required
+            placeholder="Masukkan nama ibu"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.nama || ""}
+            onChange={(e) => handleInputChange("nama", e.target.value, "ibu")}
+          />
+        </div>
+
+        {/* NIK Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            NIK Ibu
+          </label>
+          <input
+            type="text"
+            required
+            placeholder="Masukkan NIK ibu"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.nik || ""}
+            onChange={(e) => handleInputChange("nik", e.target.value, "ibu")}
+          />
+        </div>
+
+        {/* Kewarganegaraan Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Kewarganegaraan Ibu
+          </label>
+          <select
+            required
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.kewarganegaraan || ""}
+            onChange={(e) =>
+              handleInputChange("kewarganegaraan", e.target.value, "ibu")
+            }
+          >
+            <option value="">Pilih Kewarganegaraan</option>
+            <option value="WNI">Warga Negara Indonesia (WNI)</option>
+            <option value="WNA">Warga Negara Asing (WNA)</option>
+          </select>
+        </div>
+
+        {/* Tempat Lahir Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Tempat Lahir Ibu
+          </label>
+          <input
+            type="text"
+            required
+            placeholder="Masukkan tempat lahir ibu"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.tempat_lahir || ""}
+            onChange={(e) =>
+              handleInputChange("tempat_lahir", e.target.value, "ibu")
+            }
+          />
+        </div>
+
+        {/* Tanggal Lahir Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Tanggal Lahir Ibu
+          </label>
+          <DatePicker
+            selected={orangTuaData.ibu.tanggal_lahir || null}
+            onChange={(date) => handleInputChange("tanggal_lahir", date, "ibu")}
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            placeholderText="Pilih tanggal lahir ibu"
+          />
+        </div>
+
+        {/* Status Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Status Ibu
+          </label>
+          <select
+            required
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.status || ""}
+            onChange={(e) => handleInputChange("status", e.target.value, "ibu")}
+          >
+            <option value="">Pilih Status</option>
+            <option value="Hidup">Hidup</option>
+            <option value="Meninggal">Meninggal</option>
+          </select>
+        </div>
+
+        {/* Pendidikan Terakhir Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Pendidikan Terakhir Ibu
+          </label>
+          <select
+            required
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.pendidikan_terakhir || ""}
+            onChange={(e) =>
+              handleInputChange("pendidikan_terakhir", e.target.value, "ibu")
+            }
+          >
+            <option value="">Pilih Pendidikan Terakhir</option>
+            <option value="SD">SD</option>
+            <option value="SMP">SMP</option>
+            <option value="SMA/SMK">SMA/SMK</option>
+            <option value="Diploma">Diploma</option>
+            <option value="Sarjana">Sarjana</option>
+            <option value="Magister">Magister</option>
+            <option value="Doktor">Doktor</option>
+          </select>
+        </div>
+
+        {/* Penghasilan Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Penghasilan Ibu
+          </label>
+          <select
+            required
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.penghasilan || ""}
+            onChange={(e) =>
+              handleInputChange("penghasilan", e.target.value, "ibu")
+            }
+          >
+            <option value="">Pilih Penghasilan</option>
+            <option value="< 1 Juta">&lt; 1 Juta</option>
+            <option value="1 - 3 Juta">1 - 3 Juta</option>
+            <option value="3 - 5 Juta">3 - 5 Juta</option>
+            <option value="> 5 Juta">&gt; 5 Juta</option>
+          </select>
+        </div>
+
+        {/* Pekerjaan Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Pekerjaan Ibu
+          </label>
+          <input
+            type="text"
+            required
+            placeholder="Masukkan pekerjaan ibu"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.pekerjaan || ""}
+            onChange={(e) =>
+              handleInputChange("pekerjaan", e.target.value, "ibu")
+            }
+          />
+        </div>
+
+        {/* Nomor HP Ibu */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700">
+            Nomor HP Ibu
+          </label>
+          <input
+            type="text"
+            required={!orangTuaData.ibu.has_no_hp}
+            disabled={orangTuaData.ibu.has_no_hp}
+            placeholder="Masukkan nomor HP ibu"
+            className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+            value={orangTuaData.ibu.nomor_hp || ""}
+            onChange={(e) =>
+              handleInputChange("nomor_hp", e.target.value, "ibu")
+            }
+          />
+          <div className="flex items-center mt-2">
+            <input
+              type="checkbox"
+              checked={orangTuaData.ibu.has_no_hp || false}
+              onChange={(e) =>
+                handleCheckboxChange("has_no_hp", e.target.checked, "ibu")
+              }
+              className="mr-2"
+            />
+            <span className="text-sm text-gray-700">
+              Tidak memiliki nomor HP
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Data Wali */}
@@ -275,15 +451,13 @@ export default function OrangTuaForm({
           <div className="flex items-center mt-2">
             <input
               type="checkbox"
-              checked={orangTuaData.wali.sama_dengan_ayah}
+              checked={orangTuaData.wali.sama_dengan_ayah || false}
               onChange={(e) =>
-                setOrangTuaData({
-                  ...orangTuaData,
-                  wali: {
-                    ...orangTuaData.wali,
-                    sama_dengan_ayah: e.target.checked,
-                  },
-                })
+                handleCheckboxChange(
+                  "sama_dengan_ayah",
+                  e.target.checked,
+                  "wali"
+                )
               }
               className="mr-2"
             />
@@ -301,15 +475,13 @@ export default function OrangTuaForm({
           <div className="flex items-center mt-2">
             <input
               type="checkbox"
-              checked={orangTuaData.wali.kartu_keluarga_sama}
+              checked={orangTuaData.wali.kartu_keluarga_sama || false}
               onChange={(e) =>
-                setOrangTuaData({
-                  ...orangTuaData,
-                  wali: {
-                    ...orangTuaData.wali,
-                    kartu_keluarga_sama: e.target.checked,
-                  },
-                })
+                handleCheckboxChange(
+                  "kartu_keluarga_sama",
+                  e.target.checked,
+                  "wali"
+                )
               }
               className="mr-2"
             />
