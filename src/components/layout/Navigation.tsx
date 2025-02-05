@@ -1,13 +1,55 @@
 "use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { supabase } from "@/lib/supabase/client";
+
+// Fungsi untuk memformat nama menjadi huruf besar pada setiap kata
+const formatName = (name: string): string => {
+  return name
+    .split(" ") // Pisahkan nama berdasarkan spasi
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Ubah huruf pertama jadi kapital
+    .join(" "); // Gabungkan kembali dengan spasi
+};
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [userFullName, setUserFullName] = useState<string | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false); // State untuk dropdown
+  const dropdownRef = useRef<HTMLDivElement | null>(null); // Ref untuk dropdown
 
+  // Cek status login saat komponen dimuat
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      if (data.user) {
+        const fullName = data.user.user_metadata.full_name || "User";
+        setUserFullName(formatName(fullName)); // Format nama sebelum disimpan
+      }
+    };
+
+    checkUser();
+
+    // Tambahkan listener untuk mendeteksi perubahan status otentikasi
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_IN" && session?.user) {
+          const fullName = session.user.user_metadata.full_name || "User";
+          setUserFullName(formatName(fullName)); // Format nama sebelum disimpan
+        } else if (event === "SIGNED_OUT") {
+          setUserFullName(null);
+        }
+      }
+    );
+
+    // Cleanup listener saat komponen unmount
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
+
+  // Handle scroll untuk efek sticky
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 0);
@@ -17,6 +59,27 @@ export default function Navigation() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Fungsi untuk logout
+  const handleLogout = async () => {
+    await supabase.auth.signOut(); // Logout pengguna
+    setIsDropdownOpen(false); // Tutup dropdown setelah logout
+  };
+
+  // Event listener untuk menutup dropdown jika diklik di luar
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false); // Tutup dropdown jika diklik di luar
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <nav
       className={`bg-white sticky top-0 z-50 transition-all duration-300 ${
@@ -24,6 +87,7 @@ export default function Navigation() {
       }`}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
+        {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
             src="/images/logo-rtq.png"
@@ -50,6 +114,7 @@ export default function Navigation() {
           </div>
         </Link>
 
+        {/* Navigasi */}
         <div className="hidden md:flex gap-6 text-lg">
           <NavLink href="/" label="Beranda" isScrolled={isScrolled} />
           <NavLink href="/berita" label="Berita" isScrolled={isScrolled} />
@@ -62,19 +127,53 @@ export default function Navigation() {
           <NavLink href="/kontak" label="Kontak" isScrolled={isScrolled} />
         </div>
 
-        <Link
-          href="/admin"
-          className={`bg-yellow-400 text-white rounded-md hover:bg-yellow-500 transition-all duration-300 ${
-            isScrolled ? "px-3 py-1.5 text-sm" : "px-4 py-2"
-          }`}
-        >
-          Login Admin
-        </Link>
+        {/* Sapaan Pengguna atau Tombol Login */}
+        {userFullName ? (
+          <div className="relative" ref={dropdownRef}>
+            {/* Nama Pengguna */}
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)} // Toggle dropdown
+              className={`text-gray-600 underline font-medium transition-all duration-300 ${
+                isScrolled ? "text-base" : "text-lg"
+              } focus:outline-none`}
+            >
+              Hai, {userFullName}
+            </button>
+
+            {/* Dropdown */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 bg-red-500 border border-gray-200 rounded shadow-lg z-10">
+                <button
+                  onClick={handleLogout}
+                  className="flex justify-center w-full text-left px-4 py-2 text-sm text-white hover:bg-red-600 rounded transition-all duration-300"
+                >
+                  <Image
+                    src={"/images/logout.svg"}
+                    alt=""
+                    width={20}
+                    height={20}
+                  ></Image>
+                  <span className="ml-1 my-auto">Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <Link
+            href="/login"
+            className={`bg-yellow-400 text-white rounded-md hover:bg-yellow-500 transition-all duration-300 ${
+              isScrolled ? "px-3 py-1.5 text-sm" : "px-4 py-2"
+            }`}
+          >
+            Login Sekarang
+          </Link>
+        )}
       </div>
     </nav>
   );
 }
 
+// Komponen NavLink
 function NavLink({
   href,
   label,
@@ -86,7 +185,6 @@ function NavLink({
 }) {
   const pathname = usePathname();
   const isActive = pathname === href;
-
   return (
     <Link
       href={href}

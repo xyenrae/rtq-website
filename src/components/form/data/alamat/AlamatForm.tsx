@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// components/AlamatForm.tsx
 import { useState } from "react";
 
 interface AlamatFormProps {
@@ -7,40 +5,40 @@ interface AlamatFormProps {
 }
 
 interface AyahIbuAlamat {
-  tinggal_luar_negeri: boolean; // Apakah tinggal di luar negeri
-  status_kepemilikan: string; // Status kepemilikan rumah
-  provinsi: string; // Provinsi
-  kabupaten: string; // Kabupaten
-  kecamatan: string; // Kecamatan
-  kelurahan: string; // Kelurahan
-  kode_pos: string; // Kode pos
-  rt: string; // RT
-  rw: string; // RW
-  alamat: string; // Alamat lengkap
+  tinggal_luar_negeri: boolean;
+  status_kepemilikan: string;
+  provinsi: string;
+  kabupaten: string;
+  kecamatan: string;
+  kelurahan: string;
+  kode_pos: string;
+  rt: string;
+  rw: string;
+  alamat: string;
 }
 
 interface SantriAlamat {
-  status_mukim: string; // Status mukim santri
-  status_tempat_tinggal: string; // Status tempat tinggal santri
-  jarak_lembaga: string; // Jarak ke lembaga
-  transportasi: string; // Transportasi santri
-  waktu_tempuh: string; // Waktu tempuh ke lembaga
-  koordinat: string; // Koordinat lokasi
-  provinsi: string; // Provinsi santri
-  kabupaten: string; // Kabupaten santri
-  kecamatan: string; // Kecamatan santri
-  kelurahan: string; // Kelurahan santri
-  kode_pos: string; // Kode pos santri
-  rt: string; // RT santri
-  rw: string; // RW santri
-  alamat: string; // Alamat lengkap santri
+  status_mukim: string;
+  status_tempat_tinggal: string;
+  jarak_lembaga: string;
+  transportasi: string;
+  waktu_tempuh: string;
+  koordinat: string;
+  provinsi: string;
+  kabupaten: string;
+  kecamatan: string;
+  kelurahan: string;
+  kode_pos: string;
+  rt: string;
+  rw: string;
+  alamat: string;
 }
 
 interface AlamatData {
   ayah: AyahIbuAlamat;
   ibu: AyahIbuAlamat;
   santri: SantriAlamat;
-  ibu_sama_dengan_ayah: boolean; // Apakah alamat ibu sama dengan ayah
+  ibu_sama_dengan_ayah: boolean;
 }
 
 export default function AlamatForm({ setActiveTab }: AlamatFormProps) {

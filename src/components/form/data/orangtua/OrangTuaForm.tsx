@@ -52,7 +52,7 @@ export default function OrangTuaForm({ setActiveTab }: OrangTuaFormProps) {
       nik: "",
       kewarganegaraan: "",
       tempat_lahir: "",
-      tanggal_lahir: null, // Null diperbolehkan karena sudah didefinisikan di interface
+      tanggal_lahir: null,
       status: "",
       pendidikan_terakhir: "",
       penghasilan: "",
@@ -66,7 +66,6 @@ export default function OrangTuaForm({ setActiveTab }: OrangTuaFormProps) {
     },
   });
 
-  // Fungsi untuk memperbarui nilai field tertentu
   const handleInputChange = (
     field: string,
     value: any,
@@ -81,7 +80,6 @@ export default function OrangTuaForm({ setActiveTab }: OrangTuaFormProps) {
     }));
   };
 
-  // Fungsi untuk memperbarui nilai checkbox
   const handleCheckboxChange = (
     field: string,
     checked: boolean,
