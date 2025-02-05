@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { supabase } from "@/lib/supabase/client";
@@ -34,6 +36,8 @@ export default function SantriForm({
 }: {
   setActiveTab: (tab: number) => void;
 }) {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [hasData, setHasData] = useState(false);
   const [santriData, setSantriData] = useState<SantriData>({
     nama_lengkap: "",
     nik: "",
@@ -59,18 +63,38 @@ export default function SantriForm({
 
   const router = useRouter();
 
-  // Handle form submission
+  useEffect(() => {
+    const fetchSantriData = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+
+      const { data: santri, error } = await supabase
+        .from("santri")
+        .select("*")
+        .eq("user_id", userData.user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching santri data:", error.message);
+        setHasData(false);
+      } else {
+        setSantriData(santri);
+        setHasData(true);
+      }
+    };
+
+    fetchSantriData();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Get current user
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
         toast.error("Anda harus login terlebih dahulu.");
         return;
       }
 
-      // Upload files to Supabase Storage
       let kkUrl = null;
       let kipUrl = null;
 
@@ -90,7 +114,6 @@ export default function SantriForm({
         kipUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/files/kip/${santriData.unggah_kip.name}`;
       }
 
-      // Insert data into the `santri` table
       const { error } = await supabase.from("santri").insert({
         user_id: userData.user.id,
         nama_lengkap: santriData.nama_lengkap,
@@ -119,11 +142,51 @@ export default function SantriForm({
         toast.error("Gagal menyimpan data santri.");
       } else {
         toast.success("Data santri berhasil disimpan!");
-        setActiveTab(2); // Pindah ke tab berikutnya (misalnya Data Orang Tua)
+        setHasData(true);
       }
     } catch (error) {
       console.error("Error during registration:", error);
       toast.error("Terjadi kesalahan saat mendaftar.");
+    }
+  };
+
+  const handleUpdate = async () => {
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return;
+
+      const { error } = await supabase
+        .from("santri")
+        .update({
+          nama_lengkap: santriData.nama_lengkap,
+          nik: santriData.nik,
+          tempat_lahir: santriData.tempat_lahir,
+          tanggal_lahir: santriData.tanggal_lahir?.toISOString(),
+          jenis_kelamin: santriData.jenis_kelamin,
+          jumlah_saudara: santriData.jumlah_saudara,
+          anak_ke: santriData.anak_ke,
+          cita_cita: santriData.cita_cita,
+          nomor_hp: santriData.has_no_hp ? null : santriData.nomor_hp,
+          email: santriData.email,
+          hobi: santriData.hobi,
+          sumber_pembiayaan: santriData.sumber_pembiayaan,
+          nomor_kip: santriData.nomor_kip,
+          kebutuhan_khusus: santriData.kebutuhan_khusus,
+          kebutuhan_disabilitas: santriData.kebutuhan_disabilitas,
+          nomor_kk: santriData.nomor_kk,
+          nama_kepala_keluarga: santriData.nama_kepala_keluarga,
+        })
+        .eq("user_id", userData.user.id);
+
+      if (error) {
+        toast.error("Gagal menyimpan perubahan.");
+      } else {
+        toast.success("Perubahan berhasil disimpan!");
+        setIsEditMode(false); // Kembali ke mode read-only
+      }
+    } catch (error) {
+      console.error("Error during update:", error);
+      toast.error("Terjadi kesalahan saat menyimpan perubahan.");
     }
   };
 
@@ -139,6 +202,7 @@ export default function SantriForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan nama lengkap"
               className="p-2 mt-1 block w-full outline-none rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
               value={santriData.nama_lengkap}
@@ -156,6 +220,7 @@ export default function SantriForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan NIK"
               className="mt-1 outline-none p-2 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
               value={santriData.nik}
@@ -173,6 +238,7 @@ export default function SantriForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan tempat lahir"
               className="mt-1 p-2 outline-none block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
               value={santriData.tempat_lahir}
@@ -189,6 +255,7 @@ export default function SantriForm({
             </label>
             <DatePicker
               selected={santriData.tanggal_lahir}
+              disabled={!isEditMode}
               onChange={(date) =>
                 setSantriData({ ...santriData, tanggal_lahir: date! })
               }
@@ -204,6 +271,7 @@ export default function SantriForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.jenis_kelamin}
               onChange={(e) =>
@@ -223,6 +291,7 @@ export default function SantriForm({
             <input
               type="number"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan jumlah saudara"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.jumlah_saudara}
@@ -243,6 +312,7 @@ export default function SantriForm({
             <input
               type="number"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan urutan anak"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.anak_ke}
@@ -262,6 +332,7 @@ export default function SantriForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.cita_cita}
               onChange={(e) =>
@@ -299,6 +370,7 @@ export default function SantriForm({
             />
             <div className="flex items-center mt-2">
               <input
+                disabled={!isEditMode}
                 type="checkbox"
                 checked={santriData.has_no_hp}
                 onChange={(e) =>
@@ -318,6 +390,7 @@ export default function SantriForm({
               Email
             </label>
             <input
+              disabled={!isEditMode}
               type="email"
               required
               placeholder="Masukkan email"
@@ -335,6 +408,7 @@ export default function SantriForm({
               Hobi
             </label>
             <select
+              disabled={!isEditMode}
               required
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.hobi}
@@ -357,6 +431,7 @@ export default function SantriForm({
               Sumber Pembiayaan
             </label>
             <select
+              disabled={!isEditMode}
               required
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.sumber_pembiayaan}
@@ -379,6 +454,7 @@ export default function SantriForm({
               Nomor KIP
             </label>
             <input
+              disabled={!isEditMode}
               type="text"
               placeholder="Masukkan nomor KIP"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
@@ -395,6 +471,7 @@ export default function SantriForm({
               Kebutuhan Khusus
             </label>
             <select
+              disabled={!isEditMode}
               required
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.kebutuhan_khusus}
@@ -424,6 +501,7 @@ export default function SantriForm({
               Kebutuhan Disabilitas
             </label>
             <select
+              disabled={!isEditMode}
               required
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.kebutuhan_disabilitas}
@@ -451,6 +529,7 @@ export default function SantriForm({
               Nomor KK*
             </label>
             <input
+              disabled={!isEditMode}
               type="text"
               required
               placeholder="Masukkan nomor KK"
@@ -468,6 +547,7 @@ export default function SantriForm({
               Nama Kepala Keluarga*
             </label>
             <input
+              disabled={!isEditMode}
               type="text"
               required
               placeholder="Masukkan nama kepala keluarga"
@@ -488,6 +568,7 @@ export default function SantriForm({
               Unggah KK
             </label>
             <input
+              disabled={!isEditMode}
               type="file"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               onChange={(e) =>
@@ -505,6 +586,7 @@ export default function SantriForm({
               Unggah KIP
             </label>
             <input
+              disabled={!isEditMode}
               type="file"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               onChange={(e) =>
@@ -519,12 +601,47 @@ export default function SantriForm({
 
         {/* Navigation Buttons */}
         <div className="flex justify-end">
-          <button
-            type="submit"
-            className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            Daftar
-          </button>
+          {/* Tombol Daftar */}
+          {!hasData && (
+            <button
+              type="submit"
+              className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Daftar
+            </button>
+          )}
+
+          {/* Tombol Edit Data */}
+          {hasData && !isEditMode && (
+            <button
+              type="button"
+              onClick={() => setIsEditMode(true)}
+              className="inline-flex justify-center rounded-md border border-transparent bg-green-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+            >
+              Edit Data
+            </button>
+          )}
+
+          {/* Tombol Simpan Perubahan */}
+          {hasData && isEditMode && (
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setIsEditMode(false)}
+                className="inline-flex justify-center rounded-md border border-transparent bg-red-400 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                Batal
+              </button>
+
+              <button
+                type="button"
+                onClick={handleUpdate}
+                className="inline-flex justify-center rounded-md border border-transparent bg-green-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+              >
+                Simpan Perubahan
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </form>
