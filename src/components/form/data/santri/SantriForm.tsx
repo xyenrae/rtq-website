@@ -1,18 +1,59 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface SantriFormProps {
-  santriData: any;
-  setSantriData: (data: any) => void;
   setActiveTab: (tab: number) => void;
 }
 
-export default function SantriForm({
-  santriData,
-  setSantriData,
-  setActiveTab,
-}: SantriFormProps) {
+interface SantriData {
+  nama_lengkap: string;
+  nik: string;
+  tempat_lahir: string;
+  tanggal_lahir: Date | null;
+  jenis_kelamin: string;
+  jumlah_saudara: number;
+  anak_ke: number;
+  cita_cita: string;
+  nomor_hp: string;
+  has_no_hp: boolean;
+  email: string;
+  hobi: string;
+  sumber_pembiayaan: string;
+  nomor_kip: string;
+  kebutuhan_khusus: string;
+  kebutuhan_disabilitas: string;
+  nomor_kk: string;
+  nama_kepala_keluarga: string;
+  unggah_kk: File | null;
+  unggah_kip: File | null;
+}
+
+export default function SantriForm({ setActiveTab }: SantriFormProps) {
+  const [santriData, setSantriData] = useState<SantriData>({
+    nama_lengkap: "",
+    nik: "",
+    tempat_lahir: "",
+    tanggal_lahir: null,
+    jenis_kelamin: "",
+    jumlah_saudara: 0,
+    anak_ke: 0,
+    cita_cita: "",
+    nomor_hp: "",
+    has_no_hp: false,
+    email: "",
+    hobi: "",
+    sumber_pembiayaan: "",
+    nomor_kip: "",
+    kebutuhan_khusus: "",
+    kebutuhan_disabilitas: "",
+    nomor_kk: "",
+    nama_kepala_keluarga: "",
+    unggah_kk: null,
+    unggah_kip: null,
+  });
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-6">

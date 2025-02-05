@@ -4,16 +4,68 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 interface OrangTuaFormProps {
-  orangTuaData: any;
-  setOrangTuaData: (data: any) => void;
   setActiveTab: (tab: number) => void;
 }
 
-export default function OrangTuaForm({
-  orangTuaData,
-  setOrangTuaData,
-  setActiveTab,
-}: OrangTuaFormProps) {
+interface AyahIbu {
+  nama: string;
+  nik: string;
+  kewarganegaraan: string;
+  tempat_lahir: string;
+  tanggal_lahir: Date | null;
+  status: string;
+  pendidikan_terakhir: string;
+  penghasilan: string;
+  pekerjaan: string;
+  nomor_hp: string;
+  has_no_hp: boolean;
+}
+
+interface Wali {
+  sama_dengan_ayah: boolean;
+  kartu_keluarga_sama: boolean;
+}
+
+interface OrangTuaData {
+  ayah: AyahIbu;
+  ibu: AyahIbu;
+  wali: Wali;
+}
+
+export default function OrangTuaForm({ setActiveTab }: OrangTuaFormProps) {
+  const [orangTuaData, setOrangTuaData] = useState<OrangTuaData>({
+    ayah: {
+      nama: "",
+      nik: "",
+      kewarganegaraan: "",
+      tempat_lahir: "",
+      tanggal_lahir: null,
+      status: "",
+      pendidikan_terakhir: "",
+      penghasilan: "",
+      pekerjaan: "",
+      nomor_hp: "",
+      has_no_hp: false,
+    },
+    ibu: {
+      nama: "",
+      nik: "",
+      kewarganegaraan: "",
+      tempat_lahir: "",
+      tanggal_lahir: null, // Null diperbolehkan karena sudah didefinisikan di interface
+      status: "",
+      pendidikan_terakhir: "",
+      penghasilan: "",
+      pekerjaan: "",
+      nomor_hp: "",
+      has_no_hp: false,
+    },
+    wali: {
+      sama_dengan_ayah: false,
+      kartu_keluarga_sama: false,
+    },
+  });
+
   // Fungsi untuk memperbarui nilai field tertentu
   const handleInputChange = (
     field: string,
