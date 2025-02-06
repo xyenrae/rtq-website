@@ -292,7 +292,6 @@ export default function AlamatForm() {
           ibu_rt: alamatData.ibu.rt,
           ibu_rw: alamatData.ibu.rw,
           ibu_alamat: alamatData.ibu.alamat,
-          ibu_sama_dengan_ayah: alamatData.ibu_sama_dengan_ayah,
           santri_status_mukim: alamatData.santri.status_mukim,
           santri_status_tempat_tinggal: alamatData.santri.status_tempat_tinggal,
           santri_jarak_lembaga: alamatData.santri.jarak_lembaga,
@@ -1145,7 +1144,7 @@ export default function AlamatForm() {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-end">
           {!hasData && (
             <button
               type="submit"
