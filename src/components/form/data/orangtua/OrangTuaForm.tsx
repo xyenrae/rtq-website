@@ -33,11 +33,7 @@ interface OrangTuaData {
   wali: Wali;
 }
 
-export default function OrangTuaForm({
-  setActiveTab,
-}: {
-  setActiveTab: (tab: number) => void;
-}) {
+export default function OrangTuaForm() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [hasData, setHasData] = useState(false);
   const [orangTuaData, setOrangTuaData] = useState<OrangTuaData>({
@@ -201,7 +197,6 @@ export default function OrangTuaForm({
         toast.error("Gagal menyimpan data orang tua.");
       } else {
         toast.success("Data orang tua berhasil disimpan!");
-        setActiveTab(2); // Pindah ke tab berikutnya (misalnya Data Alamat)
       }
     } catch (error) {
       console.error("Error during registration:", error);
@@ -305,6 +300,7 @@ export default function OrangTuaForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan nama ayah"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ayah.nama || ""}
@@ -322,6 +318,7 @@ export default function OrangTuaForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan NIK ayah"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ayah.nik || ""}
@@ -336,6 +333,7 @@ export default function OrangTuaForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ayah.kewarganegaraan || ""}
               onChange={(e) =>
@@ -356,6 +354,7 @@ export default function OrangTuaForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan tempat lahir ayah"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ayah.tempat_lahir || ""}
@@ -371,6 +370,7 @@ export default function OrangTuaForm({
               Tanggal Lahir Ayah
             </label>
             <DatePicker
+              disabled={!isEditMode}
               selected={orangTuaData.ayah.tanggal_lahir || null}
               onChange={(date) =>
                 handleInputChange("tanggal_lahir", date, "ayah")
@@ -387,6 +387,7 @@ export default function OrangTuaForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ayah.status || ""}
               onChange={(e) =>
@@ -406,6 +407,7 @@ export default function OrangTuaForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ayah.pendidikan_terakhir || ""}
               onChange={(e) =>
@@ -430,6 +432,7 @@ export default function OrangTuaForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ayah.penghasilan || ""}
               onChange={(e) =>
@@ -452,6 +455,7 @@ export default function OrangTuaForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan pekerjaan ayah"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ayah.pekerjaan || ""}
@@ -480,6 +484,7 @@ export default function OrangTuaForm({
             <div className="flex items-center mt-2">
               <input
                 type="checkbox"
+                disabled={!isEditMode}
                 checked={orangTuaData.ayah.has_no_hp || false}
                 onChange={(e) =>
                   handleCheckboxChange("has_no_hp", e.target.checked, "ayah")
@@ -506,6 +511,7 @@ export default function OrangTuaForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan nama ibu"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ibu.nama || ""}
@@ -521,6 +527,7 @@ export default function OrangTuaForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan NIK ibu"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ibu.nik || ""}
@@ -535,6 +542,7 @@ export default function OrangTuaForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ibu.kewarganegaraan || ""}
               onChange={(e) =>
@@ -555,6 +563,7 @@ export default function OrangTuaForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan tempat lahir ibu"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ibu.tempat_lahir || ""}
@@ -571,6 +580,7 @@ export default function OrangTuaForm({
             </label>
             <DatePicker
               selected={orangTuaData.ibu.tanggal_lahir || null}
+              disabled={!isEditMode}
               onChange={(date) =>
                 handleInputChange("tanggal_lahir", date, "ibu")
               }
@@ -586,6 +596,7 @@ export default function OrangTuaForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ibu.status || ""}
               onChange={(e) =>
@@ -605,6 +616,7 @@ export default function OrangTuaForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ibu.pendidikan_terakhir || ""}
               onChange={(e) =>
@@ -629,6 +641,7 @@ export default function OrangTuaForm({
             </label>
             <select
               required
+              disabled={!isEditMode}
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ibu.penghasilan || ""}
               onChange={(e) =>
@@ -651,6 +664,7 @@ export default function OrangTuaForm({
             <input
               type="text"
               required
+              disabled={!isEditMode}
               placeholder="Masukkan pekerjaan ibu"
               className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={orangTuaData.ibu.pekerjaan || ""}
@@ -679,6 +693,7 @@ export default function OrangTuaForm({
             <div className="flex items-center mt-2">
               <input
                 type="checkbox"
+                disabled={!isEditMode}
                 checked={orangTuaData.ibu.has_no_hp || false}
                 onChange={(e) =>
                   handleCheckboxChange("has_no_hp", e.target.checked, "ibu")
@@ -705,6 +720,7 @@ export default function OrangTuaForm({
             <div className="flex items-center mt-2">
               <input
                 type="checkbox"
+                disabled={!isEditMode}
                 checked={orangTuaData.wali.sama_dengan_ayah || false}
                 onChange={(e) =>
                   handleCheckboxChange(
@@ -729,6 +745,7 @@ export default function OrangTuaForm({
             <div className="flex items-center mt-2">
               <input
                 type="checkbox"
+                disabled={!isEditMode}
                 checked={orangTuaData.wali.kartu_keluarga_sama || false}
                 onChange={(e) =>
                   handleCheckboxChange(

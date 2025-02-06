@@ -31,11 +31,7 @@ interface SantriData {
   unggah_kip: File | null;
 }
 
-export default function SantriForm({
-  setActiveTab,
-}: {
-  setActiveTab: (tab: number) => void;
-}) {
+export default function SantriForm() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [hasData, setHasData] = useState(false);
   const [santriData, setSantriData] = useState<SantriData>({

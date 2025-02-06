@@ -27,9 +27,9 @@ export default function FormPendaftaran() {
       </div>
 
       {/* Render Form Berdasarkan Tab Aktif */}
-      {activeTab === 0 && <SantriForm setActiveTab={setActiveTab} />}
-      {activeTab === 1 && <OrangTuaForm setActiveTab={setActiveTab} />}
-      {activeTab === 2 && <AlamatForm setActiveTab={setActiveTab} />}
+      {activeTab === 0 && <SantriForm />}
+      {activeTab === 1 && <OrangTuaForm />}
+      {activeTab === 2 && <AlamatForm />}
     </div>
   );
 }
