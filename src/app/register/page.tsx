@@ -19,7 +19,6 @@ export default function Register() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validasi konfirmasi password
     if (password !== confirmPassword) {
       setError("Password dan Konfirmasi Password tidak cocok.");
       toast.error("Password dan Konfirmasi Password tidak cocok.");
@@ -32,7 +31,7 @@ export default function Register() {
       email,
       password,
       options: {
-        data: { full_name: fullName, role: "user_santri" }, // Role default
+        data: { full_name: fullName, role: "user_santri" },
       },
     });
 
