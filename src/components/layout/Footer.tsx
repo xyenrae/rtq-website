@@ -40,7 +40,6 @@ export default function Footer() {
               <FooterLink href="/pendaftaran" label="Pendaftaran" />
             </div>
             <div className="space-y-2">
-              <FooterLink href="/galeri" label="Galeri" />
               <FooterLink href="/kontak" label="Kontak" />
               <FooterLink href="/admin" label="Admin" />
             </div>
