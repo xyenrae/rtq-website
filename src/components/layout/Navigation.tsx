@@ -118,11 +118,11 @@ export default function Navigation() {
           <NavLink href="/" label="Beranda" isScrolled={isScrolled} />
           <NavLink href="/berita" label="Berita" isScrolled={isScrolled} />
           <NavLink
-            href="/pendaftaran"
-            label="Pendaftaran"
+            href={userFullName ? "/pendaftaran" : "/pendaftaran"}
+            label={userFullName ? "Data Diri" : "Pendaftaran"}
             isScrolled={isScrolled}
           />
-          <NavLink href="/galeri" label="Galeri" isScrolled={isScrolled} />
+          {/* <NavLink href="/galeri" label="Galeri" isScrolled={isScrolled} /> */}
           <NavLink href="/kontak" label="Kontak" isScrolled={isScrolled} />
         </div>
 
