@@ -64,7 +64,7 @@ export default function Home() {
         <Guru />
       </section>
       {/* Berita Section */}
-      <section className="mt-32">
+      <section className="mt-12">
         <Berita />
       </section>
     </div>

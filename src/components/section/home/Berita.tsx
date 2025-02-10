@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "framer-motion";
 
 // Interface untuk berita
 interface Berita {
@@ -24,12 +23,6 @@ const formatDate = (dateString: string) => {
   }).format(date);
 };
 
-// Animasi untuk card
-const cardVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.6 } },
-};
-
 export default function Berita() {
   const [berita, setBerita] = useState<Berita[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,8 +36,7 @@ export default function Berita() {
           .from("berita")
           .select("*")
           .order("tanggal", { ascending: false })
-          .limit(3); // Menampilkan 3 berita terbaru
-
+          .limit(6); // Mengambil 6 berita terbaru
         if (error) throw error;
         setBerita(data);
         setError(null);
@@ -55,7 +47,6 @@ export default function Berita() {
         setIsLoading(false);
       }
     };
-
     fetchBerita();
   }, []);
 
@@ -64,14 +55,9 @@ export default function Berita() {
   if (error) return <ErrorMessage message={error} />;
 
   return (
-    <div className="container mx-auto px-4 py-16">
+    <div className="container mx-auto px-4 pb-16">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="text-center mb-12"
-      >
+      <div className="text-center mb-12">
         <h1 className="text-2xl font-bold text-gray-800 text-start">
           Berita Terbaru
         </h1>
@@ -80,25 +66,13 @@ export default function Berita() {
           sehari-hari, pengumuman penting, dan pencapaian dari Santri RTQ
           Al-Hikmah.
         </p>
-      </motion.div>
+      </div>
 
       {/* Berita Grid */}
-      <motion.div
-        variants={{
-          hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.2 },
-          },
-        }}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8"
-      >
-        {berita.map((item) => (
-          <motion.div
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+        {berita.slice(0, window.innerWidth < 768 ? 3 : 6).map((item) => (
+          <div
             key={item.id}
-            variants={cardVariants}
             className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden flex flex-col sm:flex-row"
           >
             <Link href={`/berita/${item.id}`} className="flex flex-1">
@@ -135,12 +109,12 @@ export default function Berita() {
                 </div>
               </div>
             </Link>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Button Lihat Semua */}
-      <div className="flex justify-center mt-8">
+      <div className="mt-8">
         <Link
           href="/berita"
           className="px-6 py-3 bg-green-500 text-white rounded-full hover:bg-green-700 transition-colors shadow-md hover:shadow-lg"
@@ -153,37 +127,41 @@ export default function Berita() {
 }
 
 // Skeleton Loader
-const SkeletonLoader = () => (
-  <div className="container mx-auto px-4 py-16">
-    <div className="animate-pulse text-center mb-12">
-      <div className="h-10 w-64 bg-gray-300 rounded-full mx-auto mb-4"></div>
-      <div className="h-6 w-96 bg-gray-300 rounded-full mx-auto"></div>
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-      {[...Array(3)].map((_, index) => (
-        <div
-          key={index}
-          className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col sm:flex-row"
-        >
-          {/* Gambar Placeholder */}
-          <div className="relative w-4/12 sm:w-1/3 h-32 sm:h-auto bg-gray-300"></div>
+const SkeletonLoader = () => {
+  const isMobile = window.innerWidth < 768;
 
-          {/* Konten Placeholder */}
-          <div className="p-2 sm:p-4 flex flex-col justify-between flex-1 space-y-4">
-            {/* Kategori Placeholder */}
-            <div className="h-4 w-24 bg-gray-300 rounded-full"></div>
+  return (
+    <div className="container mx-auto px-4 py-16">
+      <div className="animate-pulse text-center mb-12">
+        <div className="h-10 w-64 bg-gray-300 rounded-full mx-auto mb-4"></div>
+        <div className="h-6 w-96 bg-gray-300 rounded-full mx-auto"></div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
+        {[...Array(isMobile ? 3 : 6)].map((_, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col sm:flex-row"
+          >
+            {/* Gambar Placeholder */}
+            <div className="relative w-4/12 sm:w-1/3 h-32 sm:h-auto bg-gray-300"></div>
 
-            {/* Judul Placeholder */}
-            <div className="h-6 w-48 bg-gray-300 rounded-full"></div>
+            {/* Konten Placeholder */}
+            <div className="p-2 sm:p-4 flex flex-col justify-between flex-1 space-y-4">
+              {/* Kategori Placeholder */}
+              <div className="h-4 w-24 bg-gray-300 rounded-full"></div>
 
-            {/* Tanggal Placeholder */}
-            <div className="h-4 w-32 bg-gray-300 rounded-full self-end"></div>
+              {/* Judul Placeholder */}
+              <div className="h-6 w-48 bg-gray-300 rounded-full"></div>
+
+              {/* Tanggal Placeholder */}
+              <div className="h-4 w-32 bg-gray-300 rounded-full self-end"></div>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 // Error Message Component
 const ErrorMessage = ({ message }: { message: string }) => (

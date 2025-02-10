@@ -2,24 +2,26 @@ import Image from "next/image";
 
 export default function VisiMisi() {
   return (
-    <section className="relative w-screen h-fit py-32">
+    <section className="relative w-screen h-fit py-24">
+      <div className="bg-yellow-400 w-full absolute bottom-0 h-4 z-20"></div>
+      <div className="bg-green-500 opacity-90 w-full h-full absolute inset-0 z-10"></div>
       <div className="absolute inset-0">
         <Image
-          src="/images/visimisi.png"
+          src="/images/gallery-1.png"
           alt="Visi Misi Background"
           fill
           className="object-cover object-center"
         />
       </div>
 
-      <div className="relative z-10 container grid place-content-center">
-        <div>
-          <h2 className="text-4xl font-bold text-white mb-6">Visi & Misi</h2>
-          <p className="text-lg text-white mt-2">
+      <div className="relative z-20 container grid place-content-center">
+        <div className="sm:text-lg text-white">
+          <h2 className="text-2xl font-bold mb-6">Visi & Misi</h2>
+          <p className="mt-2">
             Menciptakan generasi yang mencintai Al-Qur&#39;an dan menerapkan
             ajaran Islam dalam kehidupan sehari-hari.
           </p>
-          <ul className="list-disc pl-5 text-lg text-white mt-2 w-fit ml-4">
+          <ul className="list-disc pl-5 mt-2 w-fit ml-4">
             <li>
               Menumbuhkan kecintaan terhadap Al-Qur&#39;an di kalangan santri
               sejak dini.

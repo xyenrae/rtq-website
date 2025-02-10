@@ -1,9 +1,8 @@
 "use client";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Mousewheel, FreeMode } from "swiper/modules";
+import { Mousewheel, FreeMode } from "swiper/modules";
 import "swiper/css";
-import "swiper/css/pagination";
 import "swiper/css/free-mode";
 
 export default function CardSliderGuru() {
@@ -85,54 +84,38 @@ export default function CardSliderGuru() {
   return (
     <div className="relative px-4 overflow-hidden">
       <Swiper
-        modules={[Pagination, Mousewheel, FreeMode]}
-        spaceBetween={30}
-        slidesPerView={3}
+        modules={[Mousewheel, FreeMode]}
         freeMode={true}
         mousewheel={{
           forceToAxis: true,
           sensitivity: 0.5,
         }}
-        pagination={{
-          clickable: true,
-          bulletClass:
-            "swiper-pagination-bullet !bg-gray-300 !h-1 !w-8 !rounded-sm",
-          bulletActiveClass: "!bg-green-500",
-        }}
-        breakpoints={{
-          0: {
-            slidesPerView: 2,
-            freeMode: false,
-          },
-          768: {
-            slidesPerView: 3,
-            freeMode: true,
-          },
-          1024: {
-            slidesPerView: 4,
-            freeMode: true,
-          },
-        }}
-        wrapperClass="items-stretch"
+        slidesPerView="auto"
+        spaceBetween={16} // Minimal spasi antar slide
         className="!pb-12"
       >
         {programs.map((program) => (
-          <SwiperSlide key={program.id}>
-            <div className="overflow-hidden flex flex-col h-full bg-white hover:shadow-lg transition-shadow">
-              <div className="relative flex w-full h-full">
+          <SwiperSlide
+            key={program.id}
+            className="!w-[200px] !h-auto" // Lebar slide disesuaikan
+          >
+            <div className="overflow-hidden bg-white hover:shadow-lg transition-shadow rounded-lg">
+              <div className="relative flex flex-col w-full h-full">
+                {/* Gambar */}
                 <Image
                   src={`/images/guru-${program.id}.png`}
                   alt={program.title}
-                  width={400}
-                  height={300}
-                  className="object-cover"
+                  width={200}
+                  height={100}
+                  className="object-cover rounded-t-lg"
                   sizes="(max-width: 768px) 100vw, 33vw"
                 />
-                <div className="absolute bottom-0 w-full bg-white rounded-t-2xl text-center pt-3">
-                  <h3 className="text-xl font-semibold mb-2 text-gray-800">
+                {/* Konten */}
+                <div className="p-4 text-center">
+                  <h3 className="text-lg font-semibold mb-2 text-gray-800 line-clamp-2">
                     {program.title}
                   </h3>
-                  <p className="text-gray-600 line-clamp-3 mb-6 flex-1">
+                  <p className="text-sm text-gray-600 line-clamp-3">
                     {program.desc}
                   </p>
                 </div>
