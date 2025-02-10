@@ -122,6 +122,7 @@ export default function Navigation() {
             label={userFullName ? "Data Diri" : "Pendaftaran"}
             isScrolled={isScrolled}
           />
+          <NavLink href="/galeri" label="Galeri" isScrolled={isScrolled} />
           <NavLink href="/kontak" label="Kontak" isScrolled={isScrolled} />
         </div>
 
