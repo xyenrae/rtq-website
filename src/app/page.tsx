@@ -5,13 +5,11 @@ import KenaliKami from "@/components/section/home/KenaliKami";
 import ProgramUnggulan from "@/components/section/home/ProgramUnggulan";
 import VisiMisi from "@/components/section/home/VisiMisi";
 import Guru from "@/components/section/home/Guru";
-import Testimoni from "@/components/section/home/Testimoni";
 import Berita from "@/components/section/home/Berita";
-import Newsletter from "@/components/section/home/Newsletter";
 
 export default function Home() {
   return (
-    <div className="mt-16">
+    <div className="mt-16 w-full overflow-x-hidden">
       {/* Hero Section */}
       <section className="container">
         <div className="flex w-full items-center">
@@ -41,32 +39,33 @@ export default function Home() {
           </div>
         </div>
       </section>
+      {/* Program Unggulan Section */}
       <section className="container mt-32 overflow-hidden">
         <ProgramUnggulan />
       </section>
+      {/* Program Kami Section */}
       <section className="container mt-32">
         <ProgramKami />
       </section>
+      {/* Program Membaca Section */}
       <section className="container mt-32">
         <ProgramMembaca />
       </section>
+      {/* Kenali Kami Section */}
       <section className="container mt-32">
         <KenaliKami />
       </section>
+      {/* Visi Misi Section */}
       <section className="mt-32">
         <VisiMisi />
       </section>
+      {/* Guru Section */}
       <section className="container mt-32">
         <Guru />
       </section>
-      <section className="mt-32">
-        <Testimoni />
-      </section>
+      {/* Berita Section */}
       <section className="mt-32">
         <Berita />
-      </section>
-      <section className="my-32">
-        <Newsletter />
       </section>
     </div>
   );
