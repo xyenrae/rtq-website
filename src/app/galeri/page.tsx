@@ -54,6 +54,7 @@ export default function GaleriPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const lightboxRef = useRef<HTMLDivElement>(null);
 
+  // Menggabungkan semua gambar dari semua kategori
   const allImages = galleryCategories.flatMap((category) =>
     category.images.map((imageName) => ({
       publicId: `${category.folder}/${imageName}`,
@@ -61,10 +62,12 @@ export default function GaleriPage() {
     }))
   );
 
+  // Mengurutkan gambar berdasarkan nama file
   const sortedImages = [...allImages].sort((a, b) =>
     b.publicId.localeCompare(a.publicId)
   );
 
+  // Preload gambar untuk meningkatkan performa
   const preloadImage = useCallback(
     (publicId: string) => {
       if (typeof window !== "undefined" && !preloadedImages.has(publicId)) {
@@ -78,23 +81,25 @@ export default function GaleriPage() {
     [preloadedImages]
   );
 
-  const handleImageNavigation = (direction: "prev" | "next") => {
-    if (!selectedPublicId) return;
+  // Navigasi gambar di lightbox
+  const handleImageNavigation = useCallback(
+    (direction: "prev" | "next") => {
+      if (!selectedPublicId) return;
+      const currentIndex = sortedImages.findIndex(
+        (img) => img.publicId === selectedPublicId
+      );
+      const newIndex =
+        direction === "next"
+          ? (currentIndex + 1) % sortedImages.length
+          : (currentIndex - 1 + sortedImages.length) % sortedImages.length;
+      setIsImageLoading(true);
+      setSelectedPublicId(sortedImages[newIndex].publicId);
+      setCurrentIndex(newIndex);
+    },
+    [selectedPublicId, sortedImages]
+  );
 
-    const currentIndex = sortedImages.findIndex(
-      (img) => img.publicId === selectedPublicId
-    );
-
-    const newIndex =
-      direction === "next"
-        ? (currentIndex + 1) % sortedImages.length
-        : (currentIndex - 1 + sortedImages.length) % sortedImages.length;
-
-    setIsImageLoading(true);
-    setSelectedPublicId(sortedImages[newIndex].publicId);
-    setCurrentIndex(newIndex);
-  };
-
+  // Handle keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (selectedPublicId) {
@@ -103,14 +108,16 @@ export default function GaleriPage() {
         if (e.key === "Escape") setSelectedPublicId(null);
       }
     },
-    [selectedPublicId]
+    [selectedPublicId, handleImageNavigation]
   );
 
+  // Efek samping untuk menambahkan event listener keyboard
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
+  // Efek samping untuk mengatur overflow body dan preload gambar
   useEffect(() => {
     if (selectedPublicId) {
       document.body.style.overflow = "hidden";
@@ -125,7 +132,7 @@ export default function GaleriPage() {
     } else {
       document.body.style.overflow = "auto";
     }
-  }, [selectedPublicId, currentIndex]);
+  }, [selectedPublicId, currentIndex, preloadImage, sortedImages]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
