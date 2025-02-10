@@ -92,7 +92,7 @@ export default function Navigation() {
 
   return (
     <nav
-      className={`bg-white sticky top-0 z-50 transition-all duration-300 shadow-md ${
+      className={`bg-white sticky top-0 z-50 transition-all duration-300 ${
         isScrolled ? "py-2" : "py-3"
       }`}
     >

@@ -32,7 +32,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="id" className={`${fredoka.variable} ${notoSans.variable}`}>
-      <body className={`bg-gray-50 w-screen overflow-x-hidden`}>
+      <body className={`bg-gray-50 !w-screen !overflow-x-hidden`}>
         <ToastContainer
           position="top-right"
           autoClose={3000}

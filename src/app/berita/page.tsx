@@ -13,7 +13,7 @@ interface Berita {
   konten: string;
   views: number;
   gambar: string;
-  kategori?: string;
+  kategori?: string; // Kolom kategori opsional
 }
 
 // Fungsi untuk memformat tanggal
@@ -58,10 +58,14 @@ export default function BeritaPage() {
           .from("berita")
           .select("*")
           .order("tanggal", { ascending: false });
+
+        // Filter berdasarkan kategori jika bukan "Semua"
         if (selectedCategory !== "Semua") {
           query = query.eq("kategori", selectedCategory);
         }
+
         const { data, error } = await query;
+
         if (error) throw error;
         setBerita(data);
         setError(null);
@@ -72,6 +76,7 @@ export default function BeritaPage() {
         setIsLoading(false);
       }
     };
+
     fetchBerita();
   }, [selectedCategory]);
 
