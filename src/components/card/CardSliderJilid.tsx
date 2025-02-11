@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination, Mousewheel, FreeMode } from "swiper/modules";
+import { Pagination, Mousewheel, FreeMode, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/free-mode";
@@ -97,7 +97,7 @@ export default function CardSliderJilid() {
   return (
     <div className="relative px-4">
       <Swiper
-        modules={[Pagination, Mousewheel, FreeMode]}
+        modules={[Pagination, Mousewheel, FreeMode, Autoplay]}
         spaceBetween={30}
         slidesPerView={3}
         freeMode={true}
@@ -105,11 +105,10 @@ export default function CardSliderJilid() {
           forceToAxis: true,
           sensitivity: 0.5,
         }}
-        pagination={{
-          clickable: true,
-          bulletClass:
-            "swiper-pagination-bullet !bg-gray-300 !h-1 !w-8 !rounded-sm",
-          bulletActiveClass: "!bg-green-500",
+        loop={true} // Aktifkan infinite scroll
+        autoplay={{
+          delay: 3000, // Durasi autoplay (3 detik)
+          disableOnInteraction: false, // Tetap autoplay meskipun user berinteraksi
         }}
         breakpoints={{
           0: {
@@ -126,11 +125,10 @@ export default function CardSliderJilid() {
           },
         }}
         wrapperClass="items-stretch"
-        className="!pb-12 !overflow-visible"
       >
         {programs.map((program, index) => (
           <SwiperSlide key={program.id} className="h-full">
-            <div className="overflow-hidden flex flex-col h-full py-6 bg-white hover:shadow-lg transition-shadow">
+            <div className="overflow-hidden flex flex-col h-full py-6 bg-white shadow-md rounded-lg">
               <div className="relative flex justify-center">
                 <Image
                   src={`/images/${
@@ -143,7 +141,6 @@ export default function CardSliderJilid() {
                   sizes="(max-width: 768px) 100vw, 33vw"
                 />
               </div>
-
               <div className="px-6 mt-6 flex flex-col flex-1">
                 <h3 className="text-xl font-semibold mb-2 text-gray-800">
                   {program.title}
@@ -151,7 +148,6 @@ export default function CardSliderJilid() {
                 <p className="text-gray-600 line-clamp-3 mb-6 flex-1">
                   {program.desc}
                 </p>
-
                 <div
                   className={`grid grid-cols-3 gap-4 border-t text-white rounded-xl p-4 ${
                     colorClasses[index % colorClasses.length]

@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Mousewheel, FreeMode } from "swiper/modules";
+import { Mousewheel, FreeMode, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 
@@ -84,7 +84,7 @@ export default function CardSliderGuru() {
   return (
     <div className="relative px-4 overflow-hidden">
       <Swiper
-        modules={[Mousewheel, FreeMode]}
+        modules={[Mousewheel, FreeMode, Autoplay]}
         freeMode={true}
         mousewheel={{
           forceToAxis: true,
@@ -92,6 +92,11 @@ export default function CardSliderGuru() {
         }}
         slidesPerView="auto"
         spaceBetween={16} // Minimal spasi antar slide
+        loop={true} // Aktifkan infinite scroll
+        autoplay={{
+          delay: 3000, // Durasi autoplay (3 detik)
+          disableOnInteraction: false, // Tetap autoplay meskipun user berinteraksi
+        }}
         className="!pb-12"
       >
         {programs.map((program) => (
@@ -99,7 +104,7 @@ export default function CardSliderGuru() {
             key={program.id}
             className="!w-[200px] !h-auto" // Lebar slide disesuaikan
           >
-            <div className="overflow-hidden bg-white hover:shadow-lg transition-shadow rounded-lg">
+            <div className="overflow-hidden bg-white shadow-md rounded-lg">
               <div className="relative flex flex-col w-full h-full">
                 {/* Gambar */}
                 <Image

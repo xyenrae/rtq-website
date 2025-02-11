@@ -14,7 +14,7 @@ export default function VisiMisi() {
         />
       </div>
 
-      <div className="relative z-20 container grid place-content-center">
+      <div className="relative z-20 container flex flex-col sm:items-center">
         <div className="sm:text-lg text-white">
           <h2 className="text-2xl font-bold mb-6">Visi & Misi</h2>
           <p className="mt-2">

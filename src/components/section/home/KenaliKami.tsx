@@ -10,26 +10,28 @@ export default function KenaliKami() {
     {
       title: "Membangun Generasi Qur'ani Sejak Dini",
       content:
-        "Kami di RTQ Al-Hikmah percaya bahwa setiap anak memiliki potensi yang luar biasa. Dengan pendekatan yang penuh kasih dan dedikasi, kami membimbing mereka untuk mengenal dan mencintai Al-Qur'an sejak usia dini. Temukan bagaimana kami mendidik dengan metode yang efektif dan menyenangkan.",
+        "Di RTQ Al-Hikmah, kami percaya setiap anak punya potensi besar. Kami bimbing mereka dengan kasih sayang agar bisa mengenal dan mencintai Al-Qur'an sejak kecil. Belajar jadi lebih menyenangkan dengan cara yang mudah dimengerti.",
     },
     {
       title: "Pendidikan dengan Metode Yanbu'a",
       content:
-        "Metode Yanbu'a adalah pendekatan yang kami gunakan untuk mengajarkan Al-Qur'an dengan cara yang terstruktur dan menyenangkan. Melalui tahapan pembelajaran yang disesuaikan dengan usia, santri kami belajar dengan percaya diri dan penuh semangat. Mari bergabung dan lihat bagaimana metode ini membantu anak Anda berkembang.",
+        "Kami menggunakan metode Yanbu'a untuk mengajarkan Al-Qur'an. Anak-anak belajar secara bertahap sesuai usia mereka. Cara ini membuat mereka semakin percaya diri dan semangat dalam belajar.",
     },
     {
       title: "Mengasah Potensi Anak dengan Kurikulum Islami Terbaik",
       content:
-        "Setiap anak berhak mendapatkan pendidikan terbaik, dan kami berkomitmen untuk memberikan itu. Di RTQ Al-Hikmah, kami memadukan kurikulum islami yang holistik dengan pembelajaran yang menyenangkan, sehingga anak-anak tidak hanya cerdas, tetapi juga berakhlak mulia.",
+        "Setiap anak berhak mendapatkan pendidikan terbaik. Di RTQ Al-Hikmah, kami menggabungkan kurikulum islami dengan cara belajar yang seru. Anak-anak tidak hanya pintar, tapi juga punya akhlak yang baik.",
     },
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row w-full gap-8">
-      <div className="flex-1 flex flex-col gap-4 px-4">
-        <p className="text-2xl font-semibold mb-8">Kenali Kami Lebih Dekat</p>
-
-        <div className="flex flex-col gap-2">
+    <div className="flex flex-col lg:flex-row w-full gap-8 px-4 py-8 sm:px-0 sm:container">
+      {/* Text Section */}
+      <div className="flex-1 flex flex-col gap-6">
+        <p className="text-2xl lg:text-3xl font-semibold text-gray-800">
+          Kenali Kami Lebih Dekat
+        </p>
+        <div className="flex flex-col gap-4">
           {items.map((item, index) => (
             <div
               key={index}
@@ -44,7 +46,7 @@ export default function KenaliKami() {
                 }`}
               >
                 <h3
-                  className={`text-lg font-medium text-gray-800 text-start ${
+                  className={`text-lg lg:text-xl font-medium text-start ${
                     activeIndex === index ? "text-white" : "text-gray-800"
                   }`}
                 >
@@ -54,16 +56,16 @@ export default function KenaliKami() {
                   className={`text-gray-600 transform transition-transform ${
                     activeIndex === index ? "rotate-180" : ""
                   }`}
+                  size={24}
                 />
               </button>
-
               <div
                 className={`overflow-hidden transition-all duration-300 ease-in-out ${
                   activeIndex === index ? "max-h-[500px]" : "max-h-0"
                 }`}
               >
                 <div className="p-4">
-                  <p className="text-gray-600 leading-relaxed">
+                  <p className="text-gray-600 leading-relaxed text-sm lg:text-base">
                     {item.content}
                   </p>
                 </div>
@@ -73,12 +75,13 @@ export default function KenaliKami() {
         </div>
       </div>
 
-      <div className="flex-1 relative w-full h-full min-h-[400px]">
+      {/* Image Section */}
+      <div className="flex-1 relative w-full h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0">
         <Image
           src="/images/hero-2.png"
           alt="Ilustrasi pembelajaran"
           fill
-          className="object-contain object-center"
+          className="object-cover object-center"
           priority
         />
       </div>
