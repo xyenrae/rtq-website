@@ -27,8 +27,13 @@ export default function Berita() {
   const [berita, setBerita] = useState<Berita[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Fetch data berita dari Supabase
+  useEffect(() => {
+    // Check screen width after component mounts (on the client side)
+    setIsMobile(window.innerWidth < 768);
+  }, []);
+
   useEffect(() => {
     const fetchBerita = async () => {
       try {
@@ -50,7 +55,6 @@ export default function Berita() {
     fetchBerita();
   }, []);
 
-  // Skeleton Loader
   if (isLoading) return <SkeletonLoader />;
   if (error) return <ErrorMessage message={error} />;
 
@@ -67,10 +71,9 @@ export default function Berita() {
           Al-Hikmah.
         </p>
       </div>
-
       {/* Berita Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8">
-        {berita.slice(0, window.innerWidth < 768 ? 3 : 6).map((item) => (
+        {berita.slice(0, isMobile ? 3 : 6).map((item) => (
           <div
             key={item.id}
             className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden flex flex-col sm:flex-row"
@@ -86,7 +89,6 @@ export default function Berita() {
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
               </div>
-
               {/* Konten */}
               <div className="p-2 sm:p-4 flex flex-col justify-between flex-1">
                 <div>
@@ -112,7 +114,6 @@ export default function Berita() {
           </div>
         ))}
       </div>
-
       {/* Button Lihat Semua */}
       <div className="mt-8">
         <Link
@@ -128,7 +129,12 @@ export default function Berita() {
 
 // Skeleton Loader
 const SkeletonLoader = () => {
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check screen width after component mounts (on the client side)
+    setIsMobile(window.innerWidth < 768);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -144,15 +150,12 @@ const SkeletonLoader = () => {
           >
             {/* Gambar Placeholder */}
             <div className="relative w-4/12 sm:w-1/3 h-32 sm:h-auto bg-gray-300"></div>
-
             {/* Konten Placeholder */}
             <div className="p-2 sm:p-4 flex flex-col justify-between flex-1 space-y-4">
               {/* Kategori Placeholder */}
               <div className="h-4 w-24 bg-gray-300 rounded-full"></div>
-
               {/* Judul Placeholder */}
               <div className="h-6 w-48 bg-gray-300 rounded-full"></div>
-
               {/* Tanggal Placeholder */}
               <div className="h-4 w-32 bg-gray-300 rounded-full self-end"></div>
             </div>

@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/lib/supabase/client";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 
 // Interface untuk berita
 interface Berita {
@@ -24,14 +25,12 @@ const formatDate = (dateString: string) => {
   }).format(date);
 };
 
-// Animasi container dan card
+// Variabel animasi
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
+    transition: { staggerChildren: 0.1 },
   },
 };
 
@@ -49,36 +48,50 @@ export default function BeritaPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
+  const [page, setPage] = useState(1); // Halaman saat ini
+  const [hasMore, setHasMore] = useState(true); // Apakah ada data lagi?
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
-  // Fetch data berita dari Supabase
-  useEffect(() => {
-    const fetchBerita = async () => {
-      try {
-        let query = supabase
-          .from("berita")
-          .select("*")
-          .order("tanggal", { ascending: false });
-
-        // Filter berdasarkan kategori jika bukan "Semua"
-        if (selectedCategory !== "Semua") {
-          query = query.eq("kategori", selectedCategory);
-        }
-
-        const { data, error } = await query;
-
-        if (error) throw error;
-        setBerita(data);
-        setError(null);
-      } catch (error) {
-        console.error("Error fetching berita:", error);
-        setError("Gagal memuat berita. Silakan coba kembali.");
-      } finally {
-        setIsLoading(false);
+  // Fungsi untuk memanggil data dari Supabase
+  const fetchBerita = async (reset: boolean = false) => {
+    try {
+      // Jika reset, kita hapus data lama dan set ulang status pagination
+      if (reset) {
+        setBerita([]);
+        setHasMore(true);
       }
-    };
 
-    fetchBerita();
-  }, [selectedCategory]);
+      let query = supabase
+        .from("berita")
+        .select("*")
+        .order("tanggal", { ascending: false })
+        .range((page - 1) * 6, page * 6 - 1);
+
+      if (selectedCategory !== "Semua") {
+        query = query.eq("kategori", selectedCategory);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+
+      // Jika reset, langsung set data; jika tidak, gabungkan dengan data lama
+      if (reset) {
+        setBerita(data);
+      } else {
+        setBerita((prev) => [...prev, ...data]);
+      }
+
+      // Jika data yang didapat kurang dari 6, tidak ada lagi data selanjutnya
+      if (data.length < 6) {
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.error("Error fetching berita:", err);
+      setError("Gagal memuat berita. Silakan coba kembali.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Daftar kategori
   const categories = [
@@ -89,12 +102,67 @@ export default function BeritaPage() {
     "Prestasi",
   ];
 
-  // Skeleton loading jika data sedang dimuat
-  if (isLoading) return <LoadingSkeleton />;
+  // Saat kategori berubah, reset halaman ke 1
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+  }, [selectedCategory]);
+
+  // Efek untuk fetch data berdasarkan perubahan page atau selectedCategory
+  useEffect(() => {
+    if (page === 1) {
+      fetchBerita(true); // Reset data ketika page = 1
+    } else {
+      fetchBerita(false); // Tambahkan data untuk infinite scroll
+    }
+  }, [page, selectedCategory]);
+
+  // Ref untuk observer infinite scroll
+  const loaderRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollToTop(true);
+      } else {
+        setShowScrollToTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Efek infinite scroll
+  useEffect(() => {
+    if (!hasMore || isLoading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [hasMore, isLoading]);
+
+  // Tampilkan skeleton atau error bila diperlukan
+  if (isLoading && page === 1) return <LoadingSkeleton />;
   if (error) return <ErrorMessage message={error} />;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <section className="relative h-96 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
@@ -107,7 +175,7 @@ export default function BeritaPage() {
               priority
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
         </div>
         <div className="relative z-10 text-center px-4 max-w-4xl space-y-4">
           <motion.h1
@@ -130,20 +198,37 @@ export default function BeritaPage() {
 
       {/* Category Filter */}
       <section className="container mx-auto px-4 py-8">
-        <div className="flex flex-wrap gap-4 justify-center mb-12">
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-2 rounded-full transition-all ${
-                selectedCategory === category
-                  ? "bg-green-600 text-white shadow-lg"
-                  : "bg-white text-gray-600 hover:bg-gray-100 shadow-sm"
-              }`}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+          {/* Mobile: Dropdown */}
+          <div className="sm:hidden w-full">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full px-6 py-3 rounded-xl outline-none bg-white border-2 border-gray-200 text-gray-700 font-medium"
             >
-              {category}
-            </button>
-          ))}
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+          {/* Desktop: Buttons */}
+          <div className="hidden sm:flex flex-wrap gap-4 justify-center">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-5 py-2.5 rounded-xl font-medium transition-all duration-300 ${
+                  selectedCategory === category
+                    ? "bg-green-600 text-white shadow-md"
+                    : "bg-white text-gray-600 hover:bg-gray-50 border-2 border-gray-200 hover:border-green-600 shadow-sm"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -152,73 +237,65 @@ export default function BeritaPage() {
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto px-4 pb-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        className="container mx-auto px-4 pb-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8"
       >
-        {berita.map((item) => (
+        {berita.map((item, index) => (
+          // Jika ternyata masih ada kemungkinan duplikasi id, gunakan composite key:
           <motion.article
-            key={item.id}
+            key={`${item.id}-${index}`}
             variants={cardVariants}
-            className="relative group cursor-pointer"
+            className="relative group cursor-pointer bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden flex flex-col sm:flex-row"
           >
-            <Link href={`/berita/${item.id}`}>
-              <div className="relative h-80 rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300">
+            <Link href={`/berita/${item.id}`} className="flex flex-1">
+              {/* Gambar */}
+              <div className="relative w-4/12 sm:w-1/3 h-32 sm:h-auto">
                 <Image
                   src={item.gambar || "/placeholder.jpg"}
                   alt={item.judul}
                   fill
-                  className="object-cover transform group-hover:scale-110 transition-transform duration-300"
-                  sizes="(max-width: 768px) 100vw, 33vw"
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                {/* Content Overlay */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-white space-y-3">
+              </div>
+              {/* Konten */}
+              <div className="p-2 sm:p-4 flex flex-col justify-between flex-1">
+                <div>
                   {item.kategori && (
-                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm">
+                    <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium mb-1">
                       {item.kategori}
                     </span>
                   )}
-                  <h3 className="text-xl font-bold line-clamp-2">
+                  <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
                     {item.judul}
                   </h3>
-                  <div className="flex items-center text-sm opacity-80">
-                    <span>{formatDate(item.tanggal)}</span>
-                    <span className="mx-2">•</span>
-                    <span>{item.views} views</span>
-                  </div>
+                </div>
+                <div className="flex items-center text-sm text-gray-500">
+                  <span>{formatDate(item.tanggal)}</span>
+                  <span className="mx-2">•</span>
+                  <span>{item.views} views</span>
                 </div>
               </div>
             </Link>
           </motion.article>
         ))}
+
+        {/* Loader untuk infinite scroll */}
+        {hasMore && (
+          <div ref={loaderRef} className="col-span-full text-center py-4">
+            <p className="text-gray-500">Memuat lebih banyak...</p>
+          </div>
+        )}
       </motion.section>
 
-      {/* CTA Section */}
-      <section className="bg-green-600 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Tetap Terhubung</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto">
-            Dapatkan notifikasi langsung ketika ada berita terbaru dengan
-            berlangganan newsletter kami
-          </p>
-          <div className="flex justify-center gap-4">
-            <input
-              type="email"
-              placeholder="Masukkan email Anda"
-              className="px-6 py-3 rounded-full bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white placeholder:text-white/80"
-            />
-            <button className="px-8 py-3 bg-white text-green-600 rounded-full hover:bg-gray-100 transition-colors font-semibold">
-              Berlangganan
-            </button>
-          </div>
-        </div>
-      </section>
+      {/* Tombol Scroll ke Atas */}
+      {showScrollToTop && <ScrollToTopButton />}
     </div>
   );
 }
 
 // Komponen Skeleton Loading
 const LoadingSkeleton = () => (
-  <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+  <div className="min-h-screen bg-gray-50">
     <div className="container mx-auto px-4 py-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {[...Array(6)].map((_, index) => (
@@ -241,7 +318,7 @@ const LoadingSkeleton = () => (
 
 // Komponen Pesan Error
 const ErrorMessage = ({ message }: { message: string }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100">
+  <div className="min-h-screen flex items-center justify-center bg-gray-50">
     <div className="bg-red-50 border border-red-200 p-8 rounded-2xl max-w-md text-center">
       <div className="text-red-600 text-5xl mb-4">⚠️</div>
       <h3 className="text-red-600 text-xl font-semibold mb-4">{message}</h3>

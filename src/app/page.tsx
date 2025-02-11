@@ -1,3 +1,5 @@
+"use client";
+import { useEffect, useState } from "react";
 import ProgramMembaca from "@/components/section/home/ProgramMembaca";
 import ProgramKami from "@/components/section/home/ProgramKami";
 import KenaliKami from "@/components/section/home/KenaliKami";
@@ -6,8 +8,24 @@ import VisiMisi from "@/components/section/home/VisiMisi";
 import Guru from "@/components/section/home/Guru";
 import Berita from "@/components/section/home/Berita";
 import Hero from "@/components/section/home/Hero";
+import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 
 export default function Home() {
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollToTop(true);
+      } else {
+        setShowScrollToTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <div className="w-full overflow-x-hidden">
       {/* Hero Section */}
@@ -52,6 +70,8 @@ export default function Home() {
       <section className="mt-12">
         <Berita />
       </section>
+
+      {showScrollToTop && <ScrollToTopButton />}
     </div>
   );
 }
