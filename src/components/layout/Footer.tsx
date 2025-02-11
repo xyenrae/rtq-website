@@ -53,7 +53,7 @@ export default function Footer() {
           <div className="space-y-2 text-gray-300 text-center md:text-right">
             <p>📌 Jl. Pendidikan No. 123, Jakarta</p>
             <p>📞 (021) 1234-5678</p>
-            <p>📧 info@rtq-alikhlas.id</p>
+            <p>📧 info@rtq-hikmah.id</p>
           </div>
         </div>
       </div>

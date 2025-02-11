@@ -21,7 +21,7 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "RTQ Al-Ikhlas",
+  title: "RTQ Al-Hikmah",
   description: "Lembaga Pendidikan Al-Qur'an Terbaik",
 };
 
