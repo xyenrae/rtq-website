@@ -1,3 +1,4 @@
+// app/login/page.tsx
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -5,110 +6,156 @@ import { supabase } from "@/lib/supabase/client";
 import Link from "next/link";
 import Image from "next/image";
 import { toast } from "react-toastify";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State untuk toggle visibility password
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Logging in with:", { email, password });
+    setIsLoading(true);
+    setError("");
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
-      toast.error("Login gagal. Periksa email dan password Anda.");
-    } else {
+      if (error) throw error;
+
       const userRole = data.user?.user_metadata.role;
-      if (userRole === "admin") {
-        router.push("/admin/dashboard");
-      } else {
-        router.push("/");
-      }
-      toast.success("Login berhasil!");
+      router.push(userRole === "admin" ? "/admin/dashboard" : "/");
+      toast.success("Selamat datang kembali!");
+    } catch (error: any) {
+      setError(error.message);
+      toast.error("Login gagal. Periksa kredensial Anda.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded shadow-md w-4/12"
-      >
-        <h2 className="text-2xl font-bold">Login</h2>
-        <p className="mb-4 mt-2 text-gray-600 text-sm">
-          Silahkan Masukkan E-mail dan Password untuk melanjutkan ke dalam
-          aplikasi
-        </p>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
-        <div className="mb-4">
-          <label className="block text-gray-700">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
-            required
-            placeholder="Masukkan email"
-          />
-        </div>
-        <div className="mb-4 relative">
-          <label className="block text-gray-700">Password</label>
-          <div className="flex justify-between rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400">
-            <input
-              type={showPassword ? "text" : "password"} // Toggle visibility password
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="block w-full outline-none"
-              required
-              placeholder="Masukkan password"
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-cyan-50">
+      <div className="container relative h-screen flex items-center justify-center p-4">
+        {/* Illustration Section */}
+        <div className="hidden md:flex flex-1 h-full items-center justify-center">
+          <div className="max-w-xl w-full">
+            <Image
+              src="/images/auth-login.svg"
+              alt="Login Illustration"
+              width={500}
+              height={500}
+              className="animate-float"
+              priority
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)} // Toggle visibility
-              className="flex items-center text-gray-500 hover:text-gray-700"
-            >
-              {showPassword ? (
-                <Image
-                  src={"/images/eye-open.svg"}
-                  alt="Show Password"
-                  width={25}
-                  height={25}
-                />
-              ) : (
-                <Image
-                  src={"/images/eye-closed.svg"}
-                  alt="Hide Password"
-                  width={25}
-                  height={25}
-                />
-              )}
-            </button>
+            <h2 className="text-3xl font-bold text-center mt-8 text-gray-800">
+              Selamat Datang Kembali
+            </h2>
+            <p className="text-center mt-2 text-gray-600">
+              Kelola aktivitas Anda dengan mudah melalui platform kami
+            </p>
           </div>
         </div>
-        <button
-          type="submit"
-          className="w-full bg-green-500 text-white py-2 rounded"
-        >
-          Login
-        </button>
-        <p className="mt-4 text-center">
-          Tidak punya akun?{" "}
-          <Link
-            href="/register"
-            className="text-green-500 underline hover:text-green-600"
-          >
-            Daftar akun disini
-          </Link>
-        </p>
-      </form>
+
+        {/* Form Section */}
+        <div className="md:w-1/2 lg:w-1/3 bg-white rounded-2xl shadow-xl p-8 md:p-10">
+          <div className="flex justify-center mb-8">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={120}
+              height={40}
+              priority
+            />
+          </div>
+
+          <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            Masuk ke Akun Anda
+          </h1>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all"
+                placeholder="email@contoh.com"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition-all pr-12"
+                  placeholder="••••••••"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-gray-400 hover:text-emerald-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-red-600 text-sm text-center animate-shake">
+                ⚠️ {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all ${
+                isLoading
+                  ? "bg-emerald-400 cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-700"
+              }`}
+            >
+              {isLoading ? "Memproses..." : "Masuk"}
+            </button>
+          </form>
+
+          <div className="mt-6 text-center">
+            <Link
+              href="/forgot-password"
+              className="text-sm text-emerald-600 hover:text-emerald-800 font-medium"
+            >
+              Lupa Password?
+            </Link>
+          </div>
+
+          <div className="mt-8 text-center text-sm text-gray-600">
+            Belum punya akun?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-emerald-600 hover:text-emerald-800 underline underline-offset-4"
+            >
+              Daftar disini
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

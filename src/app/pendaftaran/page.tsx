@@ -9,15 +9,21 @@ export default function RegistrationPage() {
   const router = useRouter();
 
   useEffect(() => {
+    let isMounted = true; // Flag untuk melacak apakah komponen masih mounted
+
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
-      if (!data.user) {
+      if (!data.user && isMounted) {
         toast.error("Anda harus login terlebih dahulu.");
         router.push("/login");
       }
     };
 
     checkAuth();
+
+    return () => {
+      isMounted = false; // Set flag menjadi false saat komponen unmount
+    };
   }, [router]);
 
   return (
