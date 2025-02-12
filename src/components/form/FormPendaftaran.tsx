@@ -14,7 +14,7 @@ export default function FormPendaftaran() {
         {["Santri", "Orang Tua", "Alamat"].map((tab, index) => (
           <button
             key={index}
-            className={`px-6 py-3 text-sm font-medium w-full bg-gray-200 ${
+            className={`py-3 text-sm font-medium w-full bg-gray-200 ${
               activeTab === index
                 ? "text-white !bg-green-500 rounded"
                 : "text-gray-500 hover:text-gray-700"

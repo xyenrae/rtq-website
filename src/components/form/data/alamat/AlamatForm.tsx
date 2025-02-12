@@ -1,8 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 interface AyahIbuAlamat {
@@ -42,9 +39,8 @@ interface AlamatData {
 }
 
 export default function AlamatForm() {
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [hasData, setHasData] = useState(false);
-  const [isIbuDisabled, setIsIbuDisabled] = useState(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [hasData, setHasData] = useState<boolean>(false);
   const [alamatData, setAlamatData] = useState<AlamatData>({
     ayah: {
       tinggal_luar_negeri: false,
@@ -87,31 +83,29 @@ export default function AlamatForm() {
       alamat: "",
     },
   });
-
   const [santriId, setSantriId] = useState<number | null>(null);
-  const router = useRouter();
 
+  // Ambil santriId berdasarkan user_id (menggunakan .limit(1).single() untuk memastikan satu baris)
   useEffect(() => {
     const fetchSantriId = async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
-
       const { data: santri, error } = await supabase
         .from("santri")
         .select("id")
         .eq("user_id", userData.user.id)
-        .single();
-
+        .limit(1)
+        .maybeSingle();
       if (error) {
         console.error("Error fetching santri ID:", error.message);
-      } else {
+      } else if (santri) {
         setSantriId(santri.id);
       }
     };
-
     fetchSantriId();
   }, []);
 
+  // Ambil data alamat berdasarkan santriId
   useEffect(() => {
     const fetchAlamatData = async () => {
       if (!santriId) return;
@@ -120,12 +114,10 @@ export default function AlamatForm() {
         .select("*")
         .eq("santri_id", santriId)
         .maybeSingle();
-
       if (error) {
         console.error("Error fetching alamat data:", error.message);
         setHasData(false);
       } else if (alamat) {
-        console.log("Fetched Alamat Data:", alamat);
         setAlamatData({
           ayah: {
             tinggal_luar_negeri: alamat.ayah_tinggal_luar_negeri || false,
@@ -173,19 +165,19 @@ export default function AlamatForm() {
         setHasData(false);
       }
     };
-
     fetchAlamatData();
   }, [santriId]);
 
-  const handleIbuSamaDenganAyah = (checked: boolean) => {
+  // Fungsi untuk menyamakan data ibu dengan ayah (jika diperlukan)
+  const handleIbuSamaDenganAyah = (checked: boolean): void => {
     if (checked) {
-      setAlamatData((prevData) => ({
-        ...prevData,
-        ibu: { ...prevData.ayah },
+      setAlamatData((prev) => ({
+        ...prev,
+        ibu: { ...prev.ayah },
       }));
     } else {
-      setAlamatData((prevData) => ({
-        ...prevData,
+      setAlamatData((prev) => ({
+        ...prev,
         ibu: {
           tinggal_luar_negeri: false,
           status_kepemilikan: "",
@@ -202,15 +194,44 @@ export default function AlamatForm() {
     }
   };
 
-  // Handle form submission for new data
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (!santriId) {
-        toast.error("Santri ID tidak ditemukan.");
-        return;
-      }
+  // Fungsi untuk menangani perubahan input
+  const handleInputChange = (
+    field: string,
+    value: string | boolean,
+    type: "ayah" | "ibu" | "santri"
+  ): void => {
+    setAlamatData((prev) => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        [field]: value,
+      },
+    }));
+  };
 
+  // Fungsi untuk menangani perubahan checkbox
+  const handleCheckboxChange = (
+    field: string,
+    checked: boolean,
+    type: "ayah" | "ibu" | "santri"
+  ): void => {
+    setAlamatData((prev) => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        [field]: checked,
+      },
+    }));
+  };
+
+  // Fungsi untuk submit data baru
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault();
+    if (!santriId) {
+      toast.error("Santri ID tidak ditemukan.");
+      return;
+    }
+    try {
       const { error } = await supabase.from("alamat").insert({
         santri_id: santriId,
         ayah_tinggal_luar_negeri: alamatData.ayah.tinggal_luar_negeri,
@@ -248,27 +269,25 @@ export default function AlamatForm() {
         santri_rw: alamatData.santri.rw,
         santri_alamat: alamatData.santri.alamat,
       });
-
       if (error) {
         console.error("Error inserting data:", error.message);
         toast.error("Gagal menyimpan data alamat.");
       } else {
         toast.success("Data alamat berhasil disimpan!");
       }
-    } catch (error) {
-      console.error("Error during registration:", error);
+    } catch (err) {
+      console.error("Error during submission:", err);
       toast.error("Terjadi kesalahan saat mendaftar.");
     }
   };
 
-  // Handle update datas
-  const handleUpdate = async () => {
+  // Fungsi untuk mengupdate data
+  const handleUpdate = async (): Promise<void> => {
+    if (!santriId) {
+      toast.error("Santri ID tidak ditemukan.");
+      return;
+    }
     try {
-      if (!santriId) {
-        toast.error("Santri ID tidak ditemukan.");
-        return;
-      }
-
       const { error } = await supabase
         .from("alamat")
         .update({
@@ -308,65 +327,32 @@ export default function AlamatForm() {
           santri_alamat: alamatData.santri.alamat,
         })
         .eq("santri_id", santriId);
-
       if (error) {
         toast.error("Gagal menyimpan perubahan.");
       } else {
         toast.success("Perubahan berhasil disimpan!");
-        setIsEditMode(false); // Kembali ke mode read-only
+        setIsEditMode(false);
       }
-    } catch (error) {
-      console.error("Error during update:", error);
+    } catch (err) {
+      console.error("Error during update:", err);
       toast.error("Terjadi kesalahan saat menyimpan perubahan.");
     }
   };
 
-  // Handle input changes
-  const handleInputChange = (
-    field: string,
-    value: any,
-    type: "ayah" | "ibu" | "santri"
-  ) => {
-    setAlamatData((prevData) => ({
-      ...prevData,
-      [type]: {
-        ...prevData[type],
-        [field]: value,
-      },
-    }));
-  };
-
-  // Handle checkbox changes
-  const handleCheckboxChange = (
-    field: string,
-    checked: boolean,
-    type: "ayah" | "ibu" | "santri"
-  ) => {
-    setAlamatData((prevData) => ({
-      ...prevData,
-      [type]: {
-        ...prevData[type],
-        [field]: checked,
-      },
-    }));
-  };
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-6">
         {/* Data Alamat Ayah */}
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Alamat Ayah
-        </h2>
-        <div className="grid grid-cols-2 gap-6">
+        <h2 className="text-lg font-semibold mb-4">Alamat Ayah</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Tinggal di Luar Negeri */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Tinggal di Luar Negeri?
-            </label>
-            <div className="flex items-center mt-2">
+            <label className="block">Tinggal di Luar Negeri?</label>
+            <div className="flex items-center gap-2 mt-1">
               <input
                 type="checkbox"
-                disabled={!isEditMode}
+                className="w-4 h-4"
+                disabled={hasData ? !isEditMode : false}
                 checked={alamatData.ayah.tinggal_luar_negeri}
                 onChange={(e) =>
                   setAlamatData({
@@ -377,23 +363,16 @@ export default function AlamatForm() {
                     },
                   })
                 }
-                className="mr-2"
               />
-              <span className="text-sm text-gray-700">
-                Ya, tinggal di luar negeri
-              </span>
+              <span>Ya, tinggal di luar negeri</span>
             </div>
           </div>
-
           {/* Status Kepemilikan Rumah */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Status Kepemilikan Rumah
-            </label>
+            <label className="block">Status Kepemilikan Rumah</label>
             <select
               required
-              disabled={!isEditMode}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData ? !isEditMode : false}
               value={alamatData.ayah.status_kepemilikan}
               onChange={(e) =>
                 setAlamatData({
@@ -404,25 +383,21 @@ export default function AlamatForm() {
                   },
                 })
               }
+              className="w-full"
             >
-              <option value="">Pilih Status Kepemilikan</option>
               <option value="Milik Sendiri">Milik Sendiri</option>
               <option value="Sewa/Kontrak">Sewa/Kontrak</option>
               <option value="Numpang">Numpang</option>
             </select>
           </div>
-
           {/* Provinsi */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Provinsi
-            </label>
+            <label className="block">Provinsi</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan provinsi"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ayah.provinsi}
               onChange={(e) =>
                 setAlamatData({
@@ -430,20 +405,17 @@ export default function AlamatForm() {
                   ayah: { ...alamatData.ayah, provinsi: e.target.value },
                 })
               }
+              className="w-full"
             />
           </div>
-
           {/* Kabupaten */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kabupaten
-            </label>
+            <label className="block">Kabupaten</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kabupaten"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ayah.kabupaten}
               onChange={(e) =>
                 setAlamatData({
@@ -451,20 +423,17 @@ export default function AlamatForm() {
                   ayah: { ...alamatData.ayah, kabupaten: e.target.value },
                 })
               }
+              className="w-full"
             />
           </div>
-
           {/* Kecamatan */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kecamatan
-            </label>
+            <label className="block">Kecamatan</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kecamatan"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ayah.kecamatan}
               onChange={(e) =>
                 setAlamatData({
@@ -472,20 +441,17 @@ export default function AlamatForm() {
                   ayah: { ...alamatData.ayah, kecamatan: e.target.value },
                 })
               }
+              className="w-full"
             />
           </div>
-
           {/* Kelurahan */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kelurahan
-            </label>
+            <label className="block">Kelurahan</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kelurahan"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ayah.kelurahan}
               onChange={(e) =>
                 setAlamatData({
@@ -493,20 +459,17 @@ export default function AlamatForm() {
                   ayah: { ...alamatData.ayah, kelurahan: e.target.value },
                 })
               }
+              className="w-full"
             />
           </div>
-
           {/* Kode Pos */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kode Pos
-            </label>
+            <label className="block">Kode Pos</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kode pos"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ayah.kode_pos}
               onChange={(e) =>
                 setAlamatData({
@@ -514,20 +477,17 @@ export default function AlamatForm() {
                   ayah: { ...alamatData.ayah, kode_pos: e.target.value },
                 })
               }
+              className="w-full"
             />
           </div>
-
           {/* RT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              RT
-            </label>
+            <label className="block">RT</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RT"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ayah.rt}
               onChange={(e) =>
                 setAlamatData({
@@ -535,20 +495,17 @@ export default function AlamatForm() {
                   ayah: { ...alamatData.ayah, rt: e.target.value },
                 })
               }
+              className="w-full"
             />
           </div>
-
           {/* RW */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              RW
-            </label>
+            <label className="block">RW</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RW"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ayah.rw}
               onChange={(e) =>
                 setAlamatData({
@@ -556,20 +513,17 @@ export default function AlamatForm() {
                   ayah: { ...alamatData.ayah, rw: e.target.value },
                 })
               }
+              className="w-full"
             />
           </div>
-
           {/* Alamat Lengkap */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Alamat Lengkap
-            </label>
+          <div className="sm:col-span-2">
+            <label className="block">Alamat Lengkap</label>
             <textarea
               required
               rows={3}
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan alamat lengkap"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ayah.alamat}
               onChange={(e) =>
                 setAlamatData({
@@ -577,38 +531,32 @@ export default function AlamatForm() {
                   ayah: { ...alamatData.ayah, alamat: e.target.value },
                 })
               }
+              className="w-full"
             />
           </div>
         </div>
 
         {/* Data Alamat Ibu */}
-        <h2 className="text-lg font-semibold text-gray-800 mt-8 mb-4">
-          Alamat Ibu
-        </h2>
-        <div className="grid grid-cols-2 gap-6">
-          {/* Checkbox untuk Ibu sama dengan Ayah */}
+        <h2 className="text-lg font-semibold mb-4">Alamat Ibu</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Alamat Ibu sama dengan Ayah?
-            </label>
-            <div className="flex items-center mt-2">
+            <label className="block">Alamat Ibu sama dengan Ayah?</label>
+            <div className="flex items-center mt-1">
               <input
                 type="checkbox"
+                disabled={hasData ? !isEditMode : false}
                 onChange={(e) => handleIbuSamaDenganAyah(e.target.checked)}
-                className="mr-2"
+                className="w-4 h-4"
               />
-              <span className="text-sm text-gray-700">
-                Ya, alamat ibu sama dengan ayah
-              </span>
+              <span className="ml-2">Ya, alamat ibu sama dengan ayah</span>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Tinggal di Luar Negeri?
-            </label>
-            <div className="flex items-center mt-2">
+            <label className="block">Tinggal di Luar Negeri?</label>
+            <div className="flex items-center gap-2 mt-1">
               <input
                 type="checkbox"
+                disabled={hasData ? !isEditMode : false}
                 checked={alamatData.ibu.tinggal_luar_negeri}
                 onChange={(e) =>
                   handleCheckboxChange(
@@ -617,192 +565,146 @@ export default function AlamatForm() {
                     "ibu"
                   )
                 }
-                disabled={isIbuDisabled || !isEditMode}
-                className="mr-2"
+                className="w-4 h-4"
               />
-              <span className="text-sm text-gray-700">
-                Ya, tinggal di luar negeri
-              </span>
+              <span>Ya, tinggal di luar negeri</span>
             </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          {/* Status Kepemilikan Rumah */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Status Kepemilikan Rumah
-            </label>
+            <label className="block">Status Kepemilikan Rumah</label>
             <select
               required
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData ? !isEditMode : false}
               value={alamatData.ibu.status_kepemilikan}
               onChange={(e) =>
                 handleInputChange("status_kepemilikan", e.target.value, "ibu")
               }
-              disabled={isIbuDisabled || !isEditMode}
+              className="w-full"
             >
+              <option value="">Pilih Status Kepemilikan</option>
               <option value="Milik Sendiri">Milik Sendiri</option>
               <option value="Sewa/Kontrak">Sewa/Kontrak</option>
               <option value="Numpang">Numpang</option>
             </select>
           </div>
-
-          {/* Provinsi */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Provinsi
-            </label>
+            <label className="block">Provinsi</label>
             <input
               type="text"
               required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan provinsi"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ibu.provinsi}
               onChange={(e) =>
                 handleInputChange("provinsi", e.target.value, "ibu")
               }
-              disabled={isIbuDisabled || !isEditMode}
+              className="w-full"
             />
           </div>
-
-          {/* Kabupaten */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kabupaten
-            </label>
+            <label className="block">Kabupaten</label>
             <input
               type="text"
               required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kabupaten"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ibu.kabupaten}
               onChange={(e) =>
                 handleInputChange("kabupaten", e.target.value, "ibu")
               }
-              disabled={isIbuDisabled || !isEditMode}
+              className="w-full"
             />
           </div>
-
-          {/* Kecamatan */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kecamatan
-            </label>
+            <label className="block">Kecamatan</label>
             <input
               type="text"
               required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kecamatan"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
-              value={alamatData.ibu.kelurahan}
+              value={alamatData.ibu.kecamatan}
               onChange={(e) =>
-                handleInputChange("kelurahan", e.target.value, "ibu")
+                handleInputChange("kecamatan", e.target.value, "ibu")
               }
-              disabled={isIbuDisabled || !isEditMode}
+              className="w-full"
             />
           </div>
-
-          {/* Kelurahan */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kelurahan
-            </label>
+            <label className="block">Kelurahan</label>
             <input
               type="text"
               required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kelurahan"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ibu.kelurahan}
               onChange={(e) =>
                 handleInputChange("kelurahan", e.target.value, "ibu")
               }
-              disabled={isIbuDisabled || !isEditMode}
+              className="w-full"
             />
           </div>
-
-          {/* Kode Pos */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kode Pos
-            </label>
+            <label className="block">Kode Pos</label>
             <input
               type="text"
               required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kode pos"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ibu.kode_pos}
               onChange={(e) =>
                 handleInputChange("kode_pos", e.target.value, "ibu")
               }
-              disabled={isIbuDisabled || !isEditMode}
+              className="w-full"
             />
           </div>
-
-          {/* RT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              RT
-            </label>
+            <label className="block">RT</label>
             <input
               type="text"
               required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RT"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ibu.rt}
               onChange={(e) => handleInputChange("rt", e.target.value, "ibu")}
-              disabled={isIbuDisabled || !isEditMode}
+              className="w-full"
             />
           </div>
-
-          {/* RW */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              RW
-            </label>
+            <label className="block">RW</label>
             <input
               type="text"
               required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RW"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ibu.rw}
               onChange={(e) => handleInputChange("rw", e.target.value, "ibu")}
-              disabled={isIbuDisabled || !isEditMode}
+              className="w-full"
             />
           </div>
-
-          {/* Alamat Lengkap */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Alamat Lengkap
-            </label>
+          <div className="sm:col-span-2">
+            <label className="block">Alamat Lengkap</label>
             <textarea
               required
-              disabled={isIbuDisabled || !isEditMode}
               rows={3}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan alamat lengkap"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.ibu.alamat}
               onChange={(e) =>
                 handleInputChange("alamat", e.target.value, "ibu")
               }
+              className="w-full"
             />
           </div>
         </div>
 
         {/* Data Alamat Santri */}
-        <h2 className="text-lg font-semibold text-gray-800 mt-8 mb-4">
-          Alamat Santri
-        </h2>
-        <div className="grid grid-cols-2 gap-6">
-          {/* Status Mukim */}
+        <h2 className="text-lg font-semibold mb-4">Alamat Santri</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Status Mukim
-            </label>
+            <label className="block">Status Mukim</label>
             <select
               required
-              disabled={!isEditMode}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData ? !isEditMode : false}
               value={alamatData.santri.status_mukim}
               onChange={(e) =>
                 setAlamatData({
@@ -813,21 +715,17 @@ export default function AlamatForm() {
                   },
                 })
               }
+              className="w-full"
             >
               <option value="Tidak Mukim">Tidak Mukim</option>
               <option value="Mukim">Mukim</option>
             </select>
           </div>
-
-          {/* Status Tempat Tinggal */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Status Tempat Tinggal
-            </label>
+            <label className="block">Status Tempat Tinggal</label>
             <select
               required
-              disabled={!isEditMode}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData ? !isEditMode : false}
               value={alamatData.santri.status_tempat_tinggal}
               onChange={(e) =>
                 setAlamatData({
@@ -838,6 +736,7 @@ export default function AlamatForm() {
                   },
                 })
               }
+              className="w-full"
             >
               <option value="Tinggal dengan Ayah Kandung">
                 Tinggal dengan Ayah Kandung
@@ -858,16 +757,11 @@ export default function AlamatForm() {
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-
-          {/* Jarak ke Lembaga */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Jarak ke Lembaga
-            </label>
+            <label className="block">Jarak ke Lembaga</label>
             <select
               required
-              disabled={!isEditMode}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData ? !isEditMode : false}
               value={alamatData.santri.jarak_lembaga}
               onChange={(e) =>
                 setAlamatData({
@@ -878,6 +772,7 @@ export default function AlamatForm() {
                   },
                 })
               }
+              className="w-full"
             >
               <option value="Kurang dari 5 km">Kurang dari 5 km</option>
               <option value="Antara 5 - 10 km">Antara 5 - 10 km</option>
@@ -886,16 +781,11 @@ export default function AlamatForm() {
               <option value="Lebih dari 30 km">Lebih dari 30 km</option>
             </select>
           </div>
-
-          {/* Transportasi */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Transportasi
-            </label>
+            <label className="block">Transportasi</label>
             <select
               required
-              disabled={!isEditMode}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData ? !isEditMode : false}
               value={alamatData.santri.transportasi}
               onChange={(e) =>
                 setAlamatData({
@@ -906,6 +796,7 @@ export default function AlamatForm() {
                   },
                 })
               }
+              className="w-full"
             >
               <option value="Jalan Kaki">Jalan Kaki</option>
               <option value="Sepeda">Sepeda</option>
@@ -918,21 +809,16 @@ export default function AlamatForm() {
               <option value="Kereta Api">Kereta Api</option>
               <option value="Ojek">Ojek</option>
               <option value="Andong/Bendi/Sado/Dokar/Delman/Becak">
-                Andong/Bendi/Sado/Dokar/Delman /Becak
+                Andong/Bendi/Sado/Dokar/Delman/Becak
               </option>
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-
-          {/* Waktu Tempuh */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Waktu Tempuh
-            </label>
+            <label className="block">Waktu Tempuh</label>
             <select
               required
-              disabled={!isEditMode}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData ? !isEditMode : false}
               value={alamatData.santri.waktu_tempuh}
               onChange={(e) =>
                 setAlamatData({
@@ -943,242 +829,230 @@ export default function AlamatForm() {
                   },
                 })
               }
+              className="w-full"
             >
               <option value="1-10 menit">1-10 menit</option>
-              <option value="11-30 menit">11-20 menit</option>
-              <option value="11-30 menit">21-30 menit</option>
-              <option value="11-30 menit">31-40 menit</option>
-              <option value="31-60 menit">41-50 menit</option>
-              <option value="31-60 menit">51-60 menit</option>
+              <option value="11-20 menit">11-20 menit</option>
+              <option value="21-30 menit">21-30 menit</option>
+              <option value="31-40 menit">31-40 menit</option>
+              <option value="41-50 menit">41-50 menit</option>
+              <option value="51-60 menit">51-60 menit</option>
               <option value="Lebih dari 60 menit">Lebih dari 60 menit</option>
             </select>
           </div>
-
-          {/* Koordinat */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Koordinat
-            </label>
+            <label className="block">Koordinat</label>
             <input
               type="text"
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan koordinat"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.koordinat}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, koordinat: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    koordinat: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
-
-          {/* Provinsi */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Provinsi
-            </label>
+            <label className="block">Provinsi</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan provinsi"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.provinsi}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, provinsi: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    provinsi: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
-
-          {/* Kabupaten */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kabupaten
-            </label>
+            <label className="block">Kabupaten</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kabupaten"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.kabupaten}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, kabupaten: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    kabupaten: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
-
-          {/* Kecamatan */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kecamatan
-            </label>
+            <label className="block">Kecamatan</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kecamatan"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.kecamatan}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, kecamatan: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    kecamatan: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
-
-          {/* Kelurahan */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kelurahan
-            </label>
+            <label className="block">Kelurahan</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kelurahan"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.kelurahan}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, kelurahan: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    kelurahan: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
-
-          {/* Kode Pos */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kode Pos
-            </label>
+            <label className="block">Kode Pos</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kode pos"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.kode_pos}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, kode_pos: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    kode_pos: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
-
-          {/* RT */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              RT
-            </label>
+            <label className="block">RT</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RT"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.rt}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, rt: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    rt: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
-
-          {/* RW */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              RW
-            </label>
+            <label className="block">RW</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RW"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.rw}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, rw: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    rw: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
-
-          {/* Alamat Lengkap */}
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Alamat Lengkap
-            </label>
+          <div className="sm:col-span-2">
+            <label className="block">Alamat Lengkap</label>
             <textarea
               required
               rows={3}
-              disabled={!isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan alamat lengkap"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={alamatData.santri.alamat}
               onChange={(e) =>
                 setAlamatData({
                   ...alamatData,
-                  santri: { ...alamatData.santri, alamat: e.target.value },
+                  santri: {
+                    ...alamatData.santri,
+                    alamat: e.target.value,
+                  },
                 })
               }
+              className="w-full"
             />
           </div>
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-end">
+        {/* Tombol Aksi */}
+        <div className="flex justify-end gap-4">
           {!hasData && (
             <button
               type="submit"
-              className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="px-4 py-2 bg-blue-500 text-white rounded"
             >
               Daftar
             </button>
           )}
-
-          {/* Tombol Edit */}
           {hasData && !isEditMode && (
             <button
               type="button"
               onClick={() => setIsEditMode(true)}
-              className="inline-flex justify-center rounded-md border border-transparent bg-green-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+              className="px-4 py-2 bg-green-500 text-white rounded"
             >
               Edit Data
             </button>
           )}
-
-          {/* Tombol Simpan Perubahan */}
           {hasData && isEditMode && (
             <>
               <button
                 type="button"
                 onClick={() => setIsEditMode(false)}
-                className="inline-flex justify-center rounded-md border border-transparent bg-red-400 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                className="px-4 py-2 bg-gray-500 text-white rounded"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleUpdate}
-                className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
+                className="px-4 py-2 bg-blue-500 text-white rounded"
               >
                 Simpan Perubahan
               </button>

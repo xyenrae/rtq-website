@@ -39,7 +39,8 @@ html {
   overflow: visible !important;
 }
 
-input {
+input,
+select {
   padding: 0.5rem; /* p-2 */
   margin-top: 0.25rem; /* mt-1 */
   display: block; /* block */
@@ -50,7 +51,8 @@ input {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
 }
 
-input:focous {
+input:focous,
+select:focus {
   border-color: #9ca3af; /* focus:border-gray-400 */
   box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.5); /* focus:ring-gray-400 */
 }

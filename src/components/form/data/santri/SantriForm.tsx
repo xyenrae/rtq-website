@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { supabase } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 
 interface SantriData {
@@ -32,8 +30,8 @@ interface SantriData {
 }
 
 export default function SantriForm() {
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [hasData, setHasData] = useState(false);
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [hasData, setHasData] = useState<boolean>(false);
   const [santriData, setSantriData] = useState<SantriData>({
     nama_lengkap: "",
     nik: "",
@@ -57,8 +55,6 @@ export default function SantriForm() {
     unggah_kip: null,
   });
 
-  const router = useRouter();
-
   useEffect(() => {
     const fetchSantriData = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -68,21 +64,22 @@ export default function SantriForm() {
         .from("santri")
         .select("*")
         .eq("user_id", userData.user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        console.error("Error fetching santri data:", error.message);
         setHasData(false);
-      } else {
+      } else if (santri) {
         setSantriData(santri);
         setHasData(true);
+      } else {
+        setHasData(false);
       }
     };
 
     fetchSantriData();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const { data: userData } = await supabase.auth.getUser();
@@ -91,11 +88,11 @@ export default function SantriForm() {
         return;
       }
 
-      let kkUrl = null;
-      let kipUrl = null;
+      let kkUrl: string | null = null;
+      let kipUrl: string | null = null;
 
       if (santriData.unggah_kk) {
-        const { data: kkData, error: kkError } = await supabase.storage
+        const { error: kkError } = await supabase.storage
           .from("files")
           .upload(`kk/${santriData.unggah_kk.name}`, santriData.unggah_kk);
         if (kkError) throw kkError;
@@ -103,7 +100,7 @@ export default function SantriForm() {
       }
 
       if (santriData.unggah_kip) {
-        const { data: kipData, error: kipError } = await supabase.storage
+        const { error: kipError } = await supabase.storage
           .from("files")
           .upload(`kip/${santriData.unggah_kip.name}`, santriData.unggah_kip);
         if (kipError) throw kipError;
@@ -134,14 +131,12 @@ export default function SantriForm() {
       });
 
       if (error) {
-        console.error("Error inserting data:", error.message);
         toast.error("Gagal menyimpan data santri.");
       } else {
         toast.success("Data santri berhasil disimpan!");
         setHasData(true);
       }
-    } catch (error) {
-      console.error("Error during registration:", error);
+    } catch {
       toast.error("Terjadi kesalahan saat mendaftar.");
     }
   };
@@ -178,97 +173,73 @@ export default function SantriForm() {
         toast.error("Gagal menyimpan perubahan.");
       } else {
         toast.success("Perubahan berhasil disimpan!");
-        setIsEditMode(false); // Kembali ke mode read-only
+        setIsEditMode(false);
       }
-    } catch (error) {
-      console.error("Error during update:", error);
+    } catch (err) {
+      console.error("Error during update:", err);
       toast.error("Terjadi kesalahan saat menyimpan perubahan.");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} noValidate>
       <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-6">
-          {/* Nama Lengkap */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nama Lengkap*
-            </label>
+            <label>Nama Lengkap*</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan nama lengkap"
-              className="p-2 mt-1 block w-full outline-none rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
               value={santriData.nama_lengkap}
               onChange={(e) =>
                 setSantriData({ ...santriData, nama_lengkap: e.target.value })
               }
             />
           </div>
-
-          {/* NIK */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              NIK*
-            </label>
+            <label>NIK*</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan NIK"
-              className="mt-1 outline-none p-2 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
               value={santriData.nik}
               onChange={(e) =>
                 setSantriData({ ...santriData, nik: e.target.value })
               }
             />
           </div>
-
-          {/* Tempat Lahir */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Tempat Lahir*
-            </label>
+            <label>Tempat Lahir*</label>
             <input
               type="text"
               required
-              disabled={!isEditMode}
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan tempat lahir"
-              className="mt-1 p-2 outline-none block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
               value={santriData.tempat_lahir}
               onChange={(e) =>
                 setSantriData({ ...santriData, tempat_lahir: e.target.value })
               }
             />
           </div>
-
-          {/* Tanggal Lahir */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Tanggal Lahir*
-            </label>
+          <div className="flex flex-col">
+            <label>Tanggal Lahir*</label>
             <DatePicker
               selected={santriData.tanggal_lahir}
-              disabled={!isEditMode}
+              disabled={hasData && !isEditMode}
               onChange={(date) =>
-                setSantriData({ ...santriData, tanggal_lahir: date! })
+                setSantriData({ ...santriData, tanggal_lahir: date })
               }
-              className="mt-1 outline-none p-2 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-gray-400 focus:ring-gray-400"
               placeholderText="Pilih tanggal lahir"
             />
           </div>
-
-          {/* Jenis Kelamin */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Jenis Kelamin
-            </label>
+            <label>Jenis Kelamin</label>
             <select
               required
-              disabled={!isEditMode}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData && !isEditMode}
               value={santriData.jenis_kelamin}
               onChange={(e) =>
                 setSantriData({ ...santriData, jenis_kelamin: e.target.value })
@@ -278,58 +249,43 @@ export default function SantriForm() {
               <option value="Perempuan">Perempuan</option>
             </select>
           </div>
-
-          {/* Jumlah Saudara */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Jumlah Saudara*
-            </label>
+            <label>Jumlah Saudara*</label>
             <input
               type="number"
               required
-              disabled={!isEditMode}
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan jumlah saudara"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.jumlah_saudara}
               onChange={(e) =>
                 setSantriData({
                   ...santriData,
-                  jumlah_saudara: parseInt(e.target.value),
+                  jumlah_saudara: Number(e.target.value),
                 })
               }
             />
           </div>
-
-          {/* Anak Ke */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Anak Ke*
-            </label>
+            <label>Anak Ke*</label>
             <input
               type="number"
               required
-              disabled={!isEditMode}
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan urutan anak"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.anak_ke}
               onChange={(e) =>
                 setSantriData({
                   ...santriData,
-                  anak_ke: parseInt(e.target.value),
+                  anak_ke: Number(e.target.value),
                 })
               }
             />
           </div>
-
-          {/* Cita-cita */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Cita-cita
-            </label>
+            <label>Cita-cita</label>
             <select
               required
-              disabled={!isEditMode}
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData && !isEditMode}
               value={santriData.cita_cita}
               onChange={(e) =>
                 setSantriData({ ...santriData, cita_cita: e.target.value })
@@ -347,66 +303,49 @@ export default function SantriForm() {
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-
-          {/* Nomor HP */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nomor HP
-            </label>
+          <div className="flex flex-col items-start">
+            <label>Nomor HP</label>
             <input
               type="text"
               required={!santriData.has_no_hp}
-              disabled={santriData.has_no_hp}
+              disabled={(!isEditMode && hasData) || santriData.has_no_hp}
               placeholder="Masukkan nomor HP"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.nomor_hp}
               onChange={(e) =>
                 setSantriData({ ...santriData, nomor_hp: e.target.value })
               }
             />
-            <div className="flex items-center mt-2">
+            <div className="flex gap-2 mt-1">
               <input
-                disabled={!isEditMode}
                 type="checkbox"
+                className="w-4 h-4"
+                disabled={hasData && !isEditMode}
                 checked={santriData.has_no_hp}
                 onChange={(e) =>
                   setSantriData({ ...santriData, has_no_hp: e.target.checked })
                 }
-                className="mr-2"
               />
-              <span className="text-sm text-gray-700">
-                Tidak memiliki nomor HP
-              </span>
+              <span>Tidak memiliki nomor HP</span>
             </div>
           </div>
-
-          {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label>Email</label>
             <input
-              disabled={!isEditMode}
               type="email"
               required
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan email"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.email}
               onChange={(e) =>
                 setSantriData({ ...santriData, email: e.target.value })
               }
             />
           </div>
-
-          {/* Hobi */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Hobi
-            </label>
+            <label>Hobi</label>
             <select
-              disabled={!isEditMode}
               required
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData && !isEditMode}
               value={santriData.hobi}
               onChange={(e) =>
                 setSantriData({ ...santriData, hobi: e.target.value })
@@ -420,16 +359,11 @@ export default function SantriForm() {
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-
-          {/* Sumber Pembiayaan */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Sumber Pembiayaan
-            </label>
+            <label>Sumber Pembiayaan</label>
             <select
-              disabled={!isEditMode}
               required
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData && !isEditMode}
               value={santriData.sumber_pembiayaan}
               onChange={(e) =>
                 setSantriData({
@@ -443,33 +377,23 @@ export default function SantriForm() {
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-
-          {/* Nomor KIP */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nomor KIP
-            </label>
+            <label>Nomor KIP</label>
             <input
-              disabled={!isEditMode}
               type="text"
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan nomor KIP"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.nomor_kip}
               onChange={(e) =>
                 setSantriData({ ...santriData, nomor_kip: e.target.value })
               }
             />
           </div>
-
-          {/* Kebutuhan Khusus */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kebutuhan Khusus
-            </label>
+            <label>Kebutuhan Khusus</label>
             <select
-              disabled={!isEditMode}
               required
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData && !isEditMode}
               value={santriData.kebutuhan_khusus}
               onChange={(e) =>
                 setSantriData({
@@ -490,16 +414,11 @@ export default function SantriForm() {
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-
-          {/* Kebutuhan Disabilitas */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Kebutuhan Disabilitas
-            </label>
+            <label>Kebutuhan Disabilitas</label>
             <select
-              disabled={!isEditMode}
               required
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData && !isEditMode}
               value={santriData.kebutuhan_disabilitas}
               onChange={(e) =>
                 setSantriData({
@@ -518,36 +437,26 @@ export default function SantriForm() {
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-
-          {/* Nomor KK */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nomor KK*
-            </label>
+            <label>Nomor KK*</label>
             <input
-              disabled={!isEditMode}
               type="text"
               required
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan nomor KK"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.nomor_kk}
               onChange={(e) =>
                 setSantriData({ ...santriData, nomor_kk: e.target.value })
               }
             />
           </div>
-
-          {/* Nama Kepala Keluarga */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Nama Kepala Keluarga*
-            </label>
+            <label>Nama Kepala Keluarga*</label>
             <input
-              disabled={!isEditMode}
               type="text"
               required
+              disabled={hasData && !isEditMode}
               placeholder="Masukkan nama kepala keluarga"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
               value={santriData.nama_kepala_keluarga}
               onChange={(e) =>
                 setSantriData({
@@ -557,16 +466,11 @@ export default function SantriForm() {
               }
             />
           </div>
-
-          {/* Unggah KK */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Unggah KK
-            </label>
+            <label>Unggah KK</label>
             <input
-              disabled={!isEditMode}
               type="file"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData && !isEditMode}
               onChange={(e) =>
                 setSantriData({
                   ...santriData,
@@ -575,16 +479,11 @@ export default function SantriForm() {
               }
             />
           </div>
-
-          {/* Unggah KIP */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Unggah KIP
-            </label>
+            <label>Unggah KIP</label>
             <input
-              disabled={!isEditMode}
               type="file"
-              className="mt-1 block w-full rounded-md border-2 border-gray-300 shadow-sm outline-none p-2 focus:border-gray-400 focus:ring-gray-400"
+              disabled={hasData && !isEditMode}
               onChange={(e) =>
                 setSantriData({
                   ...santriData,
@@ -595,45 +494,26 @@ export default function SantriForm() {
           </div>
         </div>
 
-        {/* Navigation Buttons */}
         <div className="flex justify-end">
-          {/* Tombol Daftar */}
           {!hasData && (
             <button
               type="submit"
-              className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
             >
-              Daftar
+              Kirim Data
             </button>
           )}
-
-          {/* Tombol Edit Data */}
           {hasData && !isEditMode && (
-            <button
-              type="button"
-              onClick={() => setIsEditMode(true)}
-              className="inline-flex justify-center rounded-md border border-transparent bg-green-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
-            >
+            <button type="button" onClick={() => setIsEditMode(true)}>
               Edit Data
             </button>
           )}
-
-          {/* Tombol Simpan Perubahan */}
           {hasData && isEditMode && (
             <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => setIsEditMode(false)}
-                className="inline-flex justify-center rounded-md border border-transparent bg-red-400 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-              >
+              <button type="button" onClick={() => setIsEditMode(false)}>
                 Batal
               </button>
-
-              <button
-                type="button"
-                onClick={handleUpdate}
-                className="inline-flex justify-center rounded-md border border-transparent bg-green-500 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2"
-              >
+              <button type="button" onClick={handleUpdate}>
                 Simpan Perubahan
               </button>
             </div>
