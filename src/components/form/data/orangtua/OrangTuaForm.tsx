@@ -330,21 +330,23 @@ export default function OrangTuaForm() {
   return (
     <form onSubmit={handleSubmit}>
       <motion.div
-        className="mb-8 sticky top-20 sm:top-24 z-30 bg-white pb-4 border-2 border-gray-300 p-2 rounded-lg"
+        className="mb-2 sticky top-20 sm:top-24 z-30 bg-white pb-4 border-2 border-gray-300 p-2 rounded-lg"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <div className="flex justify-between mb-2 text-sm font-medium">
           <div className="flex items-center gap-2 text-gray-600">
-            <span>Progress Pengisian Formulir</span>
+            <span className="font-bold">Progress Pengisian Formulir</span>
             <FiCheckCircle
               className={`${
-                progress === 100 ? "text-green-500" : "text-gray-300"
+                progress === 100 ? "text-green-500" : "text-gray-600"
               }`}
             />
           </div>
-          <span className="text-green-600">{Math.round(progress)}%</span>
+          <span className="text-green-600 font-bold">
+            {Math.round(progress)}%
+          </span>
         </div>
 
         <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
@@ -374,6 +376,10 @@ export default function OrangTuaForm() {
           </motion.div>
         )}
       </motion.div>
+      <p className="bg-yellow-400 text-gray-800 p-2 rounded text-sm mb-4 font-semibold">
+        Tanda * pada formulir menunjukkan bahwa kolom tersebut wajib diisi
+        sebelum Anda dapat melanjutkan ke langkah berikutnya.
+      </p>
       <div className="space-y-6">
         {/* Data Ayah */}
         <h2 className="text-lg font-semibold mb-4">Data Ayah</h2>
