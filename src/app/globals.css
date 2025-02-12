@@ -40,6 +40,7 @@ html {
 }
 
 input,
+textarea,
 select {
   padding: 0.5rem; /* p-2 */
   margin-top: 0.25rem; /* mt-1 */
@@ -52,7 +53,7 @@ select {
 }
 
 input:focous,
-select:focus {
+textarea:focus select:focus {
   border-color: #9ca3af; /* focus:border-gray-400 */
   box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.5); /* focus:ring-gray-400 */
 }

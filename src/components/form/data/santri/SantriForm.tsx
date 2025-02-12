@@ -5,6 +5,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
+import { FiCheckCircle } from "react-icons/fi";
 
 interface SantriData {
   nama_lengkap: string;
@@ -12,8 +14,8 @@ interface SantriData {
   tempat_lahir: string;
   tanggal_lahir: Date | null;
   jenis_kelamin: string;
-  jumlah_saudara: number;
-  anak_ke: number;
+  jumlah_saudara: number | null;
+  anak_ke: number | null;
   cita_cita: string;
   nomor_hp: string;
   has_no_hp: boolean;
@@ -32,14 +34,15 @@ interface SantriData {
 export default function SantriForm() {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasData, setHasData] = useState<boolean>(false);
+  const [progress, setProgress] = useState(0);
   const [santriData, setSantriData] = useState<SantriData>({
     nama_lengkap: "",
     nik: "",
     tempat_lahir: "",
     tanggal_lahir: null,
     jenis_kelamin: "",
-    jumlah_saudara: 0,
-    anak_ke: 0,
+    jumlah_saudara: null,
+    anak_ke: null,
     cita_cita: "",
     nomor_hp: "",
     has_no_hp: false,
@@ -181,8 +184,80 @@ export default function SantriForm() {
     }
   };
 
+  useEffect(() => {
+    const calculateProgress = () => {
+      const requiredFields = [
+        santriData.nama_lengkap,
+        santriData.nik,
+        santriData.tempat_lahir,
+        santriData.tanggal_lahir,
+        santriData.jenis_kelamin,
+        santriData.jumlah_saudara,
+        santriData.anak_ke,
+        santriData.cita_cita,
+        santriData.email,
+        santriData.hobi,
+        santriData.sumber_pembiayaan,
+        santriData.nomor_kk,
+        santriData.nama_kepala_keluarga,
+        !santriData.has_no_hp ? santriData.nomor_hp : true,
+      ];
+
+      const filled = requiredFields.filter(Boolean).length;
+      const total = requiredFields.length;
+      return (filled / total) * 100;
+    };
+
+    setProgress(calculateProgress());
+  }, [santriData]);
+
   return (
-    <form onSubmit={handleSubmit} noValidate>
+    <form onSubmit={handleSubmit} className="relative">
+      <motion.div
+        className="mb-8 sticky top-20 sm:top-24 z-30 bg-white pb-4 border-2 border-gray-300 p-2 rounded-lg"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex justify-between mb-2 text-sm font-medium">
+          <div className="flex items-center gap-2 text-gray-600">
+            <span>Progress Pengisian Formulir</span>
+            <FiCheckCircle
+              className={`${
+                progress === 100 ? "text-green-500" : "text-gray-300"
+              }`}
+            />
+          </div>
+          <span className="text-green-600">{Math.round(progress)}%</span>
+        </div>
+
+        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-green-500 rounded-full relative"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <motion.div
+              className="absolute right-0 -top-1 bg-green-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1"
+              animate={{ scale: progress === 100 ? 1 : 0.7 }}
+            >
+              <FiCheckCircle className="inline-block" />
+              {progress === 100 && "Lengkap!"}
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {progress === 100 && (
+          <motion.div
+            className="mt-3 p-3 bg-green-50 text-green-700 rounded-lg text-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            🎉 Selamat! Semua data telah terisi lengkap
+          </motion.div>
+        )}
+      </motion.div>
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div>
@@ -190,7 +265,7 @@ export default function SantriForm() {
             <input
               type="text"
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nama lengkap"
               value={santriData.nama_lengkap}
               onChange={(e) =>
@@ -203,7 +278,7 @@ export default function SantriForm() {
             <input
               type="text"
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan NIK"
               value={santriData.nik}
               onChange={(e) =>
@@ -216,7 +291,7 @@ export default function SantriForm() {
             <input
               type="text"
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan tempat lahir"
               value={santriData.tempat_lahir}
               onChange={(e) =>
@@ -228,7 +303,7 @@ export default function SantriForm() {
             <label>Tanggal Lahir*</label>
             <DatePicker
               selected={santriData.tanggal_lahir}
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               onChange={(date) =>
                 setSantriData({ ...santriData, tanggal_lahir: date })
               }
@@ -239,7 +314,7 @@ export default function SantriForm() {
             <label>Jenis Kelamin</label>
             <select
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               value={santriData.jenis_kelamin}
               onChange={(e) =>
                 setSantriData({ ...santriData, jenis_kelamin: e.target.value })
@@ -254,15 +329,17 @@ export default function SantriForm() {
             <input
               type="number"
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan jumlah saudara"
-              value={santriData.jumlah_saudara}
-              onChange={(e) =>
+              value={santriData.jumlah_saudara || ""}
+              onChange={(e) => {
+                const value =
+                  e.target.value === "" ? null : Number(e.target.value); // Konversi ke number atau null
                 setSantriData({
                   ...santriData,
-                  jumlah_saudara: Number(e.target.value),
-                })
-              }
+                  jumlah_saudara: value,
+                });
+              }}
             />
           </div>
           <div>
@@ -270,22 +347,24 @@ export default function SantriForm() {
             <input
               type="number"
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan urutan anak"
-              value={santriData.anak_ke}
-              onChange={(e) =>
+              value={santriData.anak_ke || ""} // Tampilkan kosong jika null
+              onChange={(e) => {
+                const value =
+                  e.target.value === "" ? null : Number(e.target.value); // Konversi ke number atau null
                 setSantriData({
                   ...santriData,
-                  anak_ke: Number(e.target.value),
-                })
-              }
+                  anak_ke: value,
+                });
+              }}
             />
           </div>
           <div>
             <label>Cita-cita</label>
             <select
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               value={santriData.cita_cita}
               onChange={(e) =>
                 setSantriData({ ...santriData, cita_cita: e.target.value })
@@ -319,7 +398,7 @@ export default function SantriForm() {
               <input
                 type="checkbox"
                 className="w-4 h-4"
-                disabled={hasData && !isEditMode}
+                disabled={hasData ? !isEditMode : false}
                 checked={santriData.has_no_hp}
                 onChange={(e) =>
                   setSantriData({ ...santriData, has_no_hp: e.target.checked })
@@ -333,7 +412,7 @@ export default function SantriForm() {
             <input
               type="email"
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan email"
               value={santriData.email}
               onChange={(e) =>
@@ -345,7 +424,7 @@ export default function SantriForm() {
             <label>Hobi</label>
             <select
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               value={santriData.hobi}
               onChange={(e) =>
                 setSantriData({ ...santriData, hobi: e.target.value })
@@ -363,7 +442,7 @@ export default function SantriForm() {
             <label>Sumber Pembiayaan</label>
             <select
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               value={santriData.sumber_pembiayaan}
               onChange={(e) =>
                 setSantriData({
@@ -381,7 +460,7 @@ export default function SantriForm() {
             <label>Nomor KIP</label>
             <input
               type="text"
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nomor KIP"
               value={santriData.nomor_kip}
               onChange={(e) =>
@@ -393,7 +472,7 @@ export default function SantriForm() {
             <label>Kebutuhan Khusus</label>
             <select
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               value={santriData.kebutuhan_khusus}
               onChange={(e) =>
                 setSantriData({
@@ -418,7 +497,7 @@ export default function SantriForm() {
             <label>Kebutuhan Disabilitas</label>
             <select
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               value={santriData.kebutuhan_disabilitas}
               onChange={(e) =>
                 setSantriData({
@@ -442,7 +521,7 @@ export default function SantriForm() {
             <input
               type="text"
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nomor KK"
               value={santriData.nomor_kk}
               onChange={(e) =>
@@ -455,7 +534,7 @@ export default function SantriForm() {
             <input
               type="text"
               required
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nama kepala keluarga"
               value={santriData.nama_kepala_keluarga}
               onChange={(e) =>
@@ -470,7 +549,7 @@ export default function SantriForm() {
             <label>Unggah KK</label>
             <input
               type="file"
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               onChange={(e) =>
                 setSantriData({
                   ...santriData,
@@ -483,7 +562,7 @@ export default function SantriForm() {
             <label>Unggah KIP</label>
             <input
               type="file"
-              disabled={hasData && !isEditMode}
+              disabled={hasData ? !isEditMode : false}
               onChange={(e) =>
                 setSantriData({
                   ...santriData,

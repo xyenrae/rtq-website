@@ -5,6 +5,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
+import { FiCheckCircle } from "react-icons/fi";
 
 interface AyahIbu {
   nama: string;
@@ -34,6 +36,7 @@ interface OrangTuaData {
 export default function OrangTuaForm() {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasData, setHasData] = useState<boolean>(false);
+  const [progress, setProgress] = useState(0);
   const [orangTuaData, setOrangTuaData] = useState<OrangTuaData>({
     ayah: {
       nama: "",
@@ -152,7 +155,7 @@ export default function OrangTuaForm() {
   // Handle perubahan input (untuk ayah, ibu, atau wali)
   const handleInputChange = (
     field: string,
-    value: any,
+    value: string | number | boolean | Date | null,
     type: "ayah" | "ibu" | "wali"
   ) => {
     setOrangTuaData((prev) => ({
@@ -282,8 +285,95 @@ export default function OrangTuaForm() {
     }
   };
 
+  useEffect(() => {
+    const calculateProgress = () => {
+      // Daftar field yang diperlukan untuk ayah, ibu, dan wali
+      const requiredFields = [
+        orangTuaData.ayah.nama,
+        orangTuaData.ayah.nik,
+        orangTuaData.ayah.kewarganegaraan,
+        orangTuaData.ayah.tempat_lahir,
+        orangTuaData.ayah.tanggal_lahir,
+        orangTuaData.ayah.status,
+        orangTuaData.ayah.pendidikan_terakhir,
+        orangTuaData.ayah.penghasilan,
+        orangTuaData.ayah.pekerjaan,
+        orangTuaData.ayah.has_no_hp ? true : orangTuaData.ayah.nomor_hp,
+
+        orangTuaData.ibu.nama,
+        orangTuaData.ibu.nik,
+        orangTuaData.ibu.kewarganegaraan,
+        orangTuaData.ibu.tempat_lahir,
+        orangTuaData.ibu.tanggal_lahir,
+        orangTuaData.ibu.status,
+        orangTuaData.ibu.pendidikan_terakhir,
+        orangTuaData.ibu.penghasilan,
+        orangTuaData.ibu.pekerjaan,
+        orangTuaData.ibu.has_no_hp ? true : orangTuaData.ibu.nomor_hp,
+
+        orangTuaData.wali.sama_dengan_ayah !== undefined,
+        orangTuaData.wali.kartu_keluarga_sama !== undefined,
+      ];
+
+      // Hitung jumlah field yang telah diisi
+      const filled = requiredFields.filter(Boolean).length;
+      const total = requiredFields.length;
+
+      // Hitung persentase progress
+      return (filled / total) * 100;
+    };
+
+    // Update state progress
+    setProgress(calculateProgress());
+  }, [orangTuaData]);
+
   return (
     <form onSubmit={handleSubmit}>
+      <motion.div
+        className="mb-8 sticky top-20 sm:top-24 z-30 bg-white pb-4 border-2 border-gray-300 p-2 rounded-lg"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex justify-between mb-2 text-sm font-medium">
+          <div className="flex items-center gap-2 text-gray-600">
+            <span>Progress Pengisian Formulir</span>
+            <FiCheckCircle
+              className={`${
+                progress === 100 ? "text-green-500" : "text-gray-300"
+              }`}
+            />
+          </div>
+          <span className="text-green-600">{Math.round(progress)}%</span>
+        </div>
+
+        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-green-500 rounded-full relative"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+          >
+            <motion.div
+              className="absolute right-0 -top-1 bg-green-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1"
+              animate={{ scale: progress === 100 ? 1 : 0.7 }}
+            >
+              <FiCheckCircle className="inline-block" />
+              {progress === 100 && "Lengkap!"}
+            </motion.div>
+          </motion.div>
+        </div>
+
+        {progress === 100 && (
+          <motion.div
+            className="mt-3 p-3 bg-green-50 text-green-700 rounded-lg text-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            🎉 Selamat! Semua data telah terisi lengkap
+          </motion.div>
+        )}
+      </motion.div>
       <div className="space-y-6">
         {/* Data Ayah */}
         <h2 className="text-lg font-semibold mb-4">Data Ayah</h2>
@@ -494,7 +584,7 @@ export default function OrangTuaForm() {
               }
             />
           </div>
-          <div>
+          <div className="flex flex-col">
             <label>Tanggal Lahir Ibu</label>
             <DatePicker
               selected={orangTuaData.ibu.tanggal_lahir}
