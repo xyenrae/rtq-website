@@ -40,10 +40,10 @@ export const useOrangTuaForm = () => {
     ayah: {
       nama: "",
       nik: "",
-      kewarganegaraan: "",
+      kewarganegaraan: "WNI",
       tempat_lahir: "",
       tanggal_lahir: null,
-      status: "",
+      status: "Hidup",
       pendidikan_terakhir: "",
       penghasilan: "",
       pekerjaan: "",
@@ -53,10 +53,10 @@ export const useOrangTuaForm = () => {
     ibu: {
       nama: "",
       nik: "",
-      kewarganegaraan: "",
+      kewarganegaraan: "WNI",
       tempat_lahir: "",
       tanggal_lahir: null,
-      status: "",
+      status: "Hidup",
       pendidikan_terakhir: "",
       penghasilan: "",
       pekerjaan: "",
@@ -153,9 +153,9 @@ export const useOrangTuaForm = () => {
 
   // Hitung progress pengisian formulir
   useEffect(() => {
-    const calculateProgress = () => {
-      const requiredFields = [
-        // Ayah fields
+    const calculateProgress = (): number => {
+      // Buat array field dari setiap input wajib
+      const ayahFields = [
         orangTuaData.ayah.nama,
         orangTuaData.ayah.nik,
         orangTuaData.ayah.kewarganegaraan,
@@ -166,7 +166,9 @@ export const useOrangTuaForm = () => {
         orangTuaData.ayah.penghasilan,
         orangTuaData.ayah.pekerjaan,
         orangTuaData.ayah.has_no_hp ? true : orangTuaData.ayah.nomor_hp,
-        // Ibu fields
+      ];
+
+      const ibuFields = [
         orangTuaData.ibu.nama,
         orangTuaData.ibu.nik,
         orangTuaData.ibu.kewarganegaraan,
@@ -177,13 +179,16 @@ export const useOrangTuaForm = () => {
         orangTuaData.ibu.penghasilan,
         orangTuaData.ibu.pekerjaan,
         orangTuaData.ibu.has_no_hp ? true : orangTuaData.ibu.nomor_hp,
-        // Wali fields
-        orangTuaData.wali.sama_dengan_ayah !== undefined,
-        orangTuaData.wali.kartu_keluarga_sama !== undefined,
       ];
-      const filled = requiredFields.filter(Boolean).length;
-      const total = requiredFields.length;
-      return (filled / total) * 100;
+
+      const waliFields = [
+        typeof orangTuaData.wali.sama_dengan_ayah === "boolean",
+        typeof orangTuaData.wali.kartu_keluarga_sama === "boolean",
+      ];
+
+      const allFields = [...ayahFields, ...ibuFields, ...waliFields];
+      const filledCount = allFields.filter((field) => Boolean(field)).length;
+      return (filledCount / allFields.length) * 100;
     };
 
     setProgress(calculateProgress());

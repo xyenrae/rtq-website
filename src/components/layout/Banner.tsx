@@ -1,11 +1,16 @@
+"use client";
 import Image from "next/image";
+import { useUser } from "@/context/UserContext";
 
 export default function Banner() {
+  const { user } = useUser();
+  if (user) return null;
+
   return (
     <div className="bg-green-500 text-white text-center p-2 flex justify-center">
       <Image
         src="/images/information.svg"
-        alt=""
+        alt="Info"
         className="mr-2"
         priority
         width={27}
@@ -14,7 +19,7 @@ export default function Banner() {
       Belajar Al-Qur&#39;an dengan Metode Yanbu&#39;a, Yuk Daftar Sekarang!!!
       <Image
         src="/images/information.svg"
-        alt=""
+        alt="Info"
         className="ml-2"
         priority
         width={27}

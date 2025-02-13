@@ -1,4 +1,3 @@
-// src/components/form/data/alamat/useAlamatForm.ts
 "use client";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
@@ -50,7 +49,7 @@ export const useAlamatForm = () => {
   const [alamatData, setAlamatData] = useState<AlamatData>({
     ayah: {
       tinggal_luar_negeri: false,
-      status_kepemilikan: "",
+      status_kepemilikan: "Milik Sendiri",
       provinsi: "",
       kabupaten: "",
       kecamatan: "",
@@ -62,7 +61,7 @@ export const useAlamatForm = () => {
     },
     ibu: {
       tinggal_luar_negeri: false,
-      status_kepemilikan: "",
+      status_kepemilikan: "Milik Sendiri",
       provinsi: "",
       kabupaten: "",
       kecamatan: "",
@@ -73,9 +72,9 @@ export const useAlamatForm = () => {
       alamat: "",
     },
     santri: {
-      status_mukim: "",
-      status_tempat_tinggal: "",
-      jarak_lembaga: "",
+      status_mukim: "Tidak Mukim",
+      status_tempat_tinggal: "Tinggal dengan Ayah Kandung",
+      jarak_lembaga: "Kurang dari 5 km",
       transportasi: "",
       waktu_tempuh: "",
       koordinat: "",
@@ -91,7 +90,6 @@ export const useAlamatForm = () => {
   });
   const [santriId, setSantriId] = useState<number | null>(null);
 
-  // Ambil santriId berdasarkan user_id
   useEffect(() => {
     const fetchSantriId = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -111,7 +109,6 @@ export const useAlamatForm = () => {
     fetchSantriId();
   }, []);
 
-  // Ambil data alamat berdasarkan santriId
   useEffect(() => {
     const fetchAlamatData = async () => {
       if (!santriId) return;
@@ -174,7 +171,88 @@ export const useAlamatForm = () => {
     fetchAlamatData();
   }, [santriId]);
 
-  // Contoh fungsi untuk menyamakan data ibu dengan ayah jika diperlukan
+  useEffect(() => {
+    const calculateProgress = (): number => {
+      const ayahFields = [
+        alamatData.ayah.tinggal_luar_negeri !== undefined,
+        alamatData.ayah.status_kepemilikan,
+        alamatData.ayah.provinsi,
+        alamatData.ayah.kabupaten,
+        alamatData.ayah.kecamatan,
+        alamatData.ayah.kelurahan,
+        alamatData.ayah.kode_pos,
+        alamatData.ayah.rt,
+        alamatData.ayah.rw,
+        alamatData.ayah.alamat,
+      ];
+      const ibuFields = !alamatData.ibu.tinggal_luar_negeri
+        ? [
+            alamatData.ibu.status_kepemilikan,
+            alamatData.ibu.provinsi,
+            alamatData.ibu.kabupaten,
+            alamatData.ibu.kecamatan,
+            alamatData.ibu.kelurahan,
+            alamatData.ibu.kode_pos,
+            alamatData.ibu.rt,
+            alamatData.ibu.rw,
+            alamatData.ibu.alamat,
+          ]
+        : [];
+      // Field wajib untuk santri
+      const santriFields = [
+        alamatData.santri.status_mukim,
+        alamatData.santri.status_tempat_tinggal,
+        alamatData.santri.jarak_lembaga,
+        alamatData.santri.transportasi,
+        alamatData.santri.waktu_tempuh,
+        alamatData.santri.koordinat,
+        alamatData.santri.provinsi,
+        alamatData.santri.kabupaten,
+        alamatData.santri.kecamatan,
+        alamatData.santri.kelurahan,
+        alamatData.santri.kode_pos,
+        alamatData.santri.rt,
+        alamatData.santri.rw,
+        alamatData.santri.alamat,
+      ];
+
+      const allFields = [...ayahFields, ...ibuFields, ...santriFields];
+      const filledCount = allFields.filter((field) => Boolean(field)).length;
+      const total = allFields.length;
+      return (filledCount / total) * 100;
+    };
+
+    setProgress(calculateProgress());
+  }, [alamatData]);
+
+  const handleInputChange = (
+    field: string,
+    value: string | boolean,
+    type: "ayah" | "ibu" | "santri"
+  ): void => {
+    setAlamatData((prev) => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleCheckboxChange = (
+    field: string,
+    checked: boolean,
+    type: "ayah" | "ibu" | "santri"
+  ): void => {
+    setAlamatData((prev) => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        [field]: checked,
+      },
+    }));
+  };
+
   const handleIbuSamaDenganAyah = (checked: boolean): void => {
     if (checked) {
       setAlamatData((prev) => ({
@@ -200,40 +278,8 @@ export const useAlamatForm = () => {
     }
   };
 
-  // Fungsi untuk menangani perubahan input
-  const handleInputChange = (
-    field: string,
-    value: string | boolean,
-    type: "ayah" | "ibu" | "santri"
-  ): void => {
-    setAlamatData((prev) => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        [field]: value,
-      },
-    }));
-  };
-
-  // Fungsi untuk menangani perubahan checkbox
-  const handleCheckboxChange = (
-    field: string,
-    checked: boolean,
-    type: "ayah" | "ibu" | "santri"
-  ): void => {
-    setAlamatData((prev) => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        [field]: checked,
-      },
-    }));
-  };
-
-  // Fungsi untuk submit data baru
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-
     setIsProcessing(true);
     setProcessingStep("Validasi data");
     setProcessingProgress(10);
@@ -299,7 +345,6 @@ export const useAlamatForm = () => {
     }
   };
 
-  // Fungsi untuk mengupdate data
   const handleUpdate = async (): Promise<void> => {
     setIsProcessing(true);
     setProcessingStep("Validasi data");
@@ -366,66 +411,6 @@ export const useAlamatForm = () => {
       setIsProcessing(false);
     }
   };
-
-  // Hitung progress pengisian formulir
-  useEffect(() => {
-    const calculateProgress = (): number => {
-      const requiredFields: Array<string | number | boolean | undefined> = [];
-
-      // Field Ayah
-      requiredFields.push(
-        alamatData.ayah.tinggal_luar_negeri !== undefined,
-        alamatData.ayah.status_kepemilikan,
-        alamatData.ayah.provinsi,
-        alamatData.ayah.kabupaten,
-        alamatData.ayah.kecamatan,
-        alamatData.ayah.kelurahan,
-        alamatData.ayah.kode_pos,
-        alamatData.ayah.rt,
-        alamatData.ayah.rw,
-        alamatData.ayah.alamat
-      );
-
-      // Field Ibu (misal: hanya jika tidak tinggal di luar negeri)
-      if (!alamatData.ibu.tinggal_luar_negeri) {
-        requiredFields.push(
-          alamatData.ibu.status_kepemilikan,
-          alamatData.ibu.provinsi,
-          alamatData.ibu.kabupaten,
-          alamatData.ibu.kecamatan,
-          alamatData.ibu.kelurahan,
-          alamatData.ibu.kode_pos,
-          alamatData.ibu.rt,
-          alamatData.ibu.rw,
-          alamatData.ibu.alamat
-        );
-      }
-
-      // Field Santri
-      requiredFields.push(
-        alamatData.santri.status_mukim,
-        alamatData.santri.status_tempat_tinggal,
-        alamatData.santri.jarak_lembaga,
-        alamatData.santri.transportasi,
-        alamatData.santri.waktu_tempuh,
-        alamatData.santri.koordinat,
-        alamatData.santri.provinsi,
-        alamatData.santri.kabupaten,
-        alamatData.santri.kecamatan,
-        alamatData.santri.kelurahan,
-        alamatData.santri.kode_pos,
-        alamatData.santri.rt,
-        alamatData.santri.rw,
-        alamatData.santri.alamat
-      );
-
-      const filled = requiredFields.filter(Boolean).length;
-      const total = requiredFields.length;
-      return (filled / total) * 100;
-    };
-
-    setProgress(calculateProgress());
-  }, [alamatData]);
 
   return {
     isEditMode,

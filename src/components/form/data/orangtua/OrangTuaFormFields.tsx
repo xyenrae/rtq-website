@@ -128,7 +128,6 @@ export default function OrangTuaFormFields({
                 handleInputChange("kewarganegaraan", e.target.value, "ayah")
               }
             >
-              <option value="">Pilih Kewarganegaraan</option>
               <option value="WNI">Warga Negara Indonesia (WNI)</option>
               <option value="WNA">Warga Negara Asing (WNA)</option>
             </select>
@@ -181,6 +180,7 @@ export default function OrangTuaFormFields({
                 handleInputChange("pendidikan_terakhir", e.target.value, "ayah")
               }
             >
+              <option value="">Pilih Pendidikan Terakhir</option>
               <option value="SD">SD</option>
               <option value="SMP">SMP</option>
               <option value="SMA/SMK">SMA/SMK</option>
@@ -200,6 +200,7 @@ export default function OrangTuaFormFields({
                 handleInputChange("penghasilan", e.target.value, "ayah")
               }
             >
+              <option value="">Pilih Penghasilan</option>
               <option value="< 1 Juta">&lt; 1 Juta</option>
               <option value="1 - 3 Juta">1 - 3 Juta</option>
               <option value="3 - 5 Juta">3 - 5 Juta</option>
@@ -335,6 +336,7 @@ export default function OrangTuaFormFields({
                 handleInputChange("pendidikan_terakhir", e.target.value, "ibu")
               }
             >
+              <option value="">Pilih Pendidikan Terakhir</option>
               <option value="SD">SD</option>
               <option value="SMP">SMP</option>
               <option value="SMA/SMK">SMA/SMK</option>
@@ -354,6 +356,7 @@ export default function OrangTuaFormFields({
                 handleInputChange("penghasilan", e.target.value, "ibu")
               }
             >
+              <option value="">Pilih Penghasilan</option>
               <option value="< 1 Juta">&lt; 1 Juta</option>
               <option value="1 - 3 Juta">1 - 3 Juta</option>
               <option value="3 - 5 Juta">3 - 5 Juta</option>

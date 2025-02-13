@@ -53,10 +53,10 @@ export const useSantriForm = () => {
     has_no_hp: true,
     email: "",
     hobi: "",
-    sumber_pembiayaan: "",
+    sumber_pembiayaan: "Orang Tua",
     nomor_kip: "",
-    kebutuhan_khusus: "",
-    kebutuhan_disabilitas: "",
+    kebutuhan_khusus: "Tidak Ada",
+    kebutuhan_disabilitas: "Tidak Ada",
     nomor_kk: "",
     nama_kepala_keluarga: "",
     kk_image_file: null,
@@ -104,8 +104,17 @@ export const useSantriForm = () => {
         santriData.nik,
         santriData.tempat_lahir,
         santriData.tanggal_lahir,
+        santriData.jenis_kelamin,
         santriData.jumlah_saudara,
         santriData.anak_ke,
+        santriData.cita_cita,
+        santriData.email,
+        santriData.hobi,
+        santriData.sumber_pembiayaan,
+        santriData.nomor_kip,
+        santriData.kebutuhan_khusus,
+        santriData.kebutuhan_disabilitas,
+        santriData.nomor_kk,
         santriData.nama_kepala_keluarga,
         !santriData.has_no_hp ? santriData.nomor_hp : true,
       ];
@@ -117,7 +126,6 @@ export const useSantriForm = () => {
     setProgress(calculateProgress());
   }, [santriData]);
 
-  // Fungsi submit untuk menyimpan data santri baru
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 

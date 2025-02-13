@@ -215,6 +215,7 @@ export default function SantriFormFields({
                 setSantriData({ ...santriData, jenis_kelamin: e.target.value })
               }
             >
+              <option value="">Pilih jenis kelamin</option>
               <option value="Laki-laki">Laki-laki</option>
               <option value="Perempuan">Perempuan</option>
             </select>
@@ -265,6 +266,7 @@ export default function SantriFormFields({
                 setSantriData({ ...santriData, cita_cita: e.target.value })
               }
             >
+              <option value="">Pilih cita cita</option>
               <option value="Dokter">Dokter</option>
               <option value="PNS">PNS</option>
               <option value="TNI/POLRI">TNI/POLRI</option>
@@ -324,6 +326,7 @@ export default function SantriFormFields({
                 setSantriData({ ...santriData, hobi: e.target.value })
               }
             >
+              <option value="">Pilih Hobi</option>
               <option value="Olahraga">Olahraga</option>
               <option value="Kesenian">Kesenian</option>
               <option value="Membaca">Membaca</option>

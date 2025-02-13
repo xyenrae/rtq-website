@@ -6,8 +6,9 @@ import { Pagination, Mousewheel, FreeMode, Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/free-mode";
+import { motion, AnimatePresence } from "framer-motion";
+import { FiX } from "react-icons/fi";
 
-// Interface untuk program
 interface Program {
   id: number;
   title: string;
@@ -16,7 +17,6 @@ interface Program {
   image: string;
 }
 
-// Data manual untuk program
 const programs: Program[] = [
   {
     id: 1,
@@ -63,17 +63,14 @@ const programs: Program[] = [
 export default function CardSliderProgram() {
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
 
-  // Handle open popup
   const handleOpenPopup = (program: Program) => {
     setSelectedProgram(program);
   };
 
-  // Handle close popup
   const handleClosePopup = () => {
     setSelectedProgram(null);
   };
 
-  // Handle click outside popup to close
   const handleOutsideClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       handleClosePopup();
@@ -88,38 +85,30 @@ export default function CardSliderProgram() {
         spaceBetween={30}
         slidesPerView={3}
         freeMode={true}
-        mousewheel={{
-          forceToAxis: true,
-          sensitivity: 0.5,
-        }}
-        loop={true} // Aktifkan infinite scroll
-        autoplay={{
-          delay: 3000, // Durasi autoplay (3 detik)
-          disableOnInteraction: false, // Tetap autoplay meskipun user berinteraksi
-        }}
+        mousewheel={{ forceToAxis: true, sensitivity: 0.5 }}
+        loop={true}
+        autoplay={{ delay: 3000, disableOnInteraction: false }}
         breakpoints={{
-          0: {
-            slidesPerView: 1,
-            freeMode: false,
-          },
-          768: {
-            slidesPerView: 2,
-            freeMode: true,
-          },
-          1024: {
-            slidesPerView: 3,
-            freeMode: true,
-          },
+          0: { slidesPerView: 1, freeMode: false },
+          768: { slidesPerView: 2, freeMode: true },
+          1024: { slidesPerView: 3, freeMode: true },
         }}
         wrapperClass="items-stretch"
         className="!pb-12 !overflow-x-hidden"
       >
         {programs.map((program) => (
           <SwiperSlide key={program.id}>
-            <div className="rounded-xl border-2 border-yellow-200 border-dotted overflow-hidden bg-white transition-shadow duration-300 py-6">
+            <motion.div
+              className="rounded-xl border-2 border-yellow-200 border-dotted overflow-hidden bg-white transition-shadow duration-300 py-6"
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.3 }}
+            >
               {/* Icon Section */}
               <div className="relative flex justify-center">
-                <div className="bg-yellow-50 p-6 w-fit rounded-full transition-transform duration-300 hover:scale-110">
+                <motion.div
+                  className="bg-yellow-50 p-6 w-fit rounded-full transition-transform duration-300 hover:scale-110"
+                  transition={{ duration: 0.3 }}
+                >
                   <Image
                     src={program.image}
                     alt={program.title}
@@ -128,7 +117,7 @@ export default function CardSliderProgram() {
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 33vw"
                   />
-                </div>
+                </motion.div>
               </div>
               {/* Content Section */}
               <div className="px-6 mt-6 flex flex-col flex-1">
@@ -138,7 +127,7 @@ export default function CardSliderProgram() {
                 <p className="text-gray-600 line-clamp-3 text-center flex-1">
                   {program.desc}
                 </p>
-                {/* Button with Creative Interaction */}
+                {/* Button */}
                 <div className="flex justify-center mt-6">
                   <button
                     onClick={() => handleOpenPopup(program)}
@@ -149,53 +138,50 @@ export default function CardSliderProgram() {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* Pop-up Detail */}
-      {selectedProgram && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-          onClick={handleOutsideClick} // Handle klik di luar pop-up
-        >
-          <div className="bg-white rounded-lg w-full mx-4 max-w-3xl p-8 relative overflow-hidden shadow-lg">
-            {/* Close Button */}
-            <button
-              onClick={handleClosePopup}
-              className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-colors"
+      {/* Modal Popup */}
+      <AnimatePresence>
+        {selectedProgram && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleOutsideClick}
+          >
+            <motion.div
+              className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-8 relative overflow-hidden"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+              {/* Close Button */}
+              <button
+                onClick={handleClosePopup}
+                className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-            {/* Content */}
-            <div className="flex flex-col lg:flex-row gap-8">
-              {/* Text */}
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                  {selectedProgram.title}
-                </h2>
-                <p className="text-gray-600 leading-relaxed">
-                  {selectedProgram.fullDesc}
-                </p>
+                <FiX size={24} />
+              </button>
+              {/* Modal Content */}
+              <div className="flex flex-col lg:flex-row gap-8">
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                    {selectedProgram.title}
+                  </h2>
+                  <p className="text-gray-600 leading-relaxed">
+                    {selectedProgram.fullDesc}
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

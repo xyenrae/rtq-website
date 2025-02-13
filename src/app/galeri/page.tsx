@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
+import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 
 // Konfigurasi Cloudinary
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "dd5bhcryt";
@@ -46,6 +47,7 @@ const getCloudinaryUrl = (
 };
 
 export default function GaleriPage() {
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const [selectedPublicId, setSelectedPublicId] = useState<string | null>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(
@@ -110,6 +112,19 @@ export default function GaleriPage() {
     },
     [selectedPublicId, handleImageNavigation]
   );
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollToTop(true);
+      } else {
+        setShowScrollToTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Efek samping untuk menambahkan event listener keyboard
   useEffect(() => {
@@ -346,6 +361,7 @@ export default function GaleriPage() {
           </div>
         </div>
       )}
+      {showScrollToTop && <ScrollToTopButton />}
     </div>
   );
 }

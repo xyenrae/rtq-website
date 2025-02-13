@@ -293,7 +293,6 @@ export default function AlamatFormFields({
               }
               className="w-full"
             >
-              <option value="">Pilih Status Kepemilikan</option>
               <option value="Milik Sendiri">Milik Sendiri</option>
               <option value="Sewa/Kontrak">Sewa/Kontrak</option>
               <option value="Numpang">Numpang</option>
@@ -490,6 +489,7 @@ export default function AlamatFormFields({
               }
               className="w-full"
             >
+              <option value="">Pilih Transportasi</option>
               <option value="Jalan Kaki">Jalan Kaki</option>
               <option value="Sepeda">Sepeda</option>
               <option value="Sepeda Motor">Sepeda Motor</option>
@@ -517,6 +517,7 @@ export default function AlamatFormFields({
               }
               className="w-full"
             >
+              <option value="">Pilih Waktu Tempuh</option>
               <option value="1-10 menit">1-10 menit</option>
               <option value="11-20 menit">11-20 menit</option>
               <option value="21-30 menit">21-30 menit</option>

@@ -1,15 +1,30 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
 import FormPendaftaran from "@/components/form/FormPendaftaran";
+import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 
 export default function RegistrationPage() {
   const router = useRouter();
+  const [showScrollToTop, setShowScrollToTop] = useState(false);
 
   useEffect(() => {
-    let isMounted = true; // Flag untuk melacak apakah komponen masih mounted
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollToTop(true);
+      } else {
+        setShowScrollToTop(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
 
     const checkAuth = async () => {
       const { data } = await supabase.auth.getUser();
@@ -22,13 +37,14 @@ export default function RegistrationPage() {
     checkAuth();
 
     return () => {
-      isMounted = false; // Set flag menjadi false saat komponen unmount
+      isMounted = false;
     };
   }, [router]);
 
   return (
     <div className="w-full container mt-12">
       <FormPendaftaran />
+      {showScrollToTop && <ScrollToTopButton />}
     </div>
   );
 }
