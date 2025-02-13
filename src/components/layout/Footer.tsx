@@ -50,10 +50,10 @@ export default function Footer() {
         {/* Kontak */}
         <div className="flex flex-col items-center md:items-end">
           <h3 className="text-2xl font-bold mb-4">Kontak Kami</h3>
-          <div className="space-y-2 text-gray-300 text-center md:text-right">
-            <p>📌 Jl. Pendidikan No. 123, Jakarta</p>
-            <p>📞 (021) 1234-5678</p>
-            <p>📧 info@rtq-hikmah.id</p>
+          <div className="space-y-2 text-gray-600 text-center md:text-right">
+            <p>Ds. Ngurensiti Rt.06, Rw.01, Kec.Wedarijaksa, Kab.Pati</p>
+            <p>6285641111160</p>
+            <p>alhikmahngurensiti@gmail.com</p>
           </div>
         </div>
       </div>
