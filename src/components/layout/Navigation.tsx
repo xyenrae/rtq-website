@@ -63,6 +63,8 @@ export default function Navigation() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    // Update state secara eksplisit agar UI segera diperbarui
+    setUserFullName(null);
     setIsDropdownOpen(false);
     toast.success("Anda telah berhasil logout.");
     router.push("/");
@@ -99,16 +101,16 @@ export default function Navigation() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 transform hover:scale-105 transition-transform duration-300"
-          >
-            {/* Container untuk logo dengan ukuran responsif */}
+          <Link href="/" className="flex items-center gap-2">
             <div
               className={`
-      relative transition-all duration-300
-      ${isScrolled ? "w-16 h-16 sm:w-20 sm:h-20" : "w-20 h-20 sm:w-24 sm:h-24"}
-    `}
+                relative transition-all duration-300
+                ${
+                  isScrolled
+                    ? "w-16 h-16 sm:w-20 sm:h-20"
+                    : "w-20 h-20 sm:w-24 sm:h-24"
+                }
+              `}
             >
               <Image
                 src="/images/logo-rtq.png"
@@ -118,21 +120,22 @@ export default function Navigation() {
                 className="object-contain"
               />
             </div>
-
             <div className="flex flex-col">
               <span
                 className={`
-        font-bold text-green-500 transition-all duration-300
-        ${isScrolled ? "text-2xl md:text-3xl" : "text-3xl md:text-4xl"}
-      `}
+                  font-bold text-green-500 transition-all duration-300
+                  ${
+                    isScrolled ? "text-2xl md:text-3xl" : "text-3xl md:text-4xl"
+                  }
+                `}
               >
                 Al-Hikmah
               </span>
               <span
                 className={`
-        text-green-500 transition-all duration-300
-        ${isScrolled ? "text-xs md:text-sm" : "text-sm md:text-base"}
-      `}
+                  text-green-500 transition-all duration-300
+                  ${isScrolled ? "text-xs md:text-sm" : "text-sm md:text-base"}
+                `}
               >
                 Cinta Al-Qur&#39;an, Cinta Ilmu
               </span>
@@ -169,7 +172,6 @@ export default function Navigation() {
                     {userFullName}
                   </span>
                 </button>
-
                 <AnimatePresence>
                   {isDropdownOpen && (
                     <motion.div
@@ -265,7 +267,6 @@ export default function Navigation() {
                   label="Kontak"
                   onClick={() => setIsMobileMenuOpen(false)}
                 />
-
                 {userFullName ? (
                   <div className="border-t pt-4">
                     <div className="flex items-center justify-between">
