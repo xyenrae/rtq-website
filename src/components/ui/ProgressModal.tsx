@@ -76,7 +76,7 @@ const ProgressModal = ({
             <div className="p-6">
               <div className="relative h-3 bg-gray-100 rounded-full mb-6 overflow-hidden">
                 <motion.div
-                  className="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-500 to-purple-500"
+                  className="absolute left-0 top-0 h-full bg-green-500"
                   style={{ width: `${localProgress}%` }}
                   initial={{ width: "0%" }}
                   animate={{ width: `${localProgress}%` }}
@@ -119,7 +119,7 @@ const ProgressModal = ({
               </div>
 
               {currentStep && (
-                <div className="mt-4 text-center text-sm text-blue-600 font-medium">
+                <div className="mt-4 text-center text-sm text-green-500 font-medium">
                   Sedang memproses: {currentStep}
                 </div>
               )}
