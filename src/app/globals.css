@@ -38,7 +38,6 @@ html {
 .swiper {
   overflow: visible !important;
 }
-
 input,
 textarea,
 select {
@@ -53,12 +52,15 @@ select {
 }
 
 input:focus,
-textarea:focus select:focus {
+textarea:focus,
+select:focus {
   border-color: #9ca3af; /* focus:border-gray-400 */
   box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.5); /* focus:ring-gray-400 */
 }
+
 input:disabled,
-textarea:disabled select:disabled {
+textarea:disabled,
+select:disabled {
   cursor: not-allowed;
-  background-color: #edf2f7;
+  background-color: #f9fafb; /* contoh background untuk elemen disabled */
 }

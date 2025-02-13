@@ -11,6 +11,7 @@ import Image from "next/image";
 import { FaUser } from "react-icons/fa";
 
 interface SantriData {
+  id?: string;
   nama_lengkap: string;
   nik: string;
   tempat_lahir: string;
@@ -29,10 +30,12 @@ interface SantriData {
   kebutuhan_disabilitas: string;
   nomor_kk: string;
   nama_kepala_keluarga: string;
-  unggah_kk: File | null;
-  unggah_kip: File | null;
-  profile_image_file: File | null; // File input untuk gambar profil
-  profile_image_url: string | null; // URL gambar profil dari Cloudinary
+  kk_image_file: File | null;
+  kip_image_file: File | null;
+  profile_image_file: File | null;
+  profile_image_url: string | null;
+  kk_image_url: string | null;
+  kip_image_url: string | null;
 }
 
 export default function SantriForm() {
@@ -58,10 +61,12 @@ export default function SantriForm() {
     kebutuhan_disabilitas: "",
     nomor_kk: "",
     nama_kepala_keluarga: "",
-    unggah_kk: null,
-    unggah_kip: null,
+    kk_image_file: null,
+    kip_image_file: null,
     profile_image_file: null,
     profile_image_url: null,
+    kk_image_url: null,
+    kip_image_url: null,
   });
 
   useEffect(() => {
@@ -69,20 +74,21 @@ export default function SantriForm() {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
 
-      const { data: santri, error } = await supabase
+      const { data: santri } = await supabase
         .from("santri")
         .select("*")
         .eq("user_id", userData.user.id)
         .maybeSingle();
 
-      if (error) {
-        setHasData(false);
-      } else if (santri) {
-        // Gabungkan data dari Supabase dengan state local
-        setSantriData((prevData) => ({ ...prevData, ...santri }));
+      if (santri) {
+        const updatedSantri = {
+          ...santri,
+          tanggal_lahir: santri.tanggal_lahir
+            ? new Date(santri.tanggal_lahir)
+            : null,
+        };
+        setSantriData((prevData) => ({ ...prevData, ...updatedSantri }));
         setHasData(true);
-      } else {
-        setHasData(false);
       }
     };
 
@@ -93,6 +99,7 @@ export default function SantriForm() {
     const calculateProgress = () => {
       const requiredFields = [
         santriData.profile_image_file || santriData.profile_image_url,
+        santriData.kk_image_file || santriData.kk_image_url,
         santriData.nama_lengkap,
         santriData.nik,
         santriData.tempat_lahir,
@@ -102,7 +109,6 @@ export default function SantriForm() {
         santriData.nama_kepala_keluarga,
         !santriData.has_no_hp ? santriData.nomor_hp : true,
       ];
-
       const filled = requiredFields.filter(Boolean).length;
       const total = requiredFields.length;
       return (filled / total) * 100;
@@ -111,8 +117,33 @@ export default function SantriForm() {
     setProgress(calculateProgress());
   }, [santriData]);
 
+  const uploadFileToCloudinary = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append(
+      "upload_preset",
+      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
+    );
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
+      { method: "POST", body: formData }
+    );
+    const cloudData = await res.json();
+    if (cloudData.error) {
+      throw new Error(cloudData.error.message);
+    }
+    return cloudData.secure_url;
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!santriData.has_no_hp && !santriData.nomor_hp.trim()) {
+      alert(
+        "Harap pilih salah satu: masukkan nomor HP atau centang 'Tidak memiliki nomor HP'"
+      );
+      return;
+    }
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
@@ -120,27 +151,10 @@ export default function SantriForm() {
         return;
       }
 
-      // Upload file KK dan KIP (opsional, logikanya bisa tetap seperti sebelumnya)
-      let kkUrl: string | null = null;
-      let kipUrl: string | null = null;
+      const formattedTanggalLahir = santriData.tanggal_lahir
+        ? new Date(santriData.tanggal_lahir).toISOString()
+        : null;
 
-      if (santriData.unggah_kk) {
-        const { error: kkError } = await supabase.storage
-          .from("files")
-          .upload(`kk/${santriData.unggah_kk.name}`, santriData.unggah_kk);
-        if (kkError) throw kkError;
-        kkUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/files/kk/${santriData.unggah_kk.name}`;
-      }
-
-      if (santriData.unggah_kip) {
-        const { error: kipError } = await supabase.storage
-          .from("files")
-          .upload(`kip/${santriData.unggah_kip.name}`, santriData.unggah_kip);
-        if (kipError) throw kipError;
-        kipUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/files/kip/${santriData.unggah_kip.name}`;
-      }
-
-      // Simpan data ke Supabase tanpa URL gambar profil (akan di-update jika upload Cloudinary sukses)
       const { data, error } = await supabase
         .from("santri")
         .insert({
@@ -148,7 +162,7 @@ export default function SantriForm() {
           nama_lengkap: santriData.nama_lengkap,
           nik: santriData.nik,
           tempat_lahir: santriData.tempat_lahir,
-          tanggal_lahir: santriData.tanggal_lahir?.toISOString(),
+          tanggal_lahir: formattedTanggalLahir,
           jenis_kelamin: santriData.jenis_kelamin,
           jumlah_saudara: santriData.jumlah_saudara,
           anak_ke: santriData.anak_ke,
@@ -162,51 +176,66 @@ export default function SantriForm() {
           kebutuhan_disabilitas: santriData.kebutuhan_disabilitas,
           nomor_kk: santriData.nomor_kk,
           nama_kepala_keluarga: santriData.nama_kepala_keluarga,
-          unggah_kk: kkUrl,
-          unggah_kip: kipUrl,
-          profile_image_url: null, // diset null dulu
+          kk_image_url: null,
+          kip_image_url: null,
+          profile_image_url: null,
         })
-        .select(); // select untuk mendapatkan id record
+        .select();
 
       if (error || !data || data.length === 0) {
         toast.error("Gagal menyimpan data santri.");
         return;
       }
 
-      // Jika ada file gambar profil, upload ke Cloudinary hanya setelah data berhasil tersimpan
-      let profileImageUrl: string | null = null;
-      if (santriData.profile_image_file) {
-        const formData = new FormData();
-        formData.append("file", santriData.profile_image_file);
-        formData.append(
-          "upload_preset",
-          process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-        );
-        formData.append(
-          "cloud_name",
-          process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
-        );
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-        const cloudData = await res.json();
-        if (cloudData.error) throw new Error(cloudData.error.message);
-        profileImageUrl = cloudData.secure_url;
+      const insertedRecordId = data[0].id;
 
-        // Update record Supabase dengan URL gambar profil
-        const insertedRecordId = data[0].id; // pastikan kolom primary key di tabel "santri" bernama "id"
-        const { error: updateError } = await supabase
-          .from("santri")
-          .update({ profile_image_url: profileImageUrl })
-          .eq("id", insertedRecordId);
-        if (updateError) {
-          toast.error("Data tersimpan, tetapi gagal mengupdate URL gambar.");
-        }
+      const uploadPromises = [];
+      if (santriData.profile_image_file) {
+        uploadPromises.push(
+          uploadFileToCloudinary(santriData.profile_image_file)
+            .then((url) =>
+              supabase
+                .from("santri")
+                .update({ profile_image_url: url })
+                .eq("id", insertedRecordId)
+            )
+            .catch((err) => {
+              console.error(err);
+              toast.error("Terjadi kesalahan saat mengupload gambar profil.");
+            })
+        );
       }
+      if (santriData.kk_image_file) {
+        uploadPromises.push(
+          uploadFileToCloudinary(santriData.kk_image_file)
+            .then((url) =>
+              supabase
+                .from("santri")
+                .update({ kk_image_url: url })
+                .eq("id", insertedRecordId)
+            )
+            .catch((err) => {
+              console.error(err);
+              toast.error("Terjadi kesalahan saat mengupload KK.");
+            })
+        );
+      }
+      if (santriData.kip_image_file) {
+        uploadPromises.push(
+          uploadFileToCloudinary(santriData.kip_image_file)
+            .then((url) =>
+              supabase
+                .from("santri")
+                .update({ kip_image_url: url })
+                .eq("id", insertedRecordId)
+            )
+            .catch((err) => {
+              console.error(err);
+              toast.error("Terjadi kesalahan saat mengupload KIP.");
+            })
+        );
+      }
+      await Promise.all(uploadPromises);
 
       toast.success("Data santri berhasil disimpan!");
       setHasData(true);
@@ -219,36 +248,54 @@ export default function SantriForm() {
   const handleUpdate = async () => {
     try {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) return;
+      if (!userData.user || !santriData.id) return;
 
-      let profileImageUrl: string | null = santriData.profile_image_url;
-      if (santriData.profile_image_file) {
-        const formData = new FormData();
-        formData.append("file", santriData.profile_image_file);
-        formData.append(
-          "upload_preset",
-          process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-        );
-        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
-        );
-        const data = await res.json();
-        if (data.error) throw new Error(data.error.message);
-        profileImageUrl = data.secure_url;
-      }
+      const formattedTanggalLahir = santriData.tanggal_lahir
+        ? new Date(santriData.tanggal_lahir).toISOString()
+        : null;
 
-      const { error } = await supabase
+      let profileImageUrl = santriData.profile_image_url;
+      let kkImageUrl = santriData.kk_image_url;
+      let kipImageUrl = santriData.kip_image_url;
+
+      const uploads = await Promise.all([
+        santriData.profile_image_file
+          ? uploadFileToCloudinary(santriData.profile_image_file).catch(
+              (err) => {
+                console.error(err);
+                toast.error("Terjadi kesalahan saat mengupload gambar profil.");
+                return null;
+              }
+            )
+          : Promise.resolve(null),
+        santriData.kk_image_file
+          ? uploadFileToCloudinary(santriData.kk_image_file).catch((err) => {
+              console.error(err);
+              toast.error("Terjadi kesalahan saat mengupload KK.");
+              return null;
+            })
+          : Promise.resolve(null),
+        santriData.kip_image_file
+          ? uploadFileToCloudinary(santriData.kip_image_file).catch((err) => {
+              console.error(err);
+              toast.error("Terjadi kesalahan saat mengupload KIP.");
+              return null;
+            })
+          : Promise.resolve(null),
+      ]);
+
+      if (uploads[0]) profileImageUrl = uploads[0];
+      if (uploads[1]) kkImageUrl = uploads[1];
+      if (uploads[2]) kipImageUrl = uploads[2];
+
+      const { error, count } = await supabase
         .from("santri")
         .update({
+          user_id: userData.user.id,
           nama_lengkap: santriData.nama_lengkap,
           nik: santriData.nik,
           tempat_lahir: santriData.tempat_lahir,
-          tanggal_lahir: santriData.tanggal_lahir?.toISOString(),
+          tanggal_lahir: formattedTanggalLahir,
           jenis_kelamin: santriData.jenis_kelamin,
           jumlah_saudara: santriData.jumlah_saudara,
           anak_ke: santriData.anak_ke,
@@ -262,15 +309,34 @@ export default function SantriForm() {
           kebutuhan_disabilitas: santriData.kebutuhan_disabilitas,
           nomor_kk: santriData.nomor_kk,
           nama_kepala_keluarga: santriData.nama_kepala_keluarga,
+          kk_image_url: kkImageUrl,
+          kip_image_url: kipImageUrl,
           profile_image_url: profileImageUrl,
         })
-        .eq("user_id", userData.user.id);
+        .eq("id", santriData.id)
+        .eq("user_id", userData.user.id)
+        .select();
 
       if (error) {
         toast.error("Gagal menyimpan perubahan.");
+      } else if (count === 0) {
+        toast.error("Tidak ada data yang diperbarui.");
       } else {
         toast.success("Perubahan berhasil disimpan!");
         setIsEditMode(false);
+        const { data: updatedSantri } = await supabase
+          .from("santri")
+          .select("*")
+          .eq("id", santriData.id)
+          .single();
+        if (updatedSantri) {
+          setSantriData({
+            ...updatedSantri,
+            tanggal_lahir: updatedSantri.tanggal_lahir
+              ? new Date(updatedSantri.tanggal_lahir)
+              : null,
+          });
+        }
       }
     } catch (err) {
       console.error("Error during update:", err);
@@ -530,7 +596,7 @@ export default function SantriForm() {
             </select>
           </div>
           <div className="flex flex-col items-start">
-            <label>Nomor HP</label>
+            <label>Nomor HP*</label>
             <input
               type="text"
               required={!santriData.has_no_hp}
@@ -691,59 +757,156 @@ export default function SantriForm() {
               }
             />
           </div>
-          <div>
-            <label>Unggah KK</label>
-            <input
-              type="file"
-              disabled={hasData ? !isEditMode : false}
-              onChange={(e) =>
-                setSantriData({
-                  ...santriData,
-                  unggah_kk: e.target.files ? e.target.files[0] : null,
-                })
-              }
-            />
-          </div>
-          <div>
-            <label>Unggah KIP</label>
-            <input
-              type="file"
-              disabled={hasData ? !isEditMode : false}
-              onChange={(e) =>
-                setSantriData({
-                  ...santriData,
-                  unggah_kip: e.target.files ? e.target.files[0] : null,
-                })
-              }
-            />
-          </div>
-        </div>
 
-        <div className="flex justify-end">
-          {!hasData && (
-            <button
-              type="submit"
-              className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
-            >
-              Kirim Data
-            </button>
-          )}
-          {hasData && !isEditMode && (
-            <button type="button" onClick={() => setIsEditMode(true)}>
-              Edit Data
-            </button>
-          )}
-          {hasData && isEditMode && (
-            <div className="flex gap-3">
-              <button type="button" onClick={() => setIsEditMode(false)}>
-                Batal
-              </button>
-              <button type="button" onClick={handleUpdate}>
-                Simpan Perubahan
-              </button>
+          <div>
+            <div className="relative group">
+              <p>Unggah KK</p>
+              <label
+                className={`
+            block aspect-square w-1/2 rounded-2xl border-4 border-dashed cursor-pointer
+            ${
+              hasData && !isEditMode
+                ? "cursor-not-allowed opacity-75"
+                : "hover:border-primary-500 border-gray-200"
+            }
+            transition-colors duration-200 overflow-hidden
+          `}
+                htmlFor="kkInput"
+              >
+                {santriData.kk_image_url || santriData.kk_image_file ? (
+                  <Image
+                    width={50}
+                    height={50}
+                    src={
+                      santriData.kk_image_file
+                        ? URL.createObjectURL(santriData.kk_image_file)
+                        : santriData.kk_image_url ?? ""
+                    }
+                    alt="KK Preview"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                    <FaUser className="w-12 h-12 mb-2" />
+                    <span className="text-sm font-medium">Upload Foto</span>
+                  </div>
+                )}
+              </label>
+
+              {(!hasData || isEditMode) && (
+                <input
+                  id="kkInput"
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      setSantriData({
+                        ...santriData,
+                        kk_image_file: e.target.files[0],
+                      });
+                    }
+                  }}
+                />
+              )}
             </div>
+
+            {(!hasData || isEditMode) && (
+              <p className="text-sm text-gray-500 text-center w-1/2">
+                Format: JPG, PNG (Maks. 5MB)
+              </p>
+            )}
+          </div>
+
+          {/* Unggah KIP */}
+          <div className="relative group">
+            <p>Unggah KIP</p>
+            <label
+              className={`
+            block aspect-square w-1/2 rounded-2xl border-4 border-dashed cursor-pointer
+            ${
+              hasData && !isEditMode
+                ? "cursor-not-allowed opacity-75"
+                : "hover:border-primary-500 border-gray-200"
+            }
+            transition-colors duration-200 overflow-hidden
+          `}
+              htmlFor="kipInput"
+            >
+              {santriData.kip_image_url || santriData.kip_image_file ? (
+                <Image
+                  width={50}
+                  height={50}
+                  src={
+                    santriData.kip_image_file
+                      ? URL.createObjectURL(santriData.kip_image_file)
+                      : santriData.kip_image_url ?? ""
+                  }
+                  alt="KIP Preview"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                  <FaUser className="w-12 h-12 mb-2" />
+                  <span className="text-sm font-medium">Upload Foto</span>
+                </div>
+              )}
+            </label>
+
+            {(!hasData || isEditMode) && (
+              <input
+                id="kipInput"
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={(e) => {
+                  if (e.target.files?.[0]) {
+                    setSantriData({
+                      ...santriData,
+                      kip_image_file: e.target.files[0],
+                    });
+                  }
+                }}
+              />
+            )}
+          </div>
+
+          {(!hasData || isEditMode) && (
+            <p className="text-sm text-gray-500 text-center w-1/2">
+              Format: JPG, PNG (Maks. 5MB)
+            </p>
           )}
         </div>
+      </div>
+
+      <div className="flex justify-end mt-16">
+        {!hasData && (
+          <button
+            type="submit"
+            className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
+          >
+            Kirim Data
+          </button>
+        )}
+        {hasData && !isEditMode && (
+          <button
+            type="button"
+            onClick={() => setIsEditMode(true)}
+            className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
+          >
+            Edit Data
+          </button>
+        )}
+        {hasData && isEditMode && (
+          <div className="flex gap-3">
+            <button type="button" onClick={() => setIsEditMode(false)}>
+              Batal
+            </button>
+            <button type="button" onClick={handleUpdate}>
+              Simpan Perubahan
+            </button>
+          </div>
+        )}
       </div>
     </form>
   );
