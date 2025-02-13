@@ -3,9 +3,13 @@
 import React from "react";
 import { useSantriForm } from "./useSantriForm";
 import SantriFormFields from "./SantriFormFields";
+import ProgressModal from "@/components/ui/ProgressModal";
 
 export default function SantriForm() {
   const {
+    isProcessing,
+    processingStep,
+    processingProgress,
     isEditMode,
     setIsEditMode,
     hasData,
@@ -17,16 +21,24 @@ export default function SantriForm() {
   } = useSantriForm();
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <SantriFormFields
-        santriData={santriData}
-        setSantriData={setSantriData}
-        hasData={hasData}
-        isEditMode={isEditMode}
-        progress={progress}
-        setIsEditMode={setIsEditMode}
-        handleUpdate={handleUpdate}
+    <>
+      <form onSubmit={handleSubmit} className="relative">
+        <SantriFormFields
+          santriData={santriData}
+          setSantriData={setSantriData}
+          hasData={hasData}
+          isEditMode={isEditMode}
+          progress={progress}
+          setIsEditMode={setIsEditMode}
+          handleUpdate={handleUpdate}
+        />
+      </form>
+      <ProgressModal
+        isOpen={isProcessing}
+        progress={processingProgress}
+        status={isEditMode ? "update" : "submit"}
+        currentStep={processingStep}
       />
-    </form>
+    </>
   );
 }

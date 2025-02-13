@@ -3,9 +3,13 @@
 import React from "react";
 import { useAlamatForm } from "./useAlamatForm";
 import AlamatFormFields from "./AlamatFormFields";
+import ProgressModal from "@/components/ui/ProgressModal";
 
 export default function AlamatForm() {
   const {
+    isProcessing,
+    processingStep,
+    processingProgress,
     isEditMode,
     setIsEditMode,
     hasData,
@@ -19,18 +23,26 @@ export default function AlamatForm() {
   } = useAlamatForm();
 
   return (
-    <form onSubmit={handleSubmit}>
-      <AlamatFormFields
-        alamatData={alamatData}
-        handleInputChange={handleInputChange}
-        handleCheckboxChange={handleCheckboxChange}
-        handleIbuSamaDenganAyah={handleIbuSamaDenganAyah}
-        hasData={hasData}
-        isEditMode={isEditMode}
-        progress={progress}
-        setIsEditMode={setIsEditMode}
-        handleUpdate={handleUpdate}
-      />
-    </form>
+    <>
+      <form onSubmit={handleSubmit}>
+        <AlamatFormFields
+          alamatData={alamatData}
+          handleInputChange={handleInputChange}
+          handleCheckboxChange={handleCheckboxChange}
+          handleIbuSamaDenganAyah={handleIbuSamaDenganAyah}
+          hasData={hasData}
+          isEditMode={isEditMode}
+          progress={progress}
+          setIsEditMode={setIsEditMode}
+          handleUpdate={handleUpdate}
+        />
+        <ProgressModal
+          isOpen={isProcessing}
+          progress={processingProgress}
+          status={isEditMode ? "update" : "submit"}
+          currentStep={processingStep}
+        />
+      </form>
+    </>
   );
 }

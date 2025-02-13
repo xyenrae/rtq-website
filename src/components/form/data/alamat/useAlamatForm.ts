@@ -44,6 +44,9 @@ export const useAlamatForm = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasData, setHasData] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState("");
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [alamatData, setAlamatData] = useState<AlamatData>({
     ayah: {
       tinggal_luar_negeri: false,
@@ -230,11 +233,19 @@ export const useAlamatForm = () => {
   // Fungsi untuk submit data baru
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+
+    setIsProcessing(true);
+    setProcessingStep("Validasi data");
+    setProcessingProgress(10);
+
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
       return;
     }
     try {
+      setProcessingStep("Menyimpan data utama");
+      setProcessingProgress(50);
+
       const { error } = await supabase.from("alamat").insert({
         santri_id: santriId,
         ayah_tinggal_luar_negeri: alamatData.ayah.tinggal_luar_negeri,
@@ -277,20 +288,30 @@ export const useAlamatForm = () => {
         toast.error("Gagal menyimpan data alamat.");
       } else {
         toast.success("Data alamat berhasil disimpan!");
+        setProcessingProgress(100);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     } catch (err) {
       console.error("Error during submission:", err);
       toast.error("Terjadi kesalahan saat mendaftar.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   // Fungsi untuk mengupdate data
   const handleUpdate = async (): Promise<void> => {
+    setIsProcessing(true);
+    setProcessingStep("Validasi data");
+    setProcessingProgress(10);
+
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
       return;
     }
     try {
+      setProcessingStep("Menyimpan data utama");
+      setProcessingProgress(50);
       const { error } = await supabase
         .from("alamat")
         .update({
@@ -335,10 +356,14 @@ export const useAlamatForm = () => {
       } else {
         toast.success("Perubahan berhasil disimpan!");
         setIsEditMode(false);
+        setProcessingProgress(100);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     } catch (err) {
       console.error("Error during update:", err);
       toast.error("Terjadi kesalahan saat menyimpan perubahan.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -415,5 +440,8 @@ export const useAlamatForm = () => {
     handleIbuSamaDenganAyah,
     handleSubmit,
     handleUpdate,
+    isProcessing,
+    processingStep,
+    processingProgress,
   };
 };

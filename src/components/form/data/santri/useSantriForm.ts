@@ -37,6 +37,9 @@ export const useSantriForm = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasData, setHasData] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState("");
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [santriData, setSantriData] = useState<SantriData>({
     nama_lengkap: "",
     nik: "",
@@ -79,7 +82,9 @@ export const useSantriForm = () => {
       if (santri) {
         const updatedSantri: SantriData = {
           ...santri,
-          tanggal_lahir: santri.tanggal_lahir ? new Date(santri.tanggal_lahir) : null,
+          tanggal_lahir: santri.tanggal_lahir
+            ? new Date(santri.tanggal_lahir)
+            : null,
         };
         setSantriData((prevData) => ({ ...prevData, ...updatedSantri }));
         setHasData(true);
@@ -115,6 +120,11 @@ export const useSantriForm = () => {
   // Fungsi submit untuk menyimpan data santri baru
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setIsProcessing(true);
+    setProcessingStep("Validasi data");
+    setProcessingProgress(10);
+
     if (!santriData.has_no_hp && !santriData.nomor_hp.trim()) {
       alert(
         "Harap pilih salah satu: masukkan nomor HP atau centang 'Tidak memiliki nomor HP'"
@@ -131,6 +141,9 @@ export const useSantriForm = () => {
       const formattedTanggalLahir = santriData.tanggal_lahir
         ? new Date(santriData.tanggal_lahir).toISOString()
         : null;
+
+      setProcessingStep("Menyimpan data utama");
+      setProcessingProgress(30);
 
       const { data, error } = await supabase
         .from("santri")
@@ -165,6 +178,9 @@ export const useSantriForm = () => {
       }
 
       const insertedRecordId = data[0].id;
+
+      setProcessingStep("Mengunggah dokumen");
+      setProcessingProgress(50);
 
       const uploadPromises = [];
       if (santriData.profile_image_file) {
@@ -216,14 +232,22 @@ export const useSantriForm = () => {
 
       toast.success("Data santri berhasil disimpan!");
       setHasData(true);
+      setProcessingProgress(100);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (err) {
       console.error(err);
       toast.error("Terjadi kesalahan saat mendaftar.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   // Fungsi untuk memperbarui data santri yang sudah ada
   const handleUpdate = async () => {
+    setIsProcessing(true);
+    setProcessingStep("Validasi data");
+    setProcessingProgress(10);
+
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user || !santriData.id) return;
@@ -235,6 +259,9 @@ export const useSantriForm = () => {
       let profileImageUrl = santriData.profile_image_url;
       let kkImageUrl = santriData.kk_image_url;
       let kipImageUrl = santriData.kip_image_url;
+
+      setProcessingStep("Mengunggah dokumen");
+      setProcessingProgress(30);
 
       const uploads = await Promise.all([
         santriData.profile_image_file
@@ -265,6 +292,9 @@ export const useSantriForm = () => {
       if (uploads[0]) profileImageUrl = uploads[0];
       if (uploads[1]) kkImageUrl = uploads[1];
       if (uploads[2]) kipImageUrl = uploads[2];
+
+      setProcessingStep("Menyimpan data utama");
+      setProcessingProgress(50);
 
       const { error, count } = await supabase
         .from("santri")
@@ -315,12 +345,30 @@ export const useSantriForm = () => {
               : null,
           });
         }
+
+        setHasData(true);
+        setProcessingProgress(100);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     } catch (err) {
       console.error("Error during update:", err);
       toast.error("Terjadi kesalahan saat menyimpan perubahan.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  return { isEditMode, setIsEditMode, hasData, progress, santriData, setSantriData, handleSubmit, handleUpdate };
+  return {
+    isEditMode,
+    setIsEditMode,
+    hasData,
+    progress,
+    santriData,
+    setSantriData,
+    handleSubmit,
+    handleUpdate,
+    isProcessing,
+    processingStep,
+    processingProgress,
+  };
 };

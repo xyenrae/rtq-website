@@ -3,9 +3,13 @@
 import React from "react";
 import { useOrangTuaForm } from "./useOrangTuaForm";
 import OrangTuaFormFields from "./OrangTuaFormFields";
+import ProgressModal from "@/components/ui/ProgressModal";
 
 export default function OrangTuaForm() {
   const {
+    isProcessing,
+    processingStep,
+    processingProgress,
     isEditMode,
     setIsEditMode,
     hasData,
@@ -18,17 +22,25 @@ export default function OrangTuaForm() {
   } = useOrangTuaForm();
 
   return (
-    <form onSubmit={handleSubmit}>
-      <OrangTuaFormFields
-        orangTuaData={orangTuaData}
-        handleInputChange={handleInputChange}
-        handleCheckboxChange={handleCheckboxChange}
-        hasData={hasData}
-        isEditMode={isEditMode}
-        progress={progress}
-        setIsEditMode={setIsEditMode}
-        handleUpdate={handleUpdate}
+    <>
+      <form onSubmit={handleSubmit}>
+        <OrangTuaFormFields
+          orangTuaData={orangTuaData}
+          handleInputChange={handleInputChange}
+          handleCheckboxChange={handleCheckboxChange}
+          hasData={hasData}
+          isEditMode={isEditMode}
+          progress={progress}
+          setIsEditMode={setIsEditMode}
+          handleUpdate={handleUpdate}
+        />
+      </form>
+      <ProgressModal
+        isOpen={isProcessing}
+        progress={processingProgress}
+        status={isEditMode ? "update" : "submit"}
+        currentStep={processingStep}
       />
-    </form>
+    </>
   );
 }

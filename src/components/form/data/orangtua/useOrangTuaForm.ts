@@ -33,6 +33,9 @@ export const useOrangTuaForm = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasData, setHasData] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStep, setProcessingStep] = useState("");
+  const [processingProgress, setProcessingProgress] = useState(0);
   const [orangTuaData, setOrangTuaData] = useState<OrangTuaData>({
     ayah: {
       nama: "",
@@ -219,11 +222,19 @@ export const useOrangTuaForm = () => {
   // Handle submit data baru
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setIsProcessing(true);
+    setProcessingStep("Validasi data");
+    setProcessingProgress(10);
+
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
       return;
     }
     try {
+      setProcessingStep("Menyimpan data utama");
+      setProcessingProgress(50);
+
       const { error } = await supabase.from("orang_tua").insert({
         santri_id: santriId,
         ayah_nama: orangTuaData.ayah.nama,
@@ -260,20 +271,32 @@ export const useOrangTuaForm = () => {
         toast.error("Gagal menyimpan data orang tua.");
       } else {
         toast.success("Data orang tua berhasil disimpan!");
+        setHasData(true);
+        setProcessingProgress(100);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     } catch (err) {
       console.error("Error during submission:", err);
       toast.error("Terjadi kesalahan saat mendaftar.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   // Handle update data
   const handleUpdate = async () => {
+    setIsProcessing(true);
+    setProcessingStep("Validasi data");
+    setProcessingProgress(10);
+
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
       return;
     }
     try {
+      setProcessingStep("Menyimpan data utama");
+      setProcessingProgress(50);
+
       const { error } = await supabase
         .from("orang_tua")
         .update({
@@ -312,10 +335,14 @@ export const useOrangTuaForm = () => {
       } else {
         toast.success("Perubahan berhasil disimpan!");
         setIsEditMode(false);
+        setProcessingProgress(100);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     } catch (err) {
       console.error("Error during update:", err);
       toast.error("Terjadi kesalahan saat menyimpan perubahan.");
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -331,5 +358,8 @@ export const useOrangTuaForm = () => {
     handleCheckboxChange,
     handleSubmit,
     handleUpdate,
+    isProcessing,
+    processingStep,
+    processingProgress,
   };
 };
