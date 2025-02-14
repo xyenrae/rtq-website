@@ -282,7 +282,7 @@ export default function SantriFormFields({
           <div className="flex flex-col items-start">
             <label>Nomor HP*</label>
             <input
-              type="text"
+              type="number"
               required={!santriData.has_no_hp}
               disabled={(!isEditMode && hasData) || santriData.has_no_hp}
               placeholder="Masukkan nomor HP"
@@ -356,7 +356,7 @@ export default function SantriFormFields({
           <div>
             <label>Nomor KIP</label>
             <input
-              type="text"
+              type="number"
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nomor KIP"
               value={santriData.nomor_kip ?? ""}
@@ -416,7 +416,7 @@ export default function SantriFormFields({
           <div>
             <label>Nomor KK*</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nomor KK"

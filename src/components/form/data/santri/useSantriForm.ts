@@ -1,45 +1,74 @@
-// src/components/form/data/santri/useSantriForm.ts
 "use client";
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
 import { uploadFileToCloudinary } from "./santriService";
+import { z } from "zod";
 
-export interface SantriData {
-  id?: string;
-  nama_lengkap: string;
-  nik: string;
-  tempat_lahir: string;
-  tanggal_lahir: Date | null;
-  jenis_kelamin: string;
-  jumlah_saudara: number | null;
-  anak_ke: number | null;
-  cita_cita: string;
-  nomor_hp: string;
-  has_no_hp: boolean;
-  email: string;
-  hobi: string;
-  sumber_pembiayaan: string;
-  nomor_kip: string;
-  kebutuhan_khusus: string;
-  kebutuhan_disabilitas: string;
-  nomor_kk: string;
-  nama_kepala_keluarga: string;
-  kk_image_file: File | null;
-  kip_image_file: File | null;
-  profile_image_file: File | null;
-  profile_image_url: string | null;
-  kk_image_url: string | null;
-  kip_image_url: string | null;
-}
+/* ==================== ZOD SCHEMA DEFINITIONS ==================== */
+
+const SantriDataSchema = z
+  .object({
+    id: z.string().optional(),
+    nama_lengkap: z.string().min(1, { message: "Nama lengkap wajib diisi" }),
+    nik: z.string().min(1, { message: "NIK wajib diisi" }),
+    tempat_lahir: z.string().min(1, { message: "Tempat lahir wajib diisi" }),
+    tanggal_lahir: z.preprocess(
+      (arg) => (arg ? new Date(arg as string | Date) : null),
+      z.date().nullable()
+    ),
+    jenis_kelamin: z.string().min(1, { message: "Jenis kelamin wajib diisi" }),
+    jumlah_saudara: z.number().nullable(),
+    anak_ke: z.number().nullable(),
+    cita_cita: z.string().min(1, { message: "Cita-cita wajib diisi" }),
+    nomor_hp: z.string().optional(),
+    has_no_hp: z.boolean(),
+    email: z.string().email({ message: "Email tidak valid" }),
+    hobi: z.string().min(1, { message: "Hobi wajib diisi" }),
+    sumber_pembiayaan: z
+      .string()
+      .min(1, { message: "Sumber pembiayaan wajib diisi" }),
+    nomor_kip: z.string().min(1, { message: "Nomor KIP wajib diisi" }),
+    kebutuhan_khusus: z
+      .string()
+      .min(1, { message: "Kebutuhan khusus wajib diisi" }),
+    kebutuhan_disabilitas: z
+      .string()
+      .min(1, { message: "Kebutuhan disabilitas wajib diisi" }),
+    nomor_kk: z.string().min(1, { message: "Nomor KK wajib diisi" }),
+    nama_kepala_keluarga: z
+      .string()
+      .min(1, { message: "Nama kepala keluarga wajib diisi" }),
+    kk_image_file: z.instanceof(File).nullable(),
+    kip_image_file: z.instanceof(File).nullable(),
+    profile_image_file: z.instanceof(File).nullable(),
+    profile_image_url: z.string().nullable(),
+    kk_image_url: z.string().nullable(),
+    kip_image_url: z.string().nullable(),
+  })
+  .refine(
+    (data) =>
+      data.has_no_hp ||
+      (!data.has_no_hp && data.nomor_hp && data.nomor_hp.trim() !== ""),
+    {
+      message:
+        "Nomor HP wajib diisi jika tidak memilih opsi tidak memiliki nomor HP",
+      path: ["nomor_hp"],
+    }
+  );
+
+export type SantriData = z.infer<typeof SantriDataSchema>;
+
+/* ==================== HOOK: useSantriForm ==================== */
 
 export const useSantriForm = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasData, setHasData] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState("");
-  const [processingProgress, setProcessingProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [processingStep, setProcessingStep] = useState<string>("");
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
   const [santriData, setSantriData] = useState<SantriData>({
     nama_lengkap: "",
     nik: "",
@@ -67,7 +96,9 @@ export const useSantriForm = () => {
     kip_image_url: null,
   });
 
-  // Ambil data santri dari Supabase (jika ada)
+  /* -------------------- FETCH DATA -------------------- */
+
+  // Fetch data santri berdasarkan user_id
   useEffect(() => {
     const fetchSantriData = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -86,7 +117,7 @@ export const useSantriForm = () => {
             ? new Date(santri.tanggal_lahir)
             : null,
         };
-        setSantriData((prevData) => ({ ...prevData, ...updatedSantri }));
+        setSantriData((prev) => ({ ...prev, ...updatedSantri }));
         setHasData(true);
       }
     };
@@ -94,12 +125,15 @@ export const useSantriForm = () => {
     fetchSantriData();
   }, []);
 
-  // Hitung progress pengisian formulir
+  /* -------------------- PROGRESS CALCULATION -------------------- */
+
   useEffect(() => {
-    const calculateProgress = () => {
+    const calculateProgress = (): number => {
       const requiredFields = [
+        // Cek gambar profil: file atau URL
         santriData.profile_image_file || santriData.profile_image_url,
         santriData.kk_image_file || santriData.kk_image_url,
+        // Field teks
         santriData.nama_lengkap,
         santriData.nik,
         santriData.tempat_lahir,
@@ -116,33 +150,62 @@ export const useSantriForm = () => {
         santriData.kebutuhan_disabilitas,
         santriData.nomor_kk,
         santriData.nama_kepala_keluarga,
+        // Nomor HP harus diperiksa jika has_no_hp false
         !santriData.has_no_hp ? santriData.nomor_hp : true,
       ];
-      const filled = requiredFields.filter(Boolean).length;
-      const total = requiredFields.length;
-      return (filled / total) * 100;
+
+      const filledCount = requiredFields.filter(Boolean).length;
+      return (filledCount / requiredFields.length) * 100;
     };
 
     setProgress(calculateProgress());
   }, [santriData]);
 
+  /* -------------------- VALIDATION FUNCTION -------------------- */
+
+  const validateSantriData = (): boolean => {
+    const parsed = SantriDataSchema.safeParse(santriData);
+    if (!parsed.success) {
+      console.error("Validation errors:", parsed.error.format());
+      toast.error("Data santri tidak valid. Periksa kembali isian Anda.");
+      return false;
+    }
+    return true;
+  };
+
+  /* -------------------- HANDLER FUNCTIONS -------------------- */
+
+  // Handle perubahan input untuk santri
+  const handleInputChange = (
+    field: string,
+    value: string | number | boolean | Date | null
+  ) => {
+    setSantriData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  /* -------------------- SUBMIT & UPDATE HANDLERS -------------------- */
+
+  // Handle submit data baru
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setIsProcessing(true);
     setProcessingStep("Validasi data");
     setProcessingProgress(10);
 
-    if (!santriData.has_no_hp && !santriData.nomor_hp.trim()) {
-      alert(
-        "Harap pilih salah satu: masukkan nomor HP atau centang 'Tidak memiliki nomor HP'"
-      );
+    // Validasi data menggunakan Zod
+    if (!validateSantriData()) {
+      setIsProcessing(false);
       return;
     }
+
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) {
         toast.error("Anda harus login terlebih dahulu.");
+        setIsProcessing(false);
         return;
       }
 
@@ -182,6 +245,7 @@ export const useSantriForm = () => {
 
       if (error || !data || data.length === 0) {
         toast.error("Gagal menyimpan data santri.");
+        setIsProcessing(false);
         return;
       }
 
@@ -250,15 +314,26 @@ export const useSantriForm = () => {
     }
   };
 
-  // Fungsi untuk memperbarui data santri yang sudah ada
+  // Handle update data yang sudah ada
   const handleUpdate = async () => {
     setIsProcessing(true);
     setProcessingStep("Validasi data");
     setProcessingProgress(10);
 
+    if (!santriData.id) {
+      toast.error("Data santri tidak ditemukan untuk diperbarui.");
+      setIsProcessing(false);
+      return;
+    }
+
+    if (!validateSantriData()) {
+      setIsProcessing(false);
+      return;
+    }
+
     try {
       const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user || !santriData.id) return;
+      if (!userData.user) return;
 
       const formattedTanggalLahir = santriData.tanggal_lahir
         ? new Date(santriData.tanggal_lahir).toISOString()
@@ -340,6 +415,7 @@ export const useSantriForm = () => {
       } else {
         toast.success("Perubahan berhasil disimpan!");
         setIsEditMode(false);
+        // Refresh data setelah update
         const { data: updatedSantri } = await supabase
           .from("santri")
           .select("*")
@@ -353,7 +429,6 @@ export const useSantriForm = () => {
               : null,
           });
         }
-
         setHasData(true);
         setProcessingProgress(100);
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -378,5 +453,6 @@ export const useSantriForm = () => {
     isProcessing,
     processingStep,
     processingProgress,
+    handleInputChange,
   };
 };

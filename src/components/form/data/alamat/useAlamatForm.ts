@@ -1,51 +1,62 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
+import { z } from "zod";
 
-export interface AyahIbuAlamat {
-  tinggal_luar_negeri: boolean;
-  status_kepemilikan: string;
-  provinsi: string;
-  kabupaten: string;
-  kecamatan: string;
-  kelurahan: string;
-  kode_pos: string;
-  rt: string;
-  rw: string;
-  alamat: string;
-}
+/* ==================== ZOD SCHEMA DEFINITIONS ==================== */
 
-export interface SantriAlamat {
-  status_mukim: string;
-  status_tempat_tinggal: string;
-  jarak_lembaga: string;
-  transportasi: string;
-  waktu_tempuh: string;
-  koordinat: string;
-  provinsi: string;
-  kabupaten: string;
-  kecamatan: string;
-  kelurahan: string;
-  kode_pos: string;
-  rt: string;
-  rw: string;
-  alamat: string;
-}
+const AyahIbuAlamatSchema = z.object({
+  tinggal_luar_negeri: z.boolean(),
+  status_kepemilikan: z
+    .string()
+    .min(1, { message: "Status kepemilikan wajib diisi" }),
+  provinsi: z.string().min(1, { message: "Provinsi wajib diisi" }),
+  kabupaten: z.string().min(1, { message: "Kabupaten wajib diisi" }),
+  kecamatan: z.string().min(1, { message: "Kecamatan wajib diisi" }),
+  kelurahan: z.string().min(1, { message: "Kelurahan wajib diisi" }),
+  kode_pos: z.string().min(1, { message: "Kode pos wajib diisi" }),
+  rt: z.string().min(1, { message: "RT wajib diisi" }),
+  rw: z.string().min(1, { message: "RW wajib diisi" }),
+  alamat: z.string().min(1, { message: "Alamat wajib diisi" }),
+});
 
-export interface AlamatData {
-  ayah: AyahIbuAlamat;
-  ibu: AyahIbuAlamat;
-  santri: SantriAlamat;
-}
+const SantriAlamatSchema = z.object({
+  status_mukim: z.string().min(1, { message: "Status mukim wajib diisi" }),
+  status_tempat_tinggal: z
+    .string()
+    .min(1, { message: "Status tempat tinggal wajib diisi" }),
+  jarak_lembaga: z.string().min(1, { message: "Jarak lembaga wajib diisi" }),
+  transportasi: z.string().min(1, { message: "Transportasi wajib diisi" }),
+  waktu_tempuh: z.string().min(1, { message: "Waktu tempuh wajib diisi" }),
+  provinsi: z.string().min(1, { message: "Provinsi wajib diisi" }),
+  kabupaten: z.string().min(1, { message: "Kabupaten wajib diisi" }),
+  kecamatan: z.string().min(1, { message: "Kecamatan wajib diisi" }),
+  kelurahan: z.string().min(1, { message: "Kelurahan wajib diisi" }),
+  kode_pos: z.string().min(1, { message: "Kode pos wajib diisi" }),
+  rt: z.string().min(1, { message: "RT wajib diisi" }),
+  rw: z.string().min(1, { message: "RW wajib diisi" }),
+  alamat: z.string().min(1, { message: "Alamat wajib diisi" }),
+});
+
+const AlamatDataSchema = z.object({
+  ayah: AyahIbuAlamatSchema,
+  ibu: AyahIbuAlamatSchema,
+  santri: SantriAlamatSchema,
+});
+
+export type AlamatData = z.infer<typeof AlamatDataSchema>;
+
+/* ==================== HOOK: useAlamatForm ==================== */
 
 export const useAlamatForm = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasData, setHasData] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState("");
-  const [processingProgress, setProcessingProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [processingStep, setProcessingStep] = useState<string>("");
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
   const [alamatData, setAlamatData] = useState<AlamatData>({
     ayah: {
       tinggal_luar_negeri: false,
@@ -77,7 +88,6 @@ export const useAlamatForm = () => {
       jarak_lembaga: "Kurang dari 5 km",
       transportasi: "",
       waktu_tempuh: "",
-      koordinat: "",
       provinsi: "",
       kabupaten: "",
       kecamatan: "",
@@ -90,6 +100,7 @@ export const useAlamatForm = () => {
   });
   const [santriId, setSantriId] = useState<number | null>(null);
 
+  // Ambil ID santri dari supabase
   useEffect(() => {
     const fetchSantriId = async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -109,6 +120,7 @@ export const useAlamatForm = () => {
     fetchSantriId();
   }, []);
 
+  // Ambil data alamat dari supabase
   useEffect(() => {
     const fetchAlamatData = async () => {
       if (!santriId) return;
@@ -123,44 +135,43 @@ export const useAlamatForm = () => {
       } else if (alamat) {
         setAlamatData({
           ayah: {
-            tinggal_luar_negeri: alamat.ayah_tinggal_luar_negeri || false,
-            status_kepemilikan: alamat.ayah_status_kepemilikan || "",
-            provinsi: alamat.ayah_provinsi || "",
-            kabupaten: alamat.ayah_kabupaten || "",
-            kecamatan: alamat.ayah_kecamatan || "",
-            kelurahan: alamat.ayah_kelurahan || "",
-            kode_pos: alamat.ayah_kode_pos || "",
-            rt: alamat.ayah_rt || "",
-            rw: alamat.ayah_rw || "",
-            alamat: alamat.ayah_alamat || "",
+            tinggal_luar_negeri: alamat.ayah_tinggal_luar_negeri ?? false,
+            status_kepemilikan: alamat.ayah_status_kepemilikan ?? "",
+            provinsi: alamat.ayah_provinsi ?? "",
+            kabupaten: alamat.ayah_kabupaten ?? "",
+            kecamatan: alamat.ayah_kecamatan ?? "",
+            kelurahan: alamat.ayah_kelurahan ?? "",
+            kode_pos: alamat.ayah_kode_pos ?? "",
+            rt: alamat.ayah_rt ?? "",
+            rw: alamat.ayah_rw ?? "",
+            alamat: alamat.ayah_alamat ?? "",
           },
           ibu: {
-            tinggal_luar_negeri: alamat.ibu_tinggal_luar_negeri || false,
-            status_kepemilikan: alamat.ibu_status_kepemilikan || "",
-            provinsi: alamat.ibu_provinsi || "",
-            kabupaten: alamat.ibu_kabupaten || "",
-            kecamatan: alamat.ibu_kecamatan || "",
-            kelurahan: alamat.ibu_kelurahan || "",
-            kode_pos: alamat.ibu_kode_pos || "",
-            rt: alamat.ibu_rt || "",
-            rw: alamat.ibu_rw || "",
-            alamat: alamat.ibu_alamat || "",
+            tinggal_luar_negeri: alamat.ibu_tinggal_luar_negeri ?? false,
+            status_kepemilikan: alamat.ibu_status_kepemilikan ?? "",
+            provinsi: alamat.ibu_provinsi ?? "",
+            kabupaten: alamat.ibu_kabupaten ?? "",
+            kecamatan: alamat.ibu_kecamatan ?? "",
+            kelurahan: alamat.ibu_kelurahan ?? "",
+            kode_pos: alamat.ibu_kode_pos ?? "",
+            rt: alamat.ibu_rt ?? "",
+            rw: alamat.ibu_rw ?? "",
+            alamat: alamat.ibu_alamat ?? "",
           },
           santri: {
-            status_mukim: alamat.santri_status_mukim || "",
-            status_tempat_tinggal: alamat.santri_status_tempat_tinggal || "",
-            jarak_lembaga: alamat.santri_jarak_lembaga || "",
-            transportasi: alamat.santri_transportasi || "",
-            waktu_tempuh: alamat.santri_waktu_tempuh || "",
-            koordinat: alamat.santri_koordinat || "",
-            provinsi: alamat.santri_provinsi || "",
-            kabupaten: alamat.santri_kabupaten || "",
-            kecamatan: alamat.santri_kecamatan || "",
-            kelurahan: alamat.santri_kelurahan || "",
-            kode_pos: alamat.santri_kode_pos || "",
-            rt: alamat.santri_rt || "",
-            rw: alamat.santri_rw || "",
-            alamat: alamat.santri_alamat || "",
+            status_mukim: alamat.santri_status_mukim ?? "",
+            status_tempat_tinggal: alamat.santri_status_tempat_tinggal ?? "",
+            jarak_lembaga: alamat.santri_jarak_lembaga ?? "",
+            transportasi: alamat.santri_transportasi ?? "",
+            waktu_tempuh: alamat.santri_waktu_tempuh ?? "",
+            provinsi: alamat.santri_provinsi ?? "",
+            kabupaten: alamat.santri_kabupaten ?? "",
+            kecamatan: alamat.santri_kecamatan ?? "",
+            kelurahan: alamat.santri_kelurahan ?? "",
+            kode_pos: alamat.santri_kode_pos ?? "",
+            rt: alamat.santri_rt ?? "",
+            rw: alamat.santri_rw ?? "",
+            alamat: alamat.santri_alamat ?? "",
           },
         });
         setHasData(true);
@@ -171,6 +182,7 @@ export const useAlamatForm = () => {
     fetchAlamatData();
   }, [santriId]);
 
+  // Hitung progress berdasarkan jumlah field yang terisi
   useEffect(() => {
     const calculateProgress = (): number => {
       const ayahFields = [
@@ -185,27 +197,26 @@ export const useAlamatForm = () => {
         alamatData.ayah.rw,
         alamatData.ayah.alamat,
       ];
-      const ibuFields = !alamatData.ibu.tinggal_luar_negeri
-        ? [
-            alamatData.ibu.status_kepemilikan,
-            alamatData.ibu.provinsi,
-            alamatData.ibu.kabupaten,
-            alamatData.ibu.kecamatan,
-            alamatData.ibu.kelurahan,
-            alamatData.ibu.kode_pos,
-            alamatData.ibu.rt,
-            alamatData.ibu.rw,
-            alamatData.ibu.alamat,
-          ]
-        : [];
-      // Field wajib untuk santri
+      const ibuFields =
+        alamatData.ibu.tinggal_luar_negeri === false
+          ? [
+              alamatData.ibu.status_kepemilikan,
+              alamatData.ibu.provinsi,
+              alamatData.ibu.kabupaten,
+              alamatData.ibu.kecamatan,
+              alamatData.ibu.kelurahan,
+              alamatData.ibu.kode_pos,
+              alamatData.ibu.rt,
+              alamatData.ibu.rw,
+              alamatData.ibu.alamat,
+            ]
+          : [];
       const santriFields = [
         alamatData.santri.status_mukim,
         alamatData.santri.status_tempat_tinggal,
         alamatData.santri.jarak_lembaga,
         alamatData.santri.transportasi,
         alamatData.santri.waktu_tempuh,
-        alamatData.santri.koordinat,
         alamatData.santri.provinsi,
         alamatData.santri.kabupaten,
         alamatData.santri.kecamatan,
@@ -224,6 +235,8 @@ export const useAlamatForm = () => {
 
     setProgress(calculateProgress());
   }, [alamatData]);
+
+  /* ==================== HANDLER FUNCTIONS ==================== */
 
   const handleInputChange = (
     field: string,
@@ -278,6 +291,18 @@ export const useAlamatForm = () => {
     }
   };
 
+  // Fungsi validasi menggunakan Zod
+  const validateAlamatData = (): boolean => {
+    const parsed = AlamatDataSchema.safeParse(alamatData);
+    if (!parsed.success) {
+      console.error("Validation errors:", parsed.error.format());
+      toast.error("Data alamat tidak valid. Periksa kembali isian Anda.");
+      return false;
+    }
+    return true;
+  };
+
+  // Fungsi untuk submit data baru
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setIsProcessing(true);
@@ -286,8 +311,15 @@ export const useAlamatForm = () => {
 
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
+      setIsProcessing(false);
       return;
     }
+
+    if (!validateAlamatData()) {
+      setIsProcessing(false);
+      return;
+    }
+
     try {
       setProcessingStep("Menyimpan data utama");
       setProcessingProgress(50);
@@ -319,7 +351,6 @@ export const useAlamatForm = () => {
         santri_jarak_lembaga: alamatData.santri.jarak_lembaga,
         santri_transportasi: alamatData.santri.transportasi,
         santri_waktu_tempuh: alamatData.santri.waktu_tempuh,
-        santri_koordinat: alamatData.santri.koordinat,
         santri_provinsi: alamatData.santri.provinsi,
         santri_kabupaten: alamatData.santri.kabupaten,
         santri_kecamatan: alamatData.santri.kecamatan,
@@ -345,6 +376,7 @@ export const useAlamatForm = () => {
     }
   };
 
+  // Fungsi untuk update data yang sudah ada
   const handleUpdate = async (): Promise<void> => {
     setIsProcessing(true);
     setProcessingStep("Validasi data");
@@ -352,8 +384,15 @@ export const useAlamatForm = () => {
 
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
+      setIsProcessing(false);
       return;
     }
+
+    if (!validateAlamatData()) {
+      setIsProcessing(false);
+      return;
+    }
+
     try {
       setProcessingStep("Menyimpan data utama");
       setProcessingProgress(50);
@@ -385,7 +424,6 @@ export const useAlamatForm = () => {
           santri_jarak_lembaga: alamatData.santri.jarak_lembaga,
           santri_transportasi: alamatData.santri.transportasi,
           santri_waktu_tempuh: alamatData.santri.waktu_tempuh,
-          santri_koordinat: alamatData.santri.koordinat,
           santri_provinsi: alamatData.santri.provinsi,
           santri_kabupaten: alamatData.santri.kabupaten,
           santri_kecamatan: alamatData.santri.kecamatan,

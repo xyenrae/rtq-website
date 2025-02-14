@@ -527,19 +527,7 @@ export default function AlamatFormFields({
               <option value="Lebih dari 60 menit">Lebih dari 60 menit</option>
             </select>
           </div>
-          <div>
-            <label className="block">Koordinat</label>
-            <input
-              type="text"
-              disabled={hasData ? !isEditMode : false}
-              placeholder="Masukkan koordinat"
-              value={alamatData.santri.koordinat}
-              onChange={(e) =>
-                handleInputChange("koordinat", e.target.value, "santri")
-              }
-              className="w-full"
-            />
-          </div>
+
           <div>
             <label className="block">Provinsi</label>
             <input

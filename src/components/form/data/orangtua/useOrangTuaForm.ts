@@ -1,41 +1,72 @@
-// src/components/form/data/orangtua/useOrangTuaForm.ts
 "use client";
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
+import { z } from "zod";
 
-export interface AyahIbu {
-  nama: string;
-  nik: string;
-  kewarganegaraan: string;
-  tempat_lahir: string;
-  tanggal_lahir: Date | null;
-  status: string;
-  pendidikan_terakhir: string;
-  penghasilan: string;
-  pekerjaan: string;
-  nomor_hp: string;
-  has_no_hp: boolean;
-}
+/* ==================== ZOD SCHEMA DEFINITIONS ==================== */
 
-export interface Wali {
-  sama_dengan_ayah: boolean;
-  kartu_keluarga_sama: boolean;
-}
+// Schema untuk data ayah/ibu
+const AyahIbuSchema = z
+  .object({
+    nama: z.string().min(1, { message: "Nama wajib diisi" }),
+    nik: z.string().min(1, { message: "NIK wajib diisi" }),
+    kewarganegaraan: z
+      .string()
+      .min(1, { message: "Kewarganegaraan wajib diisi" }),
+    tempat_lahir: z.string().min(1, { message: "Tempat lahir wajib diisi" }),
+    // Menggunakan preprocess untuk mengubah input menjadi Date jika memungkinkan
+    tanggal_lahir: z.preprocess((arg) => {
+      if (typeof arg === "string" || arg instanceof Date) {
+        return new Date(arg);
+      }
+      return null;
+    }, z.date().nullable()),
+    status: z.string().min(1, { message: "Status wajib diisi" }),
+    pendidikan_terakhir: z
+      .string()
+      .min(1, { message: "Pendidikan terakhir wajib diisi" }),
+    penghasilan: z.string().min(1, { message: "Penghasilan wajib diisi" }),
+    pekerjaan: z.string().min(1, { message: "Pekerjaan wajib diisi" }),
+    nomor_hp: z.string().optional(),
+    has_no_hp: z.boolean(),
+  })
+  .refine(
+    (data) =>
+      data.has_no_hp ||
+      (!data.has_no_hp && data.nomor_hp && data.nomor_hp.trim() !== ""),
+    {
+      message:
+        "Nomor HP wajib diisi jika tidak memilih opsi tidak memiliki nomor HP",
+      path: ["nomor_hp"],
+    }
+  );
 
-export interface OrangTuaData {
-  ayah: AyahIbu;
-  ibu: AyahIbu;
-  wali: Wali;
-}
+// Schema untuk data wali
+const WaliSchema = z.object({
+  sama_dengan_ayah: z.boolean(),
+  kartu_keluarga_sama: z.boolean(),
+});
+
+// Schema untuk keseluruhan data orang tua
+const OrangTuaDataSchema = z.object({
+  ayah: AyahIbuSchema,
+  ibu: AyahIbuSchema,
+  wali: WaliSchema,
+});
+
+export type OrangTuaData = z.infer<typeof OrangTuaDataSchema>;
+
+/* ==================== HOOK: useOrangTuaForm ==================== */
 
 export const useOrangTuaForm = () => {
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [hasData, setHasData] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [processingStep, setProcessingStep] = useState("");
-  const [processingProgress, setProcessingProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [processingStep, setProcessingStep] = useState<string>("");
+  const [processingProgress, setProcessingProgress] = useState<number>(0);
   const [orangTuaData, setOrangTuaData] = useState<OrangTuaData>({
     ayah: {
       nama: "",
@@ -70,24 +101,23 @@ export const useOrangTuaForm = () => {
   });
   const [santriId, setSantriId] = useState<number | null>(null);
 
+  /* -------------------- FETCH DATA -------------------- */
+
   // Fetch santri_id berdasarkan user_id
   useEffect(() => {
     const fetchSantriId = async () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return;
-
       const { data, error } = await supabase
         .from("santri")
         .select("id")
         .eq("user_id", userData.user.id);
-
       if (error) {
         console.error("Error fetching santri ID:", error.message);
       } else if (data && data.length > 0) {
         setSantriId(data[0].id);
       }
     };
-
     fetchSantriId();
   }, []);
 
@@ -95,12 +125,10 @@ export const useOrangTuaForm = () => {
   useEffect(() => {
     const fetchOrangTuaData = async () => {
       if (!santriId) return;
-
       const { data, error } = await supabase
         .from("orang_tua")
         .select("*")
         .eq("santri_id", santriId);
-
       if (error) {
         console.error("Error fetching orang tua data:", error.message);
         setHasData(false);
@@ -110,12 +138,12 @@ export const useOrangTuaForm = () => {
           ayah: {
             nama: ot.ayah_nama || "",
             nik: ot.ayah_nik || "",
-            kewarganegaraan: ot.ayah_kewarganegaraan || "",
+            kewarganegaraan: ot.ayah_kewarganegaraan || "WNI",
             tempat_lahir: ot.ayah_tempat_lahir || "",
             tanggal_lahir: ot.ayah_tanggal_lahir
               ? new Date(ot.ayah_tanggal_lahir)
               : null,
-            status: ot.ayah_status || "",
+            status: ot.ayah_status || "Hidup",
             pendidikan_terakhir: ot.ayah_pendidikan_terakhir || "",
             penghasilan: ot.ayah_penghasilan || "",
             pekerjaan: ot.ayah_pekerjaan || "",
@@ -125,12 +153,12 @@ export const useOrangTuaForm = () => {
           ibu: {
             nama: ot.ibu_nama || "",
             nik: ot.ibu_nik || "",
-            kewarganegaraan: ot.ibu_kewarganegaraan || "",
+            kewarganegaraan: ot.ibu_kewarganegaraan || "WNI",
             tempat_lahir: ot.ibu_tempat_lahir || "",
             tanggal_lahir: ot.ibu_tanggal_lahir
               ? new Date(ot.ibu_tanggal_lahir)
               : null,
-            status: ot.ibu_status || "",
+            status: ot.ibu_status || "Hidup",
             pendidikan_terakhir: ot.ibu_pendidikan_terakhir || "",
             penghasilan: ot.ibu_penghasilan || "",
             pekerjaan: ot.ibu_pekerjaan || "",
@@ -147,14 +175,14 @@ export const useOrangTuaForm = () => {
         setHasData(false);
       }
     };
-
     fetchOrangTuaData();
   }, [santriId]);
 
-  // Hitung progress pengisian formulir
+  /* -------------------- PROGRESS CALCULATION -------------------- */
+
+  // Hitung progress pengisian formulir berdasarkan jumlah field yang terisi
   useEffect(() => {
     const calculateProgress = (): number => {
-      // Buat array field dari setiap input wajib
       const ayahFields = [
         orangTuaData.ayah.nama,
         orangTuaData.ayah.nik,
@@ -194,7 +222,9 @@ export const useOrangTuaForm = () => {
     setProgress(calculateProgress());
   }, [orangTuaData]);
 
-  // Handle perubahan input (untuk ayah, ibu, atau wali)
+  /* -------------------- HANDLER FUNCTIONS -------------------- */
+
+  // Handle perubahan input untuk ayah, ibu, atau wali
   const handleInputChange = (
     field: string,
     value: string | number | boolean | Date | null,
@@ -209,7 +239,7 @@ export const useOrangTuaForm = () => {
     }));
   };
 
-  // Handle perubahan checkbox
+  // Handle perubahan checkbox untuk ayah, ibu, atau wali
   const handleCheckboxChange = (
     field: string,
     checked: boolean,
@@ -224,18 +254,39 @@ export const useOrangTuaForm = () => {
     }));
   };
 
+  /* -------------------- VALIDATION FUNCTION -------------------- */
+
+  // Validasi data menggunakan Zod
+  const validateOrangTuaData = (): boolean => {
+    const result = OrangTuaDataSchema.safeParse(orangTuaData);
+    if (!result.success) {
+      console.error("Validation errors:", result.error.format());
+      toast.error("Data orang tua tidak valid. Periksa kembali isian Anda.");
+      return false;
+    }
+    return true;
+  };
+
+  /* -------------------- SUBMIT & UPDATE HANDLERS -------------------- */
+
   // Handle submit data baru
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     setIsProcessing(true);
     setProcessingStep("Validasi data");
     setProcessingProgress(10);
 
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
+      setIsProcessing(false);
       return;
     }
+
+    if (!validateOrangTuaData()) {
+      setIsProcessing(false);
+      return;
+    }
+
     try {
       setProcessingStep("Menyimpan data utama");
       setProcessingProgress(50);
@@ -271,6 +322,7 @@ export const useOrangTuaForm = () => {
         wali_sama_dengan_ayah: orangTuaData.wali.sama_dengan_ayah,
         wali_kartu_keluarga_sama: orangTuaData.wali.kartu_keluarga_sama,
       });
+
       if (error) {
         console.error("Error inserting data:", error.message);
         toast.error("Gagal menyimpan data orang tua.");
@@ -288,7 +340,7 @@ export const useOrangTuaForm = () => {
     }
   };
 
-  // Handle update data
+  // Handle update data yang sudah ada
   const handleUpdate = async () => {
     setIsProcessing(true);
     setProcessingStep("Validasi data");
@@ -296,8 +348,15 @@ export const useOrangTuaForm = () => {
 
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
+      setIsProcessing(false);
       return;
     }
+
+    if (!validateOrangTuaData()) {
+      setIsProcessing(false);
+      return;
+    }
+
     try {
       setProcessingStep("Menyimpan data utama");
       setProcessingProgress(50);
@@ -335,6 +394,7 @@ export const useOrangTuaForm = () => {
           wali_kartu_keluarga_sama: orangTuaData.wali.kartu_keluarga_sama,
         })
         .eq("santri_id", santriId);
+
       if (error) {
         toast.error("Gagal menyimpan perubahan.");
       } else {

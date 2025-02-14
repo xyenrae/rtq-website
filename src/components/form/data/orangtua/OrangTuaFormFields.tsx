@@ -223,7 +223,7 @@ export default function OrangTuaFormFields({
           <div>
             <label>Nomor HP Ayah</label>
             <input
-              type="text"
+              type="number"
               required={!orangTuaData.ayah.has_no_hp}
               disabled={
                 orangTuaData.ayah.has_no_hp || (hasData ? !isEditMode : false)
@@ -379,7 +379,7 @@ export default function OrangTuaFormFields({
           <div>
             <label>Nomor HP Ibu</label>
             <input
-              type="text"
+              type="number"
               required={!orangTuaData.ibu.has_no_hp}
               disabled={
                 orangTuaData.ibu.has_no_hp || (hasData ? !isEditMode : false)
