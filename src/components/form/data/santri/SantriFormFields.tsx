@@ -142,9 +142,7 @@ export default function SantriFormFields({
           </div>
           <div className="col-span-6">
             <div>
-              <label>
-                Nama Lengkap <span className="text-red-500">*</span>
-              </label>
+              <label>Nama Lengkap*</label>
               <input
                 type="text"
                 required
@@ -154,15 +152,6 @@ export default function SantriFormFields({
                 onChange={(e) =>
                   setSantriData({ ...santriData, nama_lengkap: e.target.value })
                 }
-                className={`
-                  w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-primary-500
-                  ${
-                    hasData && !isEditMode
-                      ? "bg-gray-100 border-gray-200 cursor-not-allowed"
-                      : "bg-white border-gray-300 focus:border-primary-500"
-                  }
-                  transition-colors duration-200
-                `}
               />
             </div>
             <div className="mt-6">
