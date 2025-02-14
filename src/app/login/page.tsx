@@ -26,8 +26,8 @@ export default function Login() {
           password,
         });
       if (signInError) throw signInError;
-      const userRole = data.user?.user_metadata?.role;
-      router.push(userRole === "admin" ? "/admin/dashboard" : "/");
+      const userRole = data.user?.app_metadata?.role;
+      router.push(userRole === "admin" ? "/admin" : "/");
       toast.success("Selamat datang kembali!");
     } catch (err: unknown) {
       let message = "Login gagal. Periksa kredensial Anda.";

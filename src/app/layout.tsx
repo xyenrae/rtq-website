@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import Navigation from "@/components/layout/Navigation";
-import Footer from "@/components/layout/Footer";
-import Banner from "@/components/layout/Banner";
 import { Fredoka, Noto_Sans } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "@/context/UserContext";
+import ConditionalLayout from "@/components/layout/ConditionalLayout";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -47,10 +45,7 @@ export default function RootLayout({
           theme="light"
         />
         <UserProvider>
-          <Banner />
-          <Navigation />
-          <main className="min-h-[calc(100vh-160px)]">{children}</main>
-          <Footer />
+          <ConditionalLayout>{children}</ConditionalLayout>
         </UserProvider>
       </body>
     </html>
