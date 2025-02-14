@@ -235,16 +235,15 @@ export default function GaleriPage() {
         </div>
       </section>
 
-      {/* Gallery Grid dengan Masonry Layout */}
       <section id="gallery-grid" className="container mx-auto px-4 py-16">
         <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
           Momen Terbaru
         </h2>
-        <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {sortedImages.map(({ publicId, categoryTitle }, index) => (
             <div
               key={publicId}
-              className="relative group break-inside-avoid cursor-pointer transform hover:-translate-y-2 transition-all duration-300"
+              className="relative group cursor-pointer transform hover:scale-105 transition-all duration-300"
               onClick={() => {
                 setIsImageLoading(true);
                 setSelectedPublicId(publicId);
@@ -260,7 +259,7 @@ export default function GaleriPage() {
                   alt={`Kegiatan ${index + 1}`}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 640px) 100vw, 50vw, 33vw"
+                  sizes="(max-width: 640px) 100vw, 50vw, 33vw, 25vw"
                   priority={index < 8}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -275,7 +274,7 @@ export default function GaleriPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20 mt-16">
+      <section className="bg-green-500 text-white py-20 mt-16">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-4xl font-bold mb-6 animate-pulse">
@@ -286,7 +285,7 @@ export default function GaleriPage() {
               sejarah komunitas kami!
             </p>
             <div className="flex justify-center gap-6">
-              <button className="bg-white text-blue-600 px-8 py-3 rounded-full hover:bg-gray-100 transition-colors font-semibold shadow-lg transform hover:scale-105">
+              <button className="bg-white text-green-600 px-8 py-3 rounded-full hover:bg-gray-100 transition-colors font-semibold shadow-lg transform hover:scale-105">
                 Unggah Foto
               </button>
               <button className="border-2 border-white px-8 py-3 rounded-full hover:bg-white/10 transition-colors font-semibold shadow-lg transform hover:scale-105">
