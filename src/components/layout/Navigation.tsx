@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@/context/UserContext";
+import LogoutModal from "@/components/ui/LogoutModal";
 
 const formatName = (name: string): string =>
   name
@@ -23,6 +24,7 @@ export default function Navigation() {
     : null;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -64,209 +66,229 @@ export default function Navigation() {
   }, []);
 
   return (
-    <nav
-      className={`bg-white sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled ? "py-2 shadow-md" : "py-3"
-      }`}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div
-              className={`relative transition-all duration-300 ${
-                isScrolled
-                  ? "w-16 h-16 sm:w-20 sm:h-20"
-                  : "w-20 h-20 sm:w-24 sm:h-24"
-              }`}
-            >
-              <Image
-                src="/images/logo-rtq.png"
-                alt="Logo RTQ"
-                fill
-                sizes="(max-width: 768px) 80px, 100px"
-                className="object-contain"
-              />
-            </div>
-            <div className="flex flex-col">
-              <span
-                className={`font-bold text-green-500 transition-all duration-300 ${
-                  isScrolled ? "text-2xl md:text-3xl" : "text-3xl md:text-4xl"
+    <>
+      {/* Modal Konfirmasi Logout */}
+      <LogoutModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+      />
+      <nav
+        className={`bg-white sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled ? "py-2 shadow-md" : "py-3"
+        }`}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-2">
+              <div
+                className={`relative transition-all duration-300 ${
+                  isScrolled
+                    ? "w-16 h-16 sm:w-20 sm:h-20"
+                    : "w-20 h-20 sm:w-24 sm:h-24"
                 }`}
               >
-                Al-Hikmah
-              </span>
-              <span
-                className={`text-green-500 transition-all duration-300 ${
-                  isScrolled ? "text-xs md:text-sm" : "text-sm md:text-base"
-                }`}
-              >
-                Cinta Al-Qur&#39;an, Cinta Ilmu
-              </span>
-            </div>
-          </Link>
-
-          <div className="hidden lg:flex items-center gap-8">
-            <div className="flex gap-6">
-              <NavLink href="/" label="Beranda" isScrolled={isScrolled} />
-              <NavLink href="/berita" label="Berita" isScrolled={isScrolled} />
-              <NavLink
-                href="/pendaftaran"
-                label={userFullName ? "Data Diri" : "Pendaftaran"}
-                isScrolled={isScrolled}
-              />
-              <NavLink href="/galeri" label="Galeri" isScrolled={isScrolled} />
-              <NavLink href="/kontak" label="Kontak" isScrolled={isScrolled} />
-            </div>
-            {userFullName ? (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full hover:bg-green-100 transition-colors duration-300"
-                >
-                  <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-medium">
-                      {userFullName.charAt(0)}
-                    </span>
-                  </div>
-                  <span className="text-green-700 font-medium">
-                    {userFullName}
-                  </span>
-                </button>
-                <AnimatePresence>
-                  {isDropdownOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden"
-                    >
-                      <button
-                        onClick={handleLogout}
-                        className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 transition-colors duration-300"
-                      >
-                        <Image
-                          src="/images/logout.svg"
-                          alt=""
-                          width={20}
-                          height={20}
-                          className="mr-2"
-                        />
-                        <span>Logout</span>
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                className="bg-yellow-400 text-white px-6 py-2 rounded-full hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
-              >
-                Login Sekarang
-              </Link>
-            )}
-          </div>
-
-          <button
-            ref={mobileMenuButtonRef}
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <svg
-              className="w-6 h-6 text-gray-600"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              {isMobileMenuOpen ? (
-                <path d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
-        </div>
-
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              ref={mobileMenuRef}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden mt-4"
-            >
-              <div className="flex flex-col gap-4 bg-white rounded-lg p-4">
-                <MobileNavLink
-                  href="/"
-                  label="Beranda"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                <Image
+                  src="/images/logo-rtq.png"
+                  alt="Logo RTQ"
+                  fill
+                  sizes="(max-width: 768px) 80px, 100px"
+                  className="object-contain"
                 />
-                <MobileNavLink
+              </div>
+              <div className="flex flex-col">
+                <span
+                  className={`font-bold text-green-500 transition-all duration-300 ${
+                    isScrolled ? "text-2xl md:text-3xl" : "text-3xl md:text-4xl"
+                  }`}
+                >
+                  Al-Hikmah
+                </span>
+                <span
+                  className={`text-green-500 transition-all duration-300 ${
+                    isScrolled ? "text-xs md:text-sm" : "text-sm md:text-base"
+                  }`}
+                >
+                  Cinta Al-Qur&apos;an, Cinta Ilmu
+                </span>
+              </div>
+            </Link>
+
+            <div className="hidden lg:flex items-center gap-8">
+              <div className="flex gap-6">
+                <NavLink href="/" label="Beranda" isScrolled={isScrolled} />
+                <NavLink
                   href="/berita"
                   label="Berita"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  isScrolled={isScrolled}
                 />
-                <MobileNavLink
+                <NavLink
                   href="/pendaftaran"
                   label={userFullName ? "Data Diri" : "Pendaftaran"}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  isScrolled={isScrolled}
                 />
-                <MobileNavLink
+                <NavLink
                   href="/galeri"
                   label="Galeri"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  isScrolled={isScrolled}
                 />
-                <MobileNavLink
+                <NavLink
                   href="/kontak"
                   label="Kontak"
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  isScrolled={isScrolled}
                 />
-                {userFullName ? (
-                  <div className="border-t pt-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                          <span className="text-white font-medium">
-                            {userFullName.charAt(0)}
+              </div>
+              {userFullName ? (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full hover:bg-green-100 transition-colors duration-300"
+                  >
+                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                      <span className="text-white font-medium">
+                        {userFullName.charAt(0)}
+                      </span>
+                    </div>
+                    <span className="text-green-700 font-medium">
+                      {userFullName}
+                    </span>
+                  </button>
+                  <AnimatePresence>
+                    {isDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden"
+                      >
+                        <button
+                          onClick={() => setIsLogoutModalOpen(true)}
+                          className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 transition-colors duration-300"
+                        >
+                          <Image
+                            src="/images/logout.svg"
+                            alt="Logout"
+                            width={20}
+                            height={20}
+                            className="mr-2"
+                          />
+                          <span>Logout</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="bg-yellow-400 text-white px-6 py-2 rounded-full hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+                >
+                  Login Sekarang
+                </Link>
+              )}
+            </div>
+
+            <button
+              ref={mobileMenuButtonRef}
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            >
+              <svg
+                className="w-6 h-6 text-gray-600"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {isMobileMenuOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <motion.div
+                ref={mobileMenuRef}
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="lg:hidden mt-4"
+              >
+                <div className="flex flex-col gap-4 bg-white rounded-lg p-4">
+                  <MobileNavLink
+                    href="/"
+                    label="Beranda"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <MobileNavLink
+                    href="/berita"
+                    label="Berita"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <MobileNavLink
+                    href="/pendaftaran"
+                    label={userFullName ? "Data Diri" : "Pendaftaran"}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <MobileNavLink
+                    href="/galeri"
+                    label="Galeri"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  <MobileNavLink
+                    href="/kontak"
+                    label="Kontak"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  />
+                  {userFullName ? (
+                    <div className="border-t pt-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                            <span className="text-white font-medium">
+                              {userFullName.charAt(0)}
+                            </span>
+                          </div>
+                          <span className="text-green-700 font-medium">
+                            {userFullName}
                           </span>
                         </div>
-                        <span className="text-green-700 font-medium">
-                          {userFullName}
-                        </span>
+                        <button
+                          onClick={() => setIsLogoutModalOpen(true)}
+                          className="text-red-600 hover:text-red-700 flex items-center gap-1"
+                        >
+                          <Image
+                            src="/images/logout.svg"
+                            alt="Logout"
+                            width={20}
+                            height={20}
+                          />
+                          <span>Logout</span>
+                        </button>
                       </div>
-                      <button
-                        onClick={handleLogout}
-                        className="text-red-600 hover:text-red-700 flex items-center gap-1"
-                      >
-                        <Image
-                          src="/images/logout.svg"
-                          alt=""
-                          width={20}
-                          height={20}
-                        />
-                        Logout
-                      </button>
                     </div>
-                  </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="bg-yellow-400 text-white text-center py-3 rounded-full hover:bg-yellow-500 transition-all duration-300"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Login Sekarang
-                  </Link>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </nav>
+                  ) : (
+                    <Link
+                      href="/login"
+                      className="bg-yellow-400 text-white text-center py-3 rounded-full hover:bg-yellow-500 transition-all duration-300"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      Login Sekarang
+                    </Link>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </nav>
+    </>
   );
 }
 

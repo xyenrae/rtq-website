@@ -17,6 +17,7 @@ import { ChevronDown } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
+import LogoutModal from "@/components/ui/LogoutModal";
 
 interface NavigationItem {
   name: string;
@@ -41,6 +42,7 @@ export default function AdminLayout({
   const [openWebsiteSubMenu, setOpenWebsiteSubMenu] = useState(
     pathname.startsWith("/admin/website")
   );
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   // Update submenu pendaftaran saat path berubah
   useEffect(() => {
@@ -86,13 +88,18 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // Jika menggunakan context user, panggil setUser(null) di sini.
     toast.success("Anda telah berhasil logout.");
     router.push("/");
   };
 
   return (
     <div className="min-h-screen bg-gray-200 flex">
+      {/* Modal Konfirmasi Logout */}
+      <LogoutModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+      />
       {/* Sidebar */}
       <motion.aside
         className={`flex flex-col justify-between fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform ${
@@ -191,10 +198,10 @@ export default function AdminLayout({
             ))}
           </nav>
         </div>
-        {/* Logout Button di bagian paling bawah */}
+        {/* Tombol Logout di bagian paling bawah */}
         <div className="p-4 border-t border-gray-200">
           <button
-            onClick={handleLogout}
+            onClick={() => setIsLogoutModalOpen(true)}
             className="flex w-full items-center p-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-100"
           >
             <FiLogOut className="mr-3 text-xl" />
