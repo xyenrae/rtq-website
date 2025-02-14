@@ -29,7 +29,6 @@ const SantriDataSchema = z
     sumber_pembiayaan: z
       .string()
       .min(1, { message: "Sumber pembiayaan wajib diisi" }),
-    nomor_kip: z.string().min(1, { message: "Nomor KIP wajib diisi" }),
     kebutuhan_khusus: z
       .string()
       .min(1, { message: "Kebutuhan khusus wajib diisi" }),
@@ -41,11 +40,9 @@ const SantriDataSchema = z
       .string()
       .min(1, { message: "Nama kepala keluarga wajib diisi" }),
     kk_image_file: z.instanceof(File).nullable(),
-    kip_image_file: z.instanceof(File).nullable(),
     profile_image_file: z.instanceof(File).nullable(),
     profile_image_url: z.string().nullable(),
     kk_image_url: z.string().nullable(),
-    kip_image_url: z.string().nullable(),
   })
   .refine(
     (data) =>
@@ -83,17 +80,14 @@ export const useSantriForm = () => {
     email: "",
     hobi: "",
     sumber_pembiayaan: "Orang Tua",
-    nomor_kip: "",
     kebutuhan_khusus: "Tidak Ada",
     kebutuhan_disabilitas: "Tidak Ada",
     nomor_kk: "",
     nama_kepala_keluarga: "",
     kk_image_file: null,
-    kip_image_file: null,
     profile_image_file: null,
     profile_image_url: null,
     kk_image_url: null,
-    kip_image_url: null,
   });
 
   /* -------------------- FETCH DATA -------------------- */
@@ -145,7 +139,6 @@ export const useSantriForm = () => {
         santriData.email,
         santriData.hobi,
         santriData.sumber_pembiayaan,
-        santriData.nomor_kip,
         santriData.kebutuhan_khusus,
         santriData.kebutuhan_disabilitas,
         santriData.nomor_kk,
@@ -232,13 +225,11 @@ export const useSantriForm = () => {
           email: santriData.email,
           hobi: santriData.hobi,
           sumber_pembiayaan: santriData.sumber_pembiayaan,
-          nomor_kip: santriData.nomor_kip,
           kebutuhan_khusus: santriData.kebutuhan_khusus,
           kebutuhan_disabilitas: santriData.kebutuhan_disabilitas,
           nomor_kk: santriData.nomor_kk,
           nama_kepala_keluarga: santriData.nama_kepala_keluarga,
           kk_image_url: null,
-          kip_image_url: null,
           profile_image_url: null,
         })
         .select();
@@ -285,21 +276,7 @@ export const useSantriForm = () => {
             })
         );
       }
-      if (santriData.kip_image_file) {
-        uploadPromises.push(
-          uploadFileToCloudinary(santriData.kip_image_file)
-            .then((url) =>
-              supabase
-                .from("santri")
-                .update({ kip_image_url: url })
-                .eq("id", insertedRecordId)
-            )
-            .catch((err) => {
-              console.error(err);
-              toast.error("Terjadi kesalahan saat mengupload KIP.");
-            })
-        );
-      }
+
       await Promise.all(uploadPromises);
 
       toast.success("Data santri berhasil disimpan!");
@@ -341,7 +318,6 @@ export const useSantriForm = () => {
 
       let profileImageUrl = santriData.profile_image_url;
       let kkImageUrl = santriData.kk_image_url;
-      let kipImageUrl = santriData.kip_image_url;
 
       setProcessingStep("Mengunggah dokumen");
       setProcessingProgress(30);
@@ -363,18 +339,10 @@ export const useSantriForm = () => {
               return null;
             })
           : Promise.resolve(null),
-        santriData.kip_image_file
-          ? uploadFileToCloudinary(santriData.kip_image_file).catch((err) => {
-              console.error(err);
-              toast.error("Terjadi kesalahan saat mengupload KIP.");
-              return null;
-            })
-          : Promise.resolve(null),
       ]);
 
       if (uploads[0]) profileImageUrl = uploads[0];
       if (uploads[1]) kkImageUrl = uploads[1];
-      if (uploads[2]) kipImageUrl = uploads[2];
 
       setProcessingStep("Menyimpan data utama");
       setProcessingProgress(50);
@@ -395,13 +363,11 @@ export const useSantriForm = () => {
           email: santriData.email,
           hobi: santriData.hobi,
           sumber_pembiayaan: santriData.sumber_pembiayaan,
-          nomor_kip: santriData.nomor_kip,
           kebutuhan_khusus: santriData.kebutuhan_khusus,
           kebutuhan_disabilitas: santriData.kebutuhan_disabilitas,
           nomor_kk: santriData.nomor_kk,
           nama_kepala_keluarga: santriData.nama_kepala_keluarga,
           kk_image_url: kkImageUrl,
-          kip_image_url: kipImageUrl,
           profile_image_url: profileImageUrl,
         })
         .eq("id", santriData.id)

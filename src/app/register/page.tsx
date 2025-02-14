@@ -51,7 +51,7 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -62,8 +62,19 @@ export default function Register() {
         },
       });
       if (error) throw error;
-      toast.success("Registrasi berhasil! Silakan cek email untuk verifikasi.");
-      router.push("/login");
+
+      if (data.session) {
+        toast.success("Registrasi berhasil!");
+        router.push("/");
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+        if (signInError) throw signInError;
+        toast.success("Registrasi berhasil!");
+        router.push("/");
+      }
     } catch (error: unknown) {
       let message = "Registrasi gagal. Silakan coba lagi.";
       if (error instanceof Error) {

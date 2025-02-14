@@ -74,15 +74,11 @@ export default function SantriFormFields({
           </motion.div>
         )}
       </motion.div>
-      <p className="bg-yellow-400 text-black p-2 rounded text-sm mb-4 font-semibold">
-        Tanda * pada formulir menunjukkan bahwa kolom tersebut wajib diisi
-        sebelum Anda dapat melanjutkan ke langkah berikutnya.
-      </p>
-      <div className="space-y-6">
+      <div className="space-y-6 mt-8">
         <div className="grid grid-cols-1 sm:grid-cols-8 gap-6">
           <div className="col-span-2">
             <div className="relative group">
-              <label>Foto Santri*</label>
+              <label>Foto Santri</label>
               <label
                 className={`
                   block aspect-square w-full rounded-2xl border-4 border-dashed cursor-pointer mt-2
@@ -120,8 +116,9 @@ export default function SantriFormFields({
                 <input
                   id="avatarInput"
                   type="file"
-                  accept="image/*"
+                  accept="image/"
                   className="sr-only"
+                  required
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
                       setSantriData({
@@ -142,7 +139,7 @@ export default function SantriFormFields({
           </div>
           <div className="col-span-6">
             <div>
-              <label>Nama Lengkap*</label>
+              <label>Nama Lengkap</label>
               <input
                 type="text"
                 required
@@ -155,7 +152,7 @@ export default function SantriFormFields({
               />
             </div>
             <div className="mt-6">
-              <label>NIK*</label>
+              <label>NIK</label>
               <input
                 type="text"
                 required
@@ -168,7 +165,7 @@ export default function SantriFormFields({
               />
             </div>
             <div className="mt-6">
-              <label>Tempat Lahir*</label>
+              <label>Tempat Lahir</label>
               <input
                 type="text"
                 required
@@ -184,8 +181,9 @@ export default function SantriFormFields({
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="flex flex-col">
-            <label>Tanggal Lahir*</label>
+            <label>Tanggal Lahir</label>
             <DatePicker
+              required
               selected={santriData.tanggal_lahir}
               disabled={hasData ? !isEditMode : false}
               onChange={(date) =>
@@ -210,7 +208,7 @@ export default function SantriFormFields({
             </select>
           </div>
           <div>
-            <label>Jumlah Saudara*</label>
+            <label>Jumlah Saudara</label>
             <input
               type="number"
               required
@@ -228,7 +226,7 @@ export default function SantriFormFields({
             />
           </div>
           <div>
-            <label>Anak Ke*</label>
+            <label>Anak Ke</label>
             <input
               type="number"
               required
@@ -269,7 +267,7 @@ export default function SantriFormFields({
             </select>
           </div>
           <div className="flex flex-col items-start">
-            <label>Nomor HP*</label>
+            <label>Nomor HP</label>
             <input
               type="number"
               required={!santriData.has_no_hp}
@@ -342,18 +340,7 @@ export default function SantriFormFields({
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-          <div>
-            <label>Nomor KIP</label>
-            <input
-              type="number"
-              disabled={hasData ? !isEditMode : false}
-              placeholder="Masukkan nomor KIP"
-              value={santriData.nomor_kip ?? ""}
-              onChange={(e) =>
-                setSantriData({ ...santriData, nomor_kip: e.target.value })
-              }
-            />
-          </div>
+
           <div>
             <label>Kebutuhan Khusus</label>
             <select
@@ -403,7 +390,7 @@ export default function SantriFormFields({
             </select>
           </div>
           <div>
-            <label>Nomor KK*</label>
+            <label>Nomor KK</label>
             <input
               type="number"
               required
@@ -416,7 +403,7 @@ export default function SantriFormFields({
             />
           </div>
           <div>
-            <label>Nama Kepala Keluarga*</label>
+            <label>Nama Kepala Keluarga</label>
             <input
               type="text"
               required
@@ -434,7 +421,7 @@ export default function SantriFormFields({
 
           <div>
             <div className="relative group">
-              <p>Unggah KK*</p>
+              <p>Unggah KK</p>
               <label
                 className={`
                   block aspect-square w-1/2 rounded-2xl border-4 border-dashed cursor-pointer mt-2
@@ -472,7 +459,7 @@ export default function SantriFormFields({
                   id="kkInput"
                   type="file"
                   required
-                  accept="image/*"
+                  accept="image/"
                   className="sr-only"
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
@@ -492,65 +479,6 @@ export default function SantriFormFields({
               </p>
             )}
           </div>
-
-          {/* Unggah KIP */}
-          <div className="relative group">
-            <p>Unggah KIP</p>
-            <label
-              className={`
-                  block aspect-square w-1/2 rounded-2xl border-4 border-dashed cursor-pointer mt-2
-                  ${
-                    hasData && !isEditMode
-                      ? "cursor-not-allowed opacity-75"
-                      : "hover:border-primary-500 border-gray-200"
-                  }
-                  transition-colors duration-200 overflow-hidden
-                `}
-              htmlFor="kipInput"
-            >
-              {santriData.kip_image_url || santriData.kip_image_file ? (
-                <Image
-                  width={50}
-                  height={50}
-                  src={
-                    santriData.kip_image_file
-                      ? URL.createObjectURL(santriData.kip_image_file)
-                      : santriData.kip_image_url ?? ""
-                  }
-                  alt="KIP Preview"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-                  <FaUser className="w-12 h-12 mb-2" />
-                  <span className="text-sm font-medium">Upload Foto</span>
-                </div>
-              )}
-            </label>
-
-            {(!hasData || isEditMode) && (
-              <input
-                id="kipInput"
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) {
-                    setSantriData({
-                      ...santriData,
-                      kip_image_file: e.target.files[0],
-                    });
-                  }
-                }}
-              />
-            )}
-          </div>
-
-          {(!hasData || isEditMode) && (
-            <p className="text-sm text-gray-500 text-center w-1/2">
-              Format: JPG, PNG (Maks. 5MB)
-            </p>
-          )}
         </div>
       </div>
 

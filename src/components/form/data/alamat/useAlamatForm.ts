@@ -8,7 +8,6 @@ import { z } from "zod";
 /* ==================== ZOD SCHEMA DEFINITIONS ==================== */
 
 const AyahIbuAlamatSchema = z.object({
-  tinggal_luar_negeri: z.boolean(),
   status_kepemilikan: z
     .string()
     .min(1, { message: "Status kepemilikan wajib diisi" }),
@@ -59,7 +58,6 @@ export const useAlamatForm = () => {
   const [processingProgress, setProcessingProgress] = useState<number>(0);
   const [alamatData, setAlamatData] = useState<AlamatData>({
     ayah: {
-      tinggal_luar_negeri: false,
       status_kepemilikan: "Milik Sendiri",
       provinsi: "",
       kabupaten: "",
@@ -71,7 +69,6 @@ export const useAlamatForm = () => {
       alamat: "",
     },
     ibu: {
-      tinggal_luar_negeri: false,
       status_kepemilikan: "Milik Sendiri",
       provinsi: "",
       kabupaten: "",
@@ -135,7 +132,6 @@ export const useAlamatForm = () => {
       } else if (alamat) {
         setAlamatData({
           ayah: {
-            tinggal_luar_negeri: alamat.ayah_tinggal_luar_negeri ?? false,
             status_kepemilikan: alamat.ayah_status_kepemilikan ?? "",
             provinsi: alamat.ayah_provinsi ?? "",
             kabupaten: alamat.ayah_kabupaten ?? "",
@@ -147,7 +143,6 @@ export const useAlamatForm = () => {
             alamat: alamat.ayah_alamat ?? "",
           },
           ibu: {
-            tinggal_luar_negeri: alamat.ibu_tinggal_luar_negeri ?? false,
             status_kepemilikan: alamat.ibu_status_kepemilikan ?? "",
             provinsi: alamat.ibu_provinsi ?? "",
             kabupaten: alamat.ibu_kabupaten ?? "",
@@ -186,7 +181,6 @@ export const useAlamatForm = () => {
   useEffect(() => {
     const calculateProgress = (): number => {
       const ayahFields = [
-        alamatData.ayah.tinggal_luar_negeri !== undefined,
         alamatData.ayah.status_kepemilikan,
         alamatData.ayah.provinsi,
         alamatData.ayah.kabupaten,
@@ -197,20 +191,17 @@ export const useAlamatForm = () => {
         alamatData.ayah.rw,
         alamatData.ayah.alamat,
       ];
-      const ibuFields =
-        alamatData.ibu.tinggal_luar_negeri === false
-          ? [
-              alamatData.ibu.status_kepemilikan,
-              alamatData.ibu.provinsi,
-              alamatData.ibu.kabupaten,
-              alamatData.ibu.kecamatan,
-              alamatData.ibu.kelurahan,
-              alamatData.ibu.kode_pos,
-              alamatData.ibu.rt,
-              alamatData.ibu.rw,
-              alamatData.ibu.alamat,
-            ]
-          : [];
+      const ibuFields = [
+        alamatData.ibu.status_kepemilikan,
+        alamatData.ibu.provinsi,
+        alamatData.ibu.kabupaten,
+        alamatData.ibu.kecamatan,
+        alamatData.ibu.kelurahan,
+        alamatData.ibu.kode_pos,
+        alamatData.ibu.rt,
+        alamatData.ibu.rw,
+        alamatData.ibu.alamat,
+      ];
       const santriFields = [
         alamatData.santri.status_mukim,
         alamatData.santri.status_tempat_tinggal,
@@ -276,7 +267,6 @@ export const useAlamatForm = () => {
       setAlamatData((prev) => ({
         ...prev,
         ibu: {
-          tinggal_luar_negeri: false,
           status_kepemilikan: "",
           provinsi: "",
           kabupaten: "",
@@ -326,7 +316,6 @@ export const useAlamatForm = () => {
 
       const { error } = await supabase.from("alamat").insert({
         santri_id: santriId,
-        ayah_tinggal_luar_negeri: alamatData.ayah.tinggal_luar_negeri,
         ayah_status_kepemilikan: alamatData.ayah.status_kepemilikan,
         ayah_provinsi: alamatData.ayah.provinsi,
         ayah_kabupaten: alamatData.ayah.kabupaten,
@@ -336,7 +325,6 @@ export const useAlamatForm = () => {
         ayah_rt: alamatData.ayah.rt,
         ayah_rw: alamatData.ayah.rw,
         ayah_alamat: alamatData.ayah.alamat,
-        ibu_tinggal_luar_negeri: alamatData.ibu.tinggal_luar_negeri,
         ibu_status_kepemilikan: alamatData.ibu.status_kepemilikan,
         ibu_provinsi: alamatData.ibu.provinsi,
         ibu_kabupaten: alamatData.ibu.kabupaten,
@@ -399,7 +387,6 @@ export const useAlamatForm = () => {
       const { error } = await supabase
         .from("alamat")
         .update({
-          ayah_tinggal_luar_negeri: alamatData.ayah.tinggal_luar_negeri,
           ayah_status_kepemilikan: alamatData.ayah.status_kepemilikan,
           ayah_provinsi: alamatData.ayah.provinsi,
           ayah_kabupaten: alamatData.ayah.kabupaten,
@@ -409,7 +396,6 @@ export const useAlamatForm = () => {
           ayah_rt: alamatData.ayah.rt,
           ayah_rw: alamatData.ayah.rw,
           ayah_alamat: alamatData.ayah.alamat,
-          ibu_tinggal_luar_negeri: alamatData.ibu.tinggal_luar_negeri,
           ibu_status_kepemilikan: alamatData.ibu.status_kepemilikan,
           ibu_provinsi: alamatData.ibu.provinsi,
           ibu_kabupaten: alamatData.ibu.kabupaten,

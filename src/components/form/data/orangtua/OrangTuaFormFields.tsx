@@ -85,10 +85,6 @@ export default function OrangTuaFormFields({
           </motion.div>
         )}
       </motion.div>
-      <p className="bg-yellow-400 text-gray-800 p-2 rounded text-sm mb-4 font-semibold">
-        Tanda * pada formulir menunjukkan bahwa kolom tersebut wajib diisi
-        sebelum Anda dapat melanjutkan ke langkah berikutnya.
-      </p>
 
       <div className="space-y-6">
         {/* Data Ayah */}

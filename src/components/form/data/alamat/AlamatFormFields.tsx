@@ -28,7 +28,6 @@ interface AlamatFormFieldsProps {
 export default function AlamatFormFields({
   alamatData,
   handleInputChange,
-  handleCheckboxChange,
   handleIbuSamaDenganAyah,
   hasData,
   isEditMode,
@@ -85,34 +84,10 @@ export default function AlamatFormFields({
           </motion.div>
         )}
       </motion.div>
-      <p className="bg-yellow-400 text-gray-800 p-2 rounded text-sm mb-4 font-semibold">
-        Tanda * pada formulir menunjukkan bahwa kolom tersebut wajib diisi
-        sebelum Anda dapat melanjutkan ke langkah berikutnya.
-      </p>
       <div className="space-y-6">
         {/* Data Alamat Ayah */}
         <h2 className="text-lg font-semibold mb-4">Alamat Ayah</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {/* Tinggal di Luar Negeri */}
-          <div>
-            <label className="block">Tinggal di Luar Negeri?</label>
-            <div className="flex items-center gap-2 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4"
-                disabled={hasData ? !isEditMode : false}
-                checked={alamatData.ayah.tinggal_luar_negeri}
-                onChange={(e) =>
-                  handleCheckboxChange(
-                    "tinggal_luar_negeri",
-                    e.target.checked,
-                    "ayah"
-                  )
-                }
-              />
-              <span>Ya, tinggal di luar negeri</span>
-            </div>
-          </div>
           {/* Status Kepemilikan Rumah */}
           <div>
             <label className="block">Status Kepemilikan Rumah</label>
@@ -263,25 +238,7 @@ export default function AlamatFormFields({
               <span className="ml-2">Ya, alamat ibu sama dengan ayah</span>
             </div>
           </div>
-          <div>
-            <label className="block">Tinggal di Luar Negeri?</label>
-            <div className="flex items-center gap-2 mt-1">
-              <input
-                type="checkbox"
-                disabled={hasData ? !isEditMode : false}
-                checked={alamatData.ibu.tinggal_luar_negeri}
-                onChange={(e) =>
-                  handleCheckboxChange(
-                    "tinggal_luar_negeri",
-                    e.target.checked,
-                    "ibu"
-                  )
-                }
-                className="w-4 h-4"
-              />
-              <span>Ya, tinggal di luar negeri</span>
-            </div>
-          </div>
+
           <div>
             <label className="block">Status Kepemilikan Rumah</label>
             <select
