@@ -1,15 +1,17 @@
 // app/admin/layout.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FiHome, FiUsers, FiSettings, FiMenu, FiX } from "react-icons/fi";
 import { FaNewspaper, FaImage } from "react-icons/fa";
+import { usePathname } from "next/navigation";
 
 interface NavigationItem {
   name: string;
-  href: string;
-  icon: React.ReactNode;
+  href?: string; // dijadikan optional jika ada children
+  icon?: React.ReactNode;
+  children?: NavigationItem[];
 }
 
 export default function AdminLayout({
@@ -17,14 +19,35 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeNav, setActiveNav] = useState("/admin");
+  // Secara default buka submenu jika current path ada di dalam pendaftaran
+  const [openSubMenu, setOpenSubMenu] = useState(
+    pathname.startsWith("/admin/pendaftaran")
+  );
+
+  // Jika path berubah, update openSubMenu secara otomatis
+  useEffect(() => {
+    if (pathname.startsWith("/admin/pendaftaran")) {
+      setOpenSubMenu(true);
+    } else {
+      setOpenSubMenu(false);
+    }
+  }, [pathname]);
 
   const navigation: NavigationItem[] = [
     { name: "Dashboard", href: "/admin", icon: <FiHome /> },
     { name: "Berita", href: "/admin/berita", icon: <FaNewspaper /> },
     { name: "Galeri", href: "/admin/galeri", icon: <FaImage /> },
-    { name: "Pengguna", href: "/admin/pengguna", icon: <FiUsers /> },
+    {
+      name: "Pendaftaran",
+      icon: <FiUsers />,
+      children: [
+        { name: "Data Santri", href: "/admin/pendaftaran/santri" },
+        { name: "Data Orang Tua", href: "/admin/pendaftaran/orangtua" },
+        { name: "Data Alamat", href: "/admin/pendaftaran/alamat" },
+      ],
+    },
     { name: "Pengaturan", href: "/admin/pengaturan", icon: <FiSettings /> },
   ];
 
@@ -42,22 +65,53 @@ export default function AdminLayout({
 
         <nav className="p-4 space-y-1">
           {navigation.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center p-3 rounded-lg transition-colors ${
-                activeNav === item.href
-                  ? "bg-green-100 text-green-600 border-l-4 border-green-500"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-              onClick={() => {
-                setActiveNav(item.href);
-                setIsSidebarOpen(false);
-              }}
-            >
-              <span className="mr-3 text-xl">{item.icon}</span>
-              {item.name}
-            </Link>
+            <div key={item.name}>
+              {item.children ? (
+                <>
+                  {/* Parent item sebagai toggle (bukan Link) */}
+                  <div
+                    onClick={() => setOpenSubMenu(!openSubMenu)}
+                    className="flex items-center p-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-100 cursor-pointer"
+                  >
+                    {item.icon && (
+                      <span className="mr-3 text-xl">{item.icon}</span>
+                    )}
+                    {item.name}
+                  </div>
+                  {openSubMenu && (
+                    <div className="ml-6 space-y-1">
+                      {item.children.map((child) => (
+                        <Link
+                          key={child.name}
+                          href={child.href!}
+                          className={`flex items-center p-2 rounded-lg transition-colors ${
+                            pathname === child.href
+                              ? "bg-green-100 text-green-600 border-l-4 border-green-500"
+                              : "text-gray-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          {child.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  href={item.href!}
+                  className={`flex items-center p-3 rounded-lg transition-colors ${
+                    pathname === item.href
+                      ? "bg-green-100 text-green-600 border-l-4 border-green-500"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {item.icon && (
+                    <span className="mr-3 text-xl">{item.icon}</span>
+                  )}
+                  {item.name}
+                </Link>
+              )}
+            </div>
           ))}
         </nav>
       </motion.aside>
