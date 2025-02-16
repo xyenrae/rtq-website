@@ -25,7 +25,7 @@ const formatDate = (dateString: string) => {
 const previewVariants = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
-  exit: { opacity: 0 },
+  exit: { opacity: 1 },
 };
 
 export default function BeritaPage() {
@@ -49,6 +49,7 @@ export default function BeritaPage() {
 
   useEffect(() => {
     if (isLoading) return;
+    const currentObserverElement = observerRef.current; // salin ke variabel lokal
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore) {
@@ -60,12 +61,12 @@ export default function BeritaPage() {
         rootMargin: "200px",
       }
     );
-    if (observerRef.current) {
-      observer.observe(observerRef.current);
+    if (currentObserverElement) {
+      observer.observe(currentObserverElement);
     }
     return () => {
-      if (observerRef.current) {
-        observer.unobserve(observerRef.current);
+      if (currentObserverElement) {
+        observer.unobserve(currentObserverElement);
       }
     };
   }, [isLoading, hasMore, setPage]);
@@ -89,7 +90,8 @@ export default function BeritaPage() {
         {previewBerita && (
           <Link href={`/berita/${previewBerita.id}`} className="cursor-pointer">
             <motion.section
-              key={selectedCategory}
+              key={previewBerita.id} // gunakan id preview sebagai key
+              layout
               variants={previewVariants}
               initial="initial"
               animate="animate"
