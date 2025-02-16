@@ -4,17 +4,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { useBerita } from "@/hooks/useBerita";
+import { useKategori } from "@/hooks/useKategori";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
 
-const categories = [
-  "Semua",
-  "Pendidikan",
-  "Kegiatan",
-  "Pengumuman",
-  "Prestasi",
-];
-
+// Fungsi format tanggal
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("id-ID", {
@@ -31,46 +25,28 @@ const previewVariants = {
 export default function BeritaPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const { berita, isLoading, setPage, hasMore } = useBerita(selectedCategory);
+  const { kategori } = useKategori();
   const [showScrollToTop, setShowScrollToTop] = useState(false);
-
-  const [persistentBerita, setPersistentBerita] = useState(berita);
-
-  useEffect(() => {
-    if (berita.length > 0) {
-      setPersistentBerita(berita);
-    }
-  }, [berita]);
-
-  const effectiveBerita = berita.length > 0 ? berita : persistentBerita;
-
-  const previewBerita = effectiveBerita[0] || null;
-
   const observerRef = useRef<HTMLDivElement | null>(null);
 
+  // Infinite scroll: gunakan IntersectionObserver
   useEffect(() => {
     if (isLoading) return;
-    const currentObserverElement = observerRef.current; // salin ke variabel lokal
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore) {
           setPage((prevPage) => prevPage + 1);
         }
       },
-      {
-        threshold: 0.1,
-        rootMargin: "200px",
-      }
+      { threshold: 0.1, rootMargin: "200px" }
     );
-    if (currentObserverElement) {
-      observer.observe(currentObserverElement);
-    }
+    if (observerRef.current) observer.observe(observerRef.current);
     return () => {
-      if (currentObserverElement) {
-        observer.unobserve(currentObserverElement);
-      }
+      if (observerRef.current) observer.unobserve(observerRef.current);
     };
   }, [isLoading, hasMore, setPage]);
 
+  // Tampilkan tombol scroll to top ketika scroll > 300px
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollToTop(window.scrollY > 300);
@@ -79,18 +55,22 @@ export default function BeritaPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (isLoading && effectiveBerita.length === 0) return <LoadingSkeleton />;
+  // Jika loading dan belum ada data, tampilkan skeleton loader
+  if (isLoading && berita.length === 0) return <LoadingSkeleton />;
 
-  const newsGrid = effectiveBerita.slice(1);
+  // Preview berita: ambil entry pertama jika ada
+  const previewBerita = berita[0] || null;
+  // Grid berita: berita selain preview
+  const newsGrid = berita.slice(1);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Preview berita */}
+      {/* Preview Berita */}
       <AnimatePresence mode="wait">
         {previewBerita && (
           <Link href={`/berita/${previewBerita.id}`} className="cursor-pointer">
             <motion.section
-              key={previewBerita.id} // gunakan id preview sebagai key
+              key={previewBerita.id}
               layout
               variants={previewVariants}
               initial="initial"
@@ -134,7 +114,7 @@ export default function BeritaPage() {
                   className="flex items-center justify-center gap-4 text-sm text-gray-300"
                 >
                   <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full">
-                    {previewBerita.kategori}
+                    {previewBerita.kategori?.nama}
                   </span>
                   <span>{formatDate(previewBerita.tanggal)}</span>
                 </motion.div>
@@ -144,7 +124,7 @@ export default function BeritaPage() {
         )}
       </AnimatePresence>
 
-      {/* Filter kategori */}
+      {/* Filter Kategori */}
       <section className="container mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
           {/* Dropdown untuk mobile */}
@@ -154,80 +134,97 @@ export default function BeritaPage() {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full px-4 py-3 rounded-xl outline-none bg-white border border-gray-200 text-gray-700 font-medium"
             >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              <option value="Semua">Semua</option>
+              {kategori.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.nama}
                 </option>
               ))}
             </select>
           </div>
           {/* Tombol untuk desktop */}
           <div className="hidden sm:flex flex-wrap gap-4 justify-center">
-            {categories.map((category) => (
+            <button
+              onClick={() => setSelectedCategory("Semua")}
+              className={`px-5 py-2 rounded-xl font-medium transition duration-300 ${
+                selectedCategory === "Semua"
+                  ? "bg-green-600 text-white shadow-md"
+                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-green-600"
+              }`}
+            >
+              Semua
+            </button>
+            {kategori.map((item) => (
               <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
+                key={item.id}
+                onClick={() => setSelectedCategory(item.id)}
                 className={`px-5 py-2 rounded-xl font-medium transition duration-300 ${
-                  selectedCategory === category
+                  selectedCategory === item.id
                     ? "bg-green-600 text-white shadow-md"
                     : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-green-600"
                 }`}
               >
-                {category}
+                {item.nama}
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Grid berita */}
+      {/* Grid Berita */}
       <motion.section
         className="container mx-auto px-4 pb-16 grid grid-cols-1 md:grid-cols-3 gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        {newsGrid.map((item, index) => (
-          <motion.article
-            key={`${item.id}-${index}`}
-            className="group cursor-pointer bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col sm:flex-row"
-          >
-            <Link href={`/berita/${item.id}`} className="flex flex-1">
-              {/* Gambar */}
-              <div className="relative w-34 sm:w-1/3 h-34 bg-gray-300">
-                <Image
-                  src={item.gambar || "/placeholder.jpg"}
-                  alt={item.judul}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                />
-              </div>
-              {/* Konten */}
-              <div className="py-2 px-3 flex flex-col justify-between flex-1">
-                <div>
-                  {item.kategori && (
-                    <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium mb-1">
-                      {item.kategori}
-                    </span>
-                  )}
-                  <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
-                    {item.judul}
-                  </h3>
+        {newsGrid.length > 0 ? (
+          newsGrid.map((item, index) => (
+            <motion.article
+              key={`${item.id}-${index}`}
+              className="group cursor-pointer bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col sm:flex-row"
+            >
+              <Link href={`/berita/${item.id}`} className="flex flex-1">
+                {/* Gambar */}
+                <div className="relative w-34 sm:w-1/3 h-34 bg-gray-300">
+                  <Image
+                    src={item.gambar || "/placeholder.jpg"}
+                    alt={item.judul}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
                 </div>
-                <div className="flex items-center text-sm text-gray-500 mt-2">
-                  <span>{formatDate(item.tanggal)}</span>
-                  <span className="mx-2">•</span>
-                  <span>{item.views} views</span>
+                {/* Konten */}
+                <div className="py-2 px-3 flex flex-col justify-between flex-1">
+                  <div>
+                    {item.kategori && (
+                      <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium mb-1">
+                        {item.kategori.nama}
+                      </span>
+                    )}
+                    <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
+                      {item.judul}
+                    </h3>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500 mt-2">
+                    <span>{formatDate(item.tanggal)}</span>
+                    <span className="mx-2">•</span>
+                    <span>{item.views} views</span>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          </motion.article>
-        ))}
+              </Link>
+            </motion.article>
+          ))
+        ) : (
+          <p className="col-span-full text-center text-gray-600">
+            Tidak ada berita untuk kategori ini.
+          </p>
+        )}
       </motion.section>
 
-      {/* Loading indicator saat infinite scroll fetch data */}
-      {isLoading && effectiveBerita.length > 0 && <LoadMoreSpinner />}
+      {/* Loading indicator untuk infinite scroll */}
+      {isLoading && berita.length > 0 && <LoadMoreSpinner />}
 
       {/* Sentinel element untuk infinite scroll */}
       <div ref={observerRef} className="h-1" />
@@ -237,7 +234,7 @@ export default function BeritaPage() {
   );
 }
 
-// Skeleton loader yang disesuaikan untuk tampilan mobile dan desktop
+// Skeleton loader sebagai fallback saat loading data
 const LoadingSkeleton = () => (
   <div className="min-h-screen bg-gray-50 animate-pulse">
     <div className="container mx-auto px-4 py-8">
@@ -249,7 +246,7 @@ const LoadingSkeleton = () => (
       <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
         <div className="w-full sm:hidden h-10 bg-gray-300 rounded-xl" />
         <div className="hidden sm:flex gap-4">
-          {categories.map((_, index) => (
+          {kategoriDummy.map((_, index) => (
             <div key={index} className="w-20 h-10 bg-gray-300 rounded-xl" />
           ))}
         </div>
@@ -273,3 +270,6 @@ const LoadingSkeleton = () => (
     </div>
   </div>
 );
+
+// Dummy array untuk skeleton filter desktop
+const kategoriDummy = [1, 2, 3, 4];
