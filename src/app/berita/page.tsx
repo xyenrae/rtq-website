@@ -194,7 +194,7 @@ export default function BeritaPage() {
           >
             <Link href={`/berita/${item.id}`} className="flex flex-1">
               {/* Gambar */}
-              <div className="relative w-32 sm:w-1/3 h-32 bg-gray-300">
+              <div className="relative w-34 sm:w-1/3 h-34 bg-gray-300">
                 <Image
                   src={item.gambar || "/placeholder.jpg"}
                   alt={item.judul}
@@ -204,7 +204,7 @@ export default function BeritaPage() {
                 />
               </div>
               {/* Konten */}
-              <div className="p-4 flex flex-col justify-between flex-1">
+              <div className="py-2 px-3 flex flex-col justify-between flex-1">
                 <div>
                   {item.kategori && (
                     <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium mb-1">

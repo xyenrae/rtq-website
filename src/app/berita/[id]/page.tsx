@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Eye, Calendar, ChevronLeft, Clock } from "lucide-react";
+import NewsCard from "@/components/card/NewsCard";
 
 interface Berita {
   id: string;
@@ -101,48 +102,6 @@ export default function BeritaDetailPage() {
 
     if (id) fetchAllData();
   }, [id, router]);
-
-  const NewsCard = ({ item }: { item: Berita }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      className="group relative bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
-    >
-      <Link href={`/berita/${item.id}`}>
-        <div className="relative h-48 w-full">
-          <Image
-            src={item.gambar || "/placeholder-news.jpg"}
-            alt={item.judul}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-        </div>
-        <div className="p-4">
-          <div className="flex items-center space-x-2 mb-2">
-            <Clock className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-500">
-              {estimateReadTime(item.konten || "")} menit baca
-            </span>
-          </div>
-          <h3 className="font-bold text-gray-800 group-hover:text-green-600 transition-colors line-clamp-2">
-            {item.judul}
-          </h3>
-          <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
-            <span className="flex items-center">
-              <Calendar className="w-4 h-4 mr-1" />
-              {formatDate(item.tanggal)}
-            </span>
-            <span className="flex items-center">
-              <Eye className="w-4 h-4 mr-1" />
-              {item.views}
-            </span>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
-  );
 
   if (isLoading) return <SkeletonLoader />;
   if (error) return <ErrorMessage message={error} />;
@@ -275,9 +234,9 @@ export default function BeritaDetailPage() {
             <h2 className="text-2xl font-bold mb-8 text-gray-800 border-l-4 border-green-500 pl-3">
               Berita Terkait
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {relatedBerita.map((item) => (
-                <NewsCard key={item.id} item={item} />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {relatedBerita.map((item, index) => (
+                <NewsCard key={`${item.id}-${index}`} item={item} />
               ))}
             </div>
           </motion.section>
