@@ -19,6 +19,8 @@ export default function OrangTuaForm() {
     handleCheckboxChange,
     handleSubmit,
     handleUpdate,
+    enterEditMode,
+    cancelEditMode,
   } = useOrangTuaForm();
 
   return (
@@ -33,6 +35,8 @@ export default function OrangTuaForm() {
           progress={progress}
           setIsEditMode={setIsEditMode}
           handleUpdate={handleUpdate}
+          enterEditMode={enterEditMode}
+          cancelEditMode={cancelEditMode}
         />
       </form>
       <ProgressModal

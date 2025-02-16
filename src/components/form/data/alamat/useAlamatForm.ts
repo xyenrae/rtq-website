@@ -56,6 +56,9 @@ export const useAlamatForm = () => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [processingStep, setProcessingStep] = useState<string>("");
   const [processingProgress, setProcessingProgress] = useState<number>(0);
+  const [backupAlamatData, setBackupAlamatData] = useState<AlamatData | null>(
+    null
+  );
   const [alamatData, setAlamatData] = useState<AlamatData>({
     ayah: {
       status_kepemilikan: "Milik Sendiri",
@@ -352,9 +355,9 @@ export const useAlamatForm = () => {
         console.error("Error inserting data:", error.message);
         toast.error("Gagal menyimpan data alamat.");
       } else {
-        toast.success("Data alamat berhasil disimpan!");
         setProcessingProgress(100);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        toast.success("Data alamat berhasil disimpan!");
       }
     } catch (err) {
       console.error("Error during submission:", err);
@@ -372,11 +375,6 @@ export const useAlamatForm = () => {
 
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
-      setIsProcessing(false);
-      return;
-    }
-
-    if (!validateAlamatData()) {
       setIsProcessing(false);
       return;
     }
@@ -423,10 +421,10 @@ export const useAlamatForm = () => {
       if (error) {
         toast.error("Gagal menyimpan perubahan.");
       } else {
-        toast.success("Perubahan berhasil disimpan!");
         setIsEditMode(false);
         setProcessingProgress(100);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        toast.success("Perubahan berhasil disimpan!");
       }
     } catch (err) {
       console.error("Error during update:", err);
@@ -434,6 +432,18 @@ export const useAlamatForm = () => {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const enterEditMode = () => {
+    setBackupAlamatData(alamatData);
+    setIsEditMode(true);
+  };
+
+  const cancelEditMode = () => {
+    if (backupAlamatData) {
+      setAlamatData(backupAlamatData);
+    }
+    setIsEditMode(false);
   };
 
   return {
@@ -452,5 +462,7 @@ export const useAlamatForm = () => {
     isProcessing,
     processingStep,
     processingProgress,
+    enterEditMode,
+    cancelEditMode,
   };
 };

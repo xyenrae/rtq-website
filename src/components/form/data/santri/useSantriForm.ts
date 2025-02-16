@@ -54,6 +54,10 @@ export const useSantriForm = () => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [processingStep, setProcessingStep] = useState<string>("");
   const [processingProgress, setProcessingProgress] = useState<number>(0);
+  const [backupSantriData, setBackupSantriData] = useState<SantriData | null>(
+    null
+  );
+
   const [santriData, setSantriData] = useState<SantriData>({
     nama_lengkap: "",
     nik: "",
@@ -265,10 +269,10 @@ export const useSantriForm = () => {
 
       await Promise.all(uploadPromises);
 
-      toast.success("Data santri berhasil disimpan!");
       setHasData(true);
       setProcessingProgress(100);
       await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Data santri berhasil disimpan!");
     } catch (err) {
       console.error(err);
       toast.error("Terjadi kesalahan saat mendaftar.");
@@ -285,11 +289,6 @@ export const useSantriForm = () => {
 
     if (!santriData.id) {
       toast.error("Data santri tidak ditemukan untuk diperbarui.");
-      setIsProcessing(false);
-      return;
-    }
-
-    if (!validateSantriData()) {
       setIsProcessing(false);
       return;
     }
@@ -365,8 +364,6 @@ export const useSantriForm = () => {
       } else if (count === 0) {
         toast.error("Tidak ada data yang diperbarui.");
       } else {
-        toast.success("Perubahan berhasil disimpan!");
-        setIsEditMode(false);
         // Refresh data setelah update
         const { data: updatedSantri } = await supabase
           .from("santri")
@@ -382,8 +379,10 @@ export const useSantriForm = () => {
           });
         }
         setHasData(true);
+        setIsEditMode(false);
         setProcessingProgress(100);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        toast.success("Perubahan berhasil disimpan!");
       }
     } catch (err) {
       console.error("Error during update:", err);
@@ -391,6 +390,18 @@ export const useSantriForm = () => {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const enterEditMode = () => {
+    setBackupSantriData(santriData);
+    setIsEditMode(true);
+  };
+
+  const cancelEditMode = () => {
+    if (backupSantriData) {
+      setSantriData(backupSantriData);
+    }
+    setIsEditMode(false);
   };
 
   return {
@@ -406,5 +417,7 @@ export const useSantriForm = () => {
     processingStep,
     processingProgress,
     handleInputChange,
+    enterEditMode,
+    cancelEditMode,
   };
 };

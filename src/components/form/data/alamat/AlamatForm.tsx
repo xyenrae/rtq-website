@@ -20,6 +20,8 @@ export default function AlamatForm() {
     handleIbuSamaDenganAyah,
     handleSubmit,
     handleUpdate,
+    enterEditMode,
+    cancelEditMode,
   } = useAlamatForm();
 
   return (
@@ -35,6 +37,8 @@ export default function AlamatForm() {
           progress={progress}
           setIsEditMode={setIsEditMode}
           handleUpdate={handleUpdate}
+          enterEditMode={enterEditMode}
+          cancelEditMode={cancelEditMode}
         />
         <ProgressModal
           isOpen={isProcessing}

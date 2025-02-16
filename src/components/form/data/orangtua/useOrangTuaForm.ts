@@ -55,6 +55,8 @@ export const useOrangTuaForm = () => {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [processingStep, setProcessingStep] = useState<string>("");
   const [processingProgress, setProcessingProgress] = useState<number>(0);
+  const [backupOrangTuaData, setBackupOrangTuaData] =
+    useState<OrangTuaData | null>(null);
   const [orangTuaData, setOrangTuaData] = useState<OrangTuaData>({
     ayah: {
       nama: "",
@@ -305,10 +307,10 @@ export const useOrangTuaForm = () => {
         console.error("Error inserting data:", error.message);
         toast.error("Gagal menyimpan data orang tua.");
       } else {
-        toast.success("Data orang tua berhasil disimpan!");
         setHasData(true);
         setProcessingProgress(100);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        toast.success("Data orang tua berhasil disimpan!");
       }
     } catch (err) {
       console.error("Error during submission:", err);
@@ -326,11 +328,6 @@ export const useOrangTuaForm = () => {
 
     if (!santriId) {
       toast.error("Santri ID tidak ditemukan.");
-      setIsProcessing(false);
-      return;
-    }
-
-    if (!validateOrangTuaData()) {
       setIsProcessing(false);
       return;
     }
@@ -370,10 +367,10 @@ export const useOrangTuaForm = () => {
       if (error) {
         toast.error("Gagal menyimpan perubahan.");
       } else {
-        toast.success("Perubahan berhasil disimpan!");
         setIsEditMode(false);
         setProcessingProgress(100);
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        toast.success("Perubahan berhasil disimpan!");
       }
     } catch (err) {
       console.error("Error during update:", err);
@@ -381,6 +378,18 @@ export const useOrangTuaForm = () => {
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const enterEditMode = () => {
+    setBackupOrangTuaData(orangTuaData);
+    setIsEditMode(true);
+  };
+
+  const cancelEditMode = () => {
+    if (backupOrangTuaData) {
+      setOrangTuaData(backupOrangTuaData);
+    }
+    setIsEditMode(false);
   };
 
   return {
@@ -398,5 +407,7 @@ export const useOrangTuaForm = () => {
     isProcessing,
     processingStep,
     processingProgress,
+    enterEditMode,
+    cancelEditMode,
   };
 };

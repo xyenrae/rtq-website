@@ -16,6 +16,8 @@ interface SantriFormFieldsProps {
   progress: number;
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   handleUpdate: () => void;
+  enterEditMode: () => void;
+  cancelEditMode: () => void;
 }
 
 export default function SantriFormFields({
@@ -24,8 +26,9 @@ export default function SantriFormFields({
   hasData,
   isEditMode,
   progress,
-  setIsEditMode,
   handleUpdate,
+  enterEditMode,
+  cancelEditMode,
 }: SantriFormFieldsProps) {
   return (
     <>
@@ -526,7 +529,7 @@ export default function SantriFormFields({
         {hasData && !isEditMode && (
           <button
             type="button"
-            onClick={() => setIsEditMode(true)}
+            onClick={enterEditMode}
             className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
           >
             Edit Data
@@ -536,7 +539,7 @@ export default function SantriFormFields({
           <div className="flex w-full gap-3">
             <button
               type="button"
-              onClick={() => setIsEditMode(false)}
+              onClick={cancelEditMode}
               className="bg-red-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-red-600"
             >
               Batal

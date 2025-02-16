@@ -23,6 +23,8 @@ interface AlamatFormFieldsProps {
   progress: number;
   setIsEditMode: React.Dispatch<React.SetStateAction<boolean>>;
   handleUpdate: () => void;
+  enterEditMode: () => void;
+  cancelEditMode: () => void;
 }
 
 export default function AlamatFormFields({
@@ -32,8 +34,9 @@ export default function AlamatFormFields({
   hasData,
   isEditMode,
   progress,
-  setIsEditMode,
   handleUpdate,
+  enterEditMode,
+  cancelEditMode,
 }: AlamatFormFieldsProps) {
   return (
     <>
@@ -169,7 +172,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">Kode Pos</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kode pos"
@@ -184,7 +187,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">RT</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RT"
@@ -197,7 +200,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">RW</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RW"
@@ -314,7 +317,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">Kode Pos</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kode pos"
@@ -328,7 +331,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">RT</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RT"
@@ -340,7 +343,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">RW</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RW"
@@ -544,7 +547,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">Kode Pos</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan kode pos"
@@ -558,7 +561,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">RT</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RT"
@@ -572,7 +575,7 @@ export default function AlamatFormFields({
           <div>
             <label className="block">RW</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan RW"
@@ -612,7 +615,7 @@ export default function AlamatFormFields({
           {hasData && !isEditMode && (
             <button
               type="button"
-              onClick={() => setIsEditMode(true)}
+              onClick={enterEditMode}
               className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
             >
               Edit Data
@@ -622,7 +625,7 @@ export default function AlamatFormFields({
             <div className="flex w-full gap-3">
               <button
                 type="button"
-                onClick={() => setIsEditMode(false)}
+                onClick={cancelEditMode}
                 className="bg-red-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-red-600"
               >
                 Batal

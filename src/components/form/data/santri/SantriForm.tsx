@@ -18,6 +18,8 @@ export default function SantriForm() {
     setSantriData,
     handleSubmit,
     handleUpdate,
+    enterEditMode,
+    cancelEditMode,
   } = useSantriForm();
 
   return (
@@ -31,6 +33,8 @@ export default function SantriForm() {
           progress={progress}
           setIsEditMode={setIsEditMode}
           handleUpdate={handleUpdate}
+          enterEditMode={enterEditMode}
+          cancelEditMode={cancelEditMode}
         />
       </form>
       <ProgressModal
