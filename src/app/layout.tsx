@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "@/context/UserContext";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
+import AutoLogout from "@/components/logout/AutoLogout";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -45,6 +46,7 @@ export default function RootLayout({
           theme="light"
         />
         <UserProvider>
+          <AutoLogout />
           <ConditionalLayout>{children}</ConditionalLayout>
         </UserProvider>
       </body>

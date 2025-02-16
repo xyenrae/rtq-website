@@ -8,40 +8,28 @@ import { z } from "zod";
 /* ==================== ZOD SCHEMA DEFINITIONS ==================== */
 
 // Schema untuk data ayah/ibu
-const AyahIbuSchema = z
-  .object({
-    nama: z.string().min(1, { message: "Nama wajib diisi" }),
-    nik: z.string().min(1, { message: "NIK wajib diisi" }),
-    kewarganegaraan: z
-      .string()
-      .min(1, { message: "Kewarganegaraan wajib diisi" }),
-    tempat_lahir: z.string().min(1, { message: "Tempat lahir wajib diisi" }),
-    // Menggunakan preprocess untuk mengubah input menjadi Date jika memungkinkan
-    tanggal_lahir: z.preprocess((arg) => {
-      if (typeof arg === "string" || arg instanceof Date) {
-        return new Date(arg);
-      }
-      return null;
-    }, z.date().nullable()),
-    status: z.string().min(1, { message: "Status wajib diisi" }),
-    pendidikan_terakhir: z
-      .string()
-      .min(1, { message: "Pendidikan terakhir wajib diisi" }),
-    penghasilan: z.string().min(1, { message: "Penghasilan wajib diisi" }),
-    pekerjaan: z.string().min(1, { message: "Pekerjaan wajib diisi" }),
-    nomor_hp: z.string().optional(),
-    has_no_hp: z.boolean(),
-  })
-  .refine(
-    (data) =>
-      data.has_no_hp ||
-      (!data.has_no_hp && data.nomor_hp && data.nomor_hp.trim() !== ""),
-    {
-      message:
-        "Nomor HP wajib diisi jika tidak memilih opsi tidak memiliki nomor HP",
-      path: ["nomor_hp"],
+const AyahIbuSchema = z.object({
+  nama: z.string().min(1, { message: "Nama wajib diisi" }),
+  nik: z.string().min(1, { message: "NIK wajib diisi" }),
+  kewarganegaraan: z
+    .string()
+    .min(1, { message: "Kewarganegaraan wajib diisi" }),
+  tempat_lahir: z.string().min(1, { message: "Tempat lahir wajib diisi" }),
+  // Menggunakan preprocess untuk mengubah input menjadi Date jika memungkinkan
+  tanggal_lahir: z.preprocess((arg) => {
+    if (typeof arg === "string" || arg instanceof Date) {
+      return new Date(arg);
     }
-  );
+    return null;
+  }, z.date().nullable()),
+  status: z.string().min(1, { message: "Status wajib diisi" }),
+  pendidikan_terakhir: z
+    .string()
+    .min(1, { message: "Pendidikan terakhir wajib diisi" }),
+  penghasilan: z.string().min(1, { message: "Penghasilan wajib diisi" }),
+  pekerjaan: z.string().min(1, { message: "Pekerjaan wajib diisi" }),
+  nomor_hp: z.string().min(1, { message: "Nomor HP wajib diisi" }),
+});
 
 // Schema untuk data wali
 const WaliSchema = z.object({
@@ -79,7 +67,6 @@ export const useOrangTuaForm = () => {
       penghasilan: "",
       pekerjaan: "",
       nomor_hp: "",
-      has_no_hp: false,
     },
     ibu: {
       nama: "",
@@ -92,7 +79,6 @@ export const useOrangTuaForm = () => {
       penghasilan: "",
       pekerjaan: "",
       nomor_hp: "",
-      has_no_hp: false,
     },
     wali: {
       sama_dengan_ayah: false,
@@ -148,7 +134,6 @@ export const useOrangTuaForm = () => {
             penghasilan: ot.ayah_penghasilan || "",
             pekerjaan: ot.ayah_pekerjaan || "",
             nomor_hp: ot.ayah_nomor_hp || "",
-            has_no_hp: ot.ayah_has_no_hp || false,
           },
           ibu: {
             nama: ot.ibu_nama || "",
@@ -163,7 +148,6 @@ export const useOrangTuaForm = () => {
             penghasilan: ot.ibu_penghasilan || "",
             pekerjaan: ot.ibu_pekerjaan || "",
             nomor_hp: ot.ibu_nomor_hp || "",
-            has_no_hp: ot.ibu_has_no_hp || false,
           },
           wali: {
             sama_dengan_ayah: ot.wali_sama_dengan_ayah || false,
@@ -193,7 +177,7 @@ export const useOrangTuaForm = () => {
         orangTuaData.ayah.pendidikan_terakhir,
         orangTuaData.ayah.penghasilan,
         orangTuaData.ayah.pekerjaan,
-        orangTuaData.ayah.has_no_hp ? true : orangTuaData.ayah.nomor_hp,
+        orangTuaData.ayah.nomor_hp,
       ];
 
       const ibuFields = [
@@ -206,7 +190,7 @@ export const useOrangTuaForm = () => {
         orangTuaData.ibu.pendidikan_terakhir,
         orangTuaData.ibu.penghasilan,
         orangTuaData.ibu.pekerjaan,
-        orangTuaData.ibu.has_no_hp ? true : orangTuaData.ibu.nomor_hp,
+        orangTuaData.ibu.nomor_hp,
       ];
 
       const waliFields = [
@@ -302,10 +286,7 @@ export const useOrangTuaForm = () => {
         ayah_pendidikan_terakhir: orangTuaData.ayah.pendidikan_terakhir,
         ayah_penghasilan: orangTuaData.ayah.penghasilan,
         ayah_pekerjaan: orangTuaData.ayah.pekerjaan,
-        ayah_nomor_hp: orangTuaData.ayah.has_no_hp
-          ? null
-          : orangTuaData.ayah.nomor_hp,
-        ayah_has_no_hp: orangTuaData.ayah.has_no_hp,
+        ayah_nomor_hp: orangTuaData.ayah.nomor_hp,
         ibu_nama: orangTuaData.ibu.nama,
         ibu_nik: orangTuaData.ibu.nik,
         ibu_kewarganegaraan: orangTuaData.ibu.kewarganegaraan,
@@ -315,10 +296,7 @@ export const useOrangTuaForm = () => {
         ibu_pendidikan_terakhir: orangTuaData.ibu.pendidikan_terakhir,
         ibu_penghasilan: orangTuaData.ibu.penghasilan,
         ibu_pekerjaan: orangTuaData.ibu.pekerjaan,
-        ibu_nomor_hp: orangTuaData.ibu.has_no_hp
-          ? null
-          : orangTuaData.ibu.nomor_hp,
-        ibu_has_no_hp: orangTuaData.ibu.has_no_hp,
+        ibu_nomor_hp: orangTuaData.ibu.nomor_hp,
         wali_sama_dengan_ayah: orangTuaData.wali.sama_dengan_ayah,
         wali_kartu_keluarga_sama: orangTuaData.wali.kartu_keluarga_sama,
       });
@@ -373,10 +351,7 @@ export const useOrangTuaForm = () => {
           ayah_pendidikan_terakhir: orangTuaData.ayah.pendidikan_terakhir,
           ayah_penghasilan: orangTuaData.ayah.penghasilan,
           ayah_pekerjaan: orangTuaData.ayah.pekerjaan,
-          ayah_nomor_hp: orangTuaData.ayah.has_no_hp
-            ? null
-            : orangTuaData.ayah.nomor_hp,
-          ayah_has_no_hp: orangTuaData.ayah.has_no_hp,
+          ayah_nomor_hp: orangTuaData.ayah.nomor_hp,
           ibu_nama: orangTuaData.ibu.nama,
           ibu_nik: orangTuaData.ibu.nik,
           ibu_kewarganegaraan: orangTuaData.ibu.kewarganegaraan,
@@ -386,10 +361,7 @@ export const useOrangTuaForm = () => {
           ibu_pendidikan_terakhir: orangTuaData.ibu.pendidikan_terakhir,
           ibu_penghasilan: orangTuaData.ibu.penghasilan,
           ibu_pekerjaan: orangTuaData.ibu.pekerjaan,
-          ibu_nomor_hp: orangTuaData.ibu.has_no_hp
-            ? null
-            : orangTuaData.ibu.nomor_hp,
-          ibu_has_no_hp: orangTuaData.ibu.has_no_hp,
+          ibu_nomor_hp: orangTuaData.ibu.nomor_hp,
           wali_sama_dengan_ayah: orangTuaData.wali.sama_dengan_ayah,
           wali_kartu_keluarga_sama: orangTuaData.wali.kartu_keluarga_sama,
         })

@@ -78,10 +78,10 @@ export default function KenaliKami() {
       {/* Image Section */}
       <div className="flex-1 relative w-full h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0">
         <Image
-          src="/images/hero-2.png"
-          alt="Ilustrasi pembelajaran"
+          src="/images/hero-3.svg"
+          alt=""
           fill
-          className="object-cover object-center"
+          className="object-center"
           priority
         />
       </div>

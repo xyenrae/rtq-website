@@ -47,17 +47,14 @@ export default function Hero() {
           </div>
         </div>
         {/* Image Section */}
-        <div className="flex-1 order-1 lg:order-2 w-full lg:w-auto relative">
-          <div className="relative aspect-square w-full lg:w-[600px] rounded-3xl overflow-hidden">
-            <Image
-              src="/images/hero.svg"
-              alt="Santri belajar Al-Qur'an"
-              fill
-              className="object-cover object-center"
-              priority
-              sizes="(max-width: 1024px) 100vw, 50vw"
-            />
-          </div>
+        <div className="flex-1 order-1 lg:order-2  relative w-full h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0">
+          <Image
+            src="/images/hero-1.svg"
+            alt=""
+            fill
+            className="object-center"
+            priority
+          />
         </div>
       </div>
     </div>

@@ -8,52 +8,40 @@ import { z } from "zod";
 
 /* ==================== ZOD SCHEMA DEFINITIONS ==================== */
 
-const SantriDataSchema = z
-  .object({
-    id: z.string().optional(),
-    nama_lengkap: z.string().min(1, { message: "Nama lengkap wajib diisi" }),
-    nik: z.string().min(1, { message: "NIK wajib diisi" }),
-    tempat_lahir: z.string().min(1, { message: "Tempat lahir wajib diisi" }),
-    tanggal_lahir: z.preprocess(
-      (arg) => (arg ? new Date(arg as string | Date) : null),
-      z.date().nullable()
-    ),
-    jenis_kelamin: z.string().min(1, { message: "Jenis kelamin wajib diisi" }),
-    jumlah_saudara: z.number().nullable(),
-    anak_ke: z.number().nullable(),
-    cita_cita: z.string().min(1, { message: "Cita-cita wajib diisi" }),
-    nomor_hp: z.string().optional(),
-    has_no_hp: z.boolean(),
-    email: z.string().email({ message: "Email tidak valid" }),
-    hobi: z.string().min(1, { message: "Hobi wajib diisi" }),
-    sumber_pembiayaan: z
-      .string()
-      .min(1, { message: "Sumber pembiayaan wajib diisi" }),
-    kebutuhan_khusus: z
-      .string()
-      .min(1, { message: "Kebutuhan khusus wajib diisi" }),
-    kebutuhan_disabilitas: z
-      .string()
-      .min(1, { message: "Kebutuhan disabilitas wajib diisi" }),
-    nomor_kk: z.string().min(1, { message: "Nomor KK wajib diisi" }),
-    nama_kepala_keluarga: z
-      .string()
-      .min(1, { message: "Nama kepala keluarga wajib diisi" }),
-    kk_image_file: z.instanceof(File).nullable(),
-    profile_image_file: z.instanceof(File).nullable(),
-    profile_image_url: z.string().nullable(),
-    kk_image_url: z.string().nullable(),
-  })
-  .refine(
-    (data) =>
-      data.has_no_hp ||
-      (!data.has_no_hp && data.nomor_hp && data.nomor_hp.trim() !== ""),
-    {
-      message:
-        "Nomor HP wajib diisi jika tidak memilih opsi tidak memiliki nomor HP",
-      path: ["nomor_hp"],
-    }
-  );
+const SantriDataSchema = z.object({
+  id: z.string().optional(),
+  nama_lengkap: z.string().min(1, { message: "Nama lengkap wajib diisi" }),
+  nik: z.string().min(1, { message: "NIK wajib diisi" }),
+  tempat_lahir: z.string().min(1, { message: "Tempat lahir wajib diisi" }),
+  tanggal_lahir: z.preprocess(
+    (arg) => (arg ? new Date(arg as string | Date) : null),
+    z.date().nullable()
+  ),
+  jenis_kelamin: z.string().min(1, { message: "Jenis kelamin wajib diisi" }),
+  jumlah_saudara: z.number().nullable(),
+  anak_ke: z.number().nullable(),
+  cita_cita: z.string().min(1, { message: "Cita-cita wajib diisi" }),
+  nomor_hp: z.string().min(1, { message: "Nomor HP wajib diisi" }),
+  email: z.string().email({ message: "Email tidak valid" }),
+  hobi: z.string().min(1, { message: "Hobi wajib diisi" }),
+  sumber_pembiayaan: z
+    .string()
+    .min(1, { message: "Sumber pembiayaan wajib diisi" }),
+  kebutuhan_khusus: z
+    .string()
+    .min(1, { message: "Kebutuhan khusus wajib diisi" }),
+  kebutuhan_disabilitas: z
+    .string()
+    .min(1, { message: "Kebutuhan disabilitas wajib diisi" }),
+  nomor_kk: z.string().min(1, { message: "Nomor KK wajib diisi" }),
+  nama_kepala_keluarga: z
+    .string()
+    .min(1, { message: "Nama kepala keluarga wajib diisi" }),
+  kk_image_file: z.instanceof(File).nullable(),
+  profile_image_file: z.instanceof(File).nullable(),
+  profile_image_url: z.string().nullable(),
+  kk_image_url: z.string().nullable(),
+});
 
 export type SantriData = z.infer<typeof SantriDataSchema>;
 
@@ -76,7 +64,6 @@ export const useSantriForm = () => {
     anak_ke: null,
     cita_cita: "",
     nomor_hp: "",
-    has_no_hp: true,
     email: "",
     hobi: "",
     sumber_pembiayaan: "Orang Tua",
@@ -143,8 +130,7 @@ export const useSantriForm = () => {
         santriData.kebutuhan_disabilitas,
         santriData.nomor_kk,
         santriData.nama_kepala_keluarga,
-        // Nomor HP harus diperiksa jika has_no_hp false
-        !santriData.has_no_hp ? santriData.nomor_hp : true,
+        santriData.nomor_hp,
       ];
 
       const filledCount = requiredFields.filter(Boolean).length;
@@ -221,7 +207,7 @@ export const useSantriForm = () => {
           jumlah_saudara: santriData.jumlah_saudara,
           anak_ke: santriData.anak_ke,
           cita_cita: santriData.cita_cita,
-          nomor_hp: santriData.has_no_hp ? null : santriData.nomor_hp,
+          nomor_hp: santriData.nomor_hp,
           email: santriData.email,
           hobi: santriData.hobi,
           sumber_pembiayaan: santriData.sumber_pembiayaan,
@@ -359,7 +345,7 @@ export const useSantriForm = () => {
           jumlah_saudara: santriData.jumlah_saudara,
           anak_ke: santriData.anak_ke,
           cita_cita: santriData.cita_cita,
-          nomor_hp: santriData.has_no_hp ? null : santriData.nomor_hp,
+          nomor_hp: santriData.nomor_hp,
           email: santriData.email,
           hobi: santriData.hobi,
           sumber_pembiayaan: santriData.sumber_pembiayaan,

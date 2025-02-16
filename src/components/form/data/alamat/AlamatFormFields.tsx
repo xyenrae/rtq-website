@@ -604,37 +604,37 @@ export default function AlamatFormFields({
           {!hasData && (
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded"
+              className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
             >
-              Daftar
+              Kirim Data
             </button>
           )}
           {hasData && !isEditMode && (
             <button
               type="button"
               onClick={() => setIsEditMode(true)}
-              className="px-4 py-2 bg-green-500 text-white rounded"
+              className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
             >
               Edit Data
             </button>
           )}
           {hasData && isEditMode && (
-            <>
+            <div className="flex w-full gap-3">
               <button
                 type="button"
                 onClick={() => setIsEditMode(false)}
-                className="px-4 py-2 bg-gray-500 text-white rounded"
+                className="bg-red-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-red-600"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleUpdate}
-                className="px-4 py-2 bg-blue-500 text-white rounded"
+                className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
               >
                 Simpan Perubahan
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>

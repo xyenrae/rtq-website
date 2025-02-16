@@ -62,7 +62,7 @@ const ProgressModal = ({
             exit={{ y: -20, opacity: 0 }}
             className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden"
           >
-            <div className="p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <div className="p-6 bg-green-500 text-white">
               <h3 className="text-xl font-bold flex items-center gap-2">
                 {status === "submit" ? (
                   <FaCloudUploadAlt className="animate-bounce" />

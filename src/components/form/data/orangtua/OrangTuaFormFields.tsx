@@ -1,11 +1,10 @@
 // src/components/form/data/orangtua/OrangTuaFormFields.tsx
 "use client";
 import React from "react";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { motion } from "framer-motion";
 import { FiCheckCircle } from "react-icons/fi";
 import { OrangTuaData } from "./useOrangTuaForm";
+import dayjs from "dayjs";
 
 interface OrangTuaFormFieldsProps {
   orangTuaData: OrangTuaData;
@@ -143,13 +142,24 @@ export default function OrangTuaFormFields({
           </div>
           <div className="flex flex-col">
             <label>Tanggal Lahir Ayah</label>
-            <DatePicker
-              selected={orangTuaData.ayah.tanggal_lahir}
-              disabled={hasData ? !isEditMode : false}
-              onChange={(date) =>
-                handleInputChange("tanggal_lahir", date, "ayah")
+            <input
+              type="date"
+              required
+              className="w-full p-2 border rounded-lg"
+              value={
+                orangTuaData.ayah.tanggal_lahir
+                  ? dayjs(orangTuaData.ayah.tanggal_lahir).format("YYYY-MM-DD")
+                  : ""
               }
-              placeholderText="Pilih tanggal lahir ayah"
+              disabled={hasData ? !isEditMode : false}
+              onChange={(e) =>
+                handleInputChange(
+                  "tanggal_lahir",
+                  e.target.value ? dayjs(e.target.value).toDate() : null,
+                  "ayah"
+                )
+              }
+              placeholder="Pilih tanggal lahir ayah"
             />
           </div>
           <div>
@@ -220,28 +230,14 @@ export default function OrangTuaFormFields({
             <label>Nomor HP Ayah</label>
             <input
               type="number"
-              required={!orangTuaData.ayah.has_no_hp}
-              disabled={
-                orangTuaData.ayah.has_no_hp || (hasData ? !isEditMode : false)
-              }
+              required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nomor HP ayah"
               value={orangTuaData.ayah.nomor_hp}
               onChange={(e) =>
                 handleInputChange("nomor_hp", e.target.value, "ayah")
               }
             />
-            <div className="flex gap-2 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4"
-                disabled={hasData ? !isEditMode : false}
-                checked={orangTuaData.ayah.has_no_hp}
-                onChange={(e) =>
-                  handleCheckboxChange("has_no_hp", e.target.checked, "ayah")
-                }
-              />
-              <span>Tidak memiliki nomor HP</span>
-            </div>
           </div>
         </div>
 
@@ -299,13 +295,24 @@ export default function OrangTuaFormFields({
           </div>
           <div className="flex flex-col">
             <label>Tanggal Lahir Ibu</label>
-            <DatePicker
-              selected={orangTuaData.ibu.tanggal_lahir}
-              disabled={hasData ? !isEditMode : false}
-              onChange={(date) =>
-                handleInputChange("tanggal_lahir", date, "ibu")
+            <input
+              type="date"
+              required
+              className="w-full p-2 border rounded-lg"
+              value={
+                orangTuaData.ibu.tanggal_lahir
+                  ? dayjs(orangTuaData.ibu.tanggal_lahir).format("YYYY-MM-DD")
+                  : ""
               }
-              placeholderText="Pilih tanggal lahir ibu"
+              disabled={hasData ? !isEditMode : false}
+              onChange={(e) =>
+                handleInputChange(
+                  "tanggal_lahir",
+                  e.target.value ? dayjs(e.target.value).toDate() : null,
+                  "ibu"
+                )
+              }
+              placeholder="Pilih tanggal lahir ibu"
             />
           </div>
           <div>
@@ -376,28 +383,14 @@ export default function OrangTuaFormFields({
             <label>Nomor HP Ibu</label>
             <input
               type="number"
-              required={!orangTuaData.ibu.has_no_hp}
-              disabled={
-                orangTuaData.ibu.has_no_hp || (hasData ? !isEditMode : false)
-              }
+              required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nomor HP ibu"
               value={orangTuaData.ibu.nomor_hp}
               onChange={(e) =>
                 handleInputChange("nomor_hp", e.target.value, "ibu")
               }
             />
-            <div className="flex gap-2 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4"
-                disabled={hasData ? !isEditMode : false}
-                checked={orangTuaData.ibu.has_no_hp}
-                onChange={(e) =>
-                  handleCheckboxChange("has_no_hp", e.target.checked, "ibu")
-                }
-              />
-              <span>Tidak memiliki nomor HP</span>
-            </div>
           </div>
         </div>
 
@@ -455,19 +448,31 @@ export default function OrangTuaFormFields({
             </button>
           )}
           {hasData && !isEditMode && (
-            <button type="button" onClick={() => setIsEditMode(true)}>
+            <button
+              type="button"
+              onClick={() => setIsEditMode(true)}
+              className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
+            >
               Edit Data
             </button>
           )}
           {hasData && isEditMode && (
-            <>
-              <button type="button" onClick={() => setIsEditMode(false)}>
+            <div className="flex w-full gap-3">
+              <button
+                type="button"
+                onClick={() => setIsEditMode(false)}
+                className="bg-red-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-red-600"
+              >
                 Batal
               </button>
-              <button type="button" onClick={handleUpdate}>
+              <button
+                type="button"
+                onClick={handleUpdate}
+                className="bg-green-500 rounded w-full sm:w-7/12 py-3 font-semibold mx-auto text-white hover:bg-green-600"
+              >
                 Simpan Perubahan
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>

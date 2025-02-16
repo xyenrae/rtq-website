@@ -2,8 +2,7 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import dayjs from "dayjs";
 import Image from "next/image";
 import { FiCheckCircle } from "react-icons/fi";
 import { FaUser } from "react-icons/fa";
@@ -182,14 +181,25 @@ export default function SantriFormFields({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="flex flex-col">
             <label>Tanggal Lahir</label>
-            <DatePicker
+            <input
+              type="date"
               required
-              selected={santriData.tanggal_lahir}
-              disabled={hasData ? !isEditMode : false}
-              onChange={(date) =>
-                setSantriData({ ...santriData, tanggal_lahir: date })
+              className="w-full p-2 border rounded-lg"
+              value={
+                santriData.tanggal_lahir
+                  ? dayjs(santriData.tanggal_lahir).format("YYYY-MM-DD")
+                  : ""
               }
-              placeholderText="Pilih tanggal lahir"
+              disabled={hasData ? !isEditMode : false}
+              onChange={(e) =>
+                setSantriData({
+                  ...santriData,
+                  tanggal_lahir: e.target.value
+                    ? dayjs(e.target.value).toDate()
+                    : null,
+                })
+              }
+              placeholder="Pilih tanggal lahir"
             />
           </div>
           <div>
@@ -270,31 +280,20 @@ export default function SantriFormFields({
             <label>Nomor HP</label>
             <input
               type="number"
-              required={!santriData.has_no_hp}
-              disabled={(!isEditMode && hasData) || santriData.has_no_hp}
+              required
+              disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan nomor HP"
               value={santriData.nomor_hp ?? ""}
               onChange={(e) =>
                 setSantriData({ ...santriData, nomor_hp: e.target.value })
               }
             />
-            <div className="flex gap-2 mt-1">
-              <input
-                type="checkbox"
-                className="w-4 h-4"
-                disabled={hasData ? !isEditMode : false}
-                checked={santriData.has_no_hp}
-                onChange={(e) =>
-                  setSantriData({ ...santriData, has_no_hp: e.target.checked })
-                }
-              />
-              <span>Tidak memiliki nomor HP</span>
-            </div>
           </div>
           <div>
             <label>Email</label>
             <input
               type="email"
+              required
               disabled={hasData ? !isEditMode : false}
               placeholder="Masukkan email"
               value={santriData.email ?? ""}
