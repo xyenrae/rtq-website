@@ -1,21 +1,19 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabase/client";
-import Link from "next/link";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { useBerita } from "@/hooks/useBerita";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 
-// Interface untuk berita
-interface Berita {
-  id: string;
-  judul: string;
-  tanggal: string;
-  konten: string;
-  views: number;
-  gambar: string;
-  kategori?: string; // Kolom kategori opsional
-}
+// Daftar kategori
+const categories = [
+  "Semua",
+  "Pendidikan",
+  "Kegiatan",
+  "Pengumuman",
+  "Prestasi",
+];
 
 // Fungsi untuk memformat tanggal
 const formatDate = (dateString: string) => {
@@ -25,176 +23,92 @@ const formatDate = (dateString: string) => {
   }).format(date);
 };
 
-// Variabel animasi
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1 },
-  },
-};
-
-const cardVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: {
-    y: 0,
-    opacity: 1,
-    transition: { duration: 0.4 },
-  },
+// Variabel animasi untuk preview dengan persistent effect
+const previewVariants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 export default function BeritaPage() {
-  const [berita, setBerita] = useState<Berita[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
-  const [page, setPage] = useState(1); // Halaman saat ini
-  const [hasMore, setHasMore] = useState(true); // Apakah ada data lagi?
+  const { berita, isLoading, error } = useBerita(selectedCategory);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
+  // Simpan preview berita terakhir yang tampil
+  const [previewBerita, setPreviewBerita] = useState<any>(null);
+  // Flag untuk mendeteksi initial load
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  // Fungsi untuk memanggil data dari Supabase
-  const fetchBerita = async (reset: boolean = false) => {
-    try {
-      // Jika reset, kita hapus data lama dan set ulang status pagination
-      if (reset) {
-        setBerita([]);
-        setHasMore(true);
-      }
-
-      let query = supabase
-        .from("berita")
-        .select("*")
-        .order("tanggal", { ascending: false })
-        .range((page - 1) * 6, page * 6 - 1);
-
-      if (selectedCategory !== "Semua") {
-        query = query.eq("kategori", selectedCategory);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      // Jika reset, langsung set data; jika tidak, gabungkan dengan data lama
-      if (reset) {
-        setBerita(data);
-      } else {
-        setBerita((prev) => [...prev, ...data]);
-      }
-
-      // Jika data yang didapat kurang dari 6, tidak ada lagi data selanjutnya
-      if (data.length < 6) {
-        setHasMore(false);
-      }
-    } catch (err) {
-      console.error("Error fetching berita:", err);
-      setError("Gagal memuat berita. Silakan coba kembali.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Daftar kategori
-  const categories = [
-    "Semua",
-    "Pendidikan",
-    "Kegiatan",
-    "Pengumuman",
-    "Prestasi",
-  ];
-
-  // Saat kategori berubah, reset halaman ke 1
+  // Update previewBerita saat data baru sudah siap
   useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-  }, [selectedCategory]);
-
-  // Efek untuk fetch data berdasarkan perubahan page atau selectedCategory
-  useEffect(() => {
-    if (page === 1) {
-      fetchBerita(true); // Reset data ketika page = 1
-    } else {
-      fetchBerita(false); // Tambahkan data untuk infinite scroll
+    if (!isLoading && berita.length > 0) {
+      setPreviewBerita(berita[0]);
+      if (isInitialLoad) setIsInitialLoad(false);
     }
-  }, [page, selectedCategory]);
+  }, [isLoading, berita, isInitialLoad]);
 
-  // Ref untuk observer infinite scroll
-  const loaderRef = useRef<HTMLDivElement | null>(null);
-
+  // Efek untuk menampilkan tombol scroll ke atas
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 300) {
-        setShowScrollToTop(true);
-      } else {
-        setShowScrollToTop(false);
-      }
+      setShowScrollToTop(window.scrollY > 300);
     };
-
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Efek infinite scroll
-  useEffect(() => {
-    if (!hasMore || isLoading) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setPage((prev) => prev + 1);
-        }
-      },
-      { threshold: 0.5 }
-    );
-
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
-    }
-
-    return () => {
-      if (loaderRef.current) {
-        observer.unobserve(loaderRef.current);
-      }
-    };
-  }, [hasMore, isLoading]);
-
-  // Tampilkan skeleton atau error bila diperlukan
-  if (isLoading && page === 1) return <LoadingSkeleton />;
   if (error) return <ErrorMessage message={error} />;
+  // Pada initial load, tampilkan skeleton loader
+  if (isInitialLoad) return <LoadingSkeleton />;
+
+  // Untuk card berita, ambil tiga item setelah preview
+  const cardBerita = berita.slice(1, 4);
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <section className="relative h-96 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          {berita[0]?.gambar && (
-            <Image
-              src={berita[0].gambar}
-              alt="Featured News"
-              fill
-              className="object-cover transform scale-105"
-              priority
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-        </div>
-        <div className="relative z-10 text-center px-4 max-w-4xl space-y-4">
-          <motion.h1
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg"
+      {/* Hero Section dengan Persistent Preview */}
+      <AnimatePresence mode="wait">
+        {previewBerita && (
+          <motion.section
+            key={selectedCategory} // Memicu animasi saat kategori berubah
+            variants={previewVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.5 }}
+            className="relative h-96 flex items-center justify-center overflow-hidden"
           >
-            Informasi Terkini
-          </motion.h1>
-          <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-xl text-gray-200"
-          >
-            Tetap update dengan perkembangan terbaru dari komunitas kami
-          </motion.p>
-        </div>
-      </section>
+            <div className="absolute inset-0 z-0">
+              {previewBerita.gambar && (
+                <Image
+                  src={previewBerita.gambar}
+                  alt="Featured News"
+                  fill
+                  className="object-cover transform scale-105"
+                  priority
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+            </div>
+            <div className="relative z-10 text-center px-4 max-w-4xl space-y-4">
+              <motion.h1
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="text-4xl md:text-5xl font-bold text-white drop-shadow-lg"
+              >
+                Informasi Terkini
+              </motion.h1>
+              <motion.p
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-xl text-gray-200"
+              >
+                Tetap update dengan perkembangan terbaru dari komunitas kami
+              </motion.p>
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
 
       {/* Category Filter */}
       <section className="container mx-auto px-4 py-8">
@@ -232,23 +146,21 @@ export default function BeritaPage() {
         </div>
       </section>
 
-      {/* News Grid */}
+      {/* Card Berita Grid (3 item) */}
       <motion.section
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="container mx-auto px-4 pb-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8"
+        className="container mx-auto px-4 pb-16 grid grid-cols-1 md:grid-cols-3 gap-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
       >
-        {berita.map((item, index) => (
-          // Jika ternyata masih ada kemungkinan duplikasi id, gunakan composite key:
+        {cardBerita.map((item, index) => (
           <motion.article
             key={`${item.id}-${index}`}
-            variants={cardVariants}
             className="relative group cursor-pointer bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow overflow-hidden flex flex-col sm:flex-row"
           >
             <Link href={`/berita/${item.id}`} className="flex flex-1">
               {/* Gambar */}
-              <div className="relative w-4/12 sm:w-1/3 h-32 sm:h-auto">
+              <div className="relative w-full sm:w-1/3 h-32 sm:h-auto">
                 <Image
                   src={item.gambar || "/placeholder.jpg"}
                   alt={item.judul}
@@ -278,13 +190,6 @@ export default function BeritaPage() {
             </Link>
           </motion.article>
         ))}
-
-        {/* Loader untuk infinite scroll */}
-        {hasMore && (
-          <div ref={loaderRef} className="col-span-full text-center py-4">
-            <p className="text-gray-500">Memuat lebih banyak...</p>
-          </div>
-        )}
       </motion.section>
 
       {/* Tombol Scroll ke Atas */}
@@ -293,21 +198,35 @@ export default function BeritaPage() {
   );
 }
 
-// Komponen Skeleton Loading
+// Komponen Skeleton Loader untuk initial load (tampilan konsisten untuk desktop dan mobile)
 const LoadingSkeleton = () => (
-  <div className="min-h-screen bg-gray-50">
+  <div className="min-h-screen bg-gray-50 animate-pulse">
     <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {[...Array(6)].map((_, index) => (
+      {/* Skeleton untuk Hero Preview */}
+      <div className="relative h-96 mb-8 bg-gray-300 rounded-lg">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+      </div>
+      {/* Skeleton untuk Category Filter */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div className="sm:hidden w-full h-12 bg-gray-300 rounded-xl" />
+        <div className="hidden sm:flex gap-4">
+          {categories.map((_, index) => (
+            <div key={index} className="w-24 h-10 bg-gray-300 rounded-xl" />
+          ))}
+        </div>
+      </div>
+      {/* Skeleton untuk Card Berita (3 item) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {[...Array(3)].map((_, index) => (
           <div
             key={index}
-            className="relative h-80 rounded-2xl overflow-hidden bg-gray-200 animate-pulse"
+            className="flex flex-col sm:flex-row bg-white rounded-lg shadow-lg overflow-hidden"
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 space-y-4">
-              <div className="h-4 w-1/3 bg-gray-300 rounded-full"></div>
-              <div className="h-6 w-4/5 bg-gray-300 rounded"></div>
-              <div className="h-4 w-2/5 bg-gray-300 rounded"></div>
+            <div className="w-full sm:w-1/3 h-32 sm:h-auto bg-gray-300" />
+            <div className="flex-1 p-4 space-y-4">
+              <div className="h-4 bg-gray-300 rounded w-1/3" />
+              <div className="h-6 bg-gray-300 rounded w-4/5" />
+              <div className="h-4 bg-gray-300 rounded w-2/5" />
             </div>
           </div>
         ))}

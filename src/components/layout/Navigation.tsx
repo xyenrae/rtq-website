@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "@/context/UserContext";
 import LogoutModal from "@/components/ui/LogoutModal";
+import { FiLogOut } from "react-icons/fi"; // Icon untuk logout
+import { ChevronDown } from "lucide-react"; // Icon ChevronDown dari lucide-react
 
 const formatName = (name: string): string =>
   name
@@ -152,6 +154,12 @@ export default function Navigation() {
                     <span className="text-green-700 font-medium">
                       {userFullName}
                     </span>
+                    <ChevronDown
+                      size={16}
+                      className={`text-green-700 transition-transform duration-300 ${
+                        isDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
                   <AnimatePresence>
                     {isDropdownOpen && (
@@ -165,13 +173,7 @@ export default function Navigation() {
                           onClick={() => setIsLogoutModalOpen(true)}
                           className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 transition-colors duration-300"
                         >
-                          <Image
-                            src="/images/logout.svg"
-                            alt="Logout"
-                            width={20}
-                            height={20}
-                            className="mr-2"
-                          />
+                          <FiLogOut size={20} className="mr-2" />
                           <span>Logout</span>
                         </button>
                       </motion.div>
@@ -263,12 +265,7 @@ export default function Navigation() {
                           onClick={() => setIsLogoutModalOpen(true)}
                           className="text-red-600 hover:text-red-700 flex items-center gap-1"
                         >
-                          <Image
-                            src="/images/logout.svg"
-                            alt="Logout"
-                            width={20}
-                            height={20}
-                          />
+                          <FiLogOut size={20} />
                           <span>Logout</span>
                         </button>
                       </div>
