@@ -115,14 +115,28 @@ export default function SantriFormFields({
                 <input
                   id="avatarInput"
                   type="file"
-                  accept="image/"
+                  accept="image/jpeg, image/png"
                   className="sr-only"
                   required
                   onChange={(e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const validTypes = ["image/jpeg", "image/png"];
+                      const maxSize = 5242880;
+
+                      if (!validTypes.includes(file.type)) {
+                        alert("Hanya file JPG dan PNG yang diperbolehkan");
+                        return;
+                      }
+
+                      if (file.size > maxSize) {
+                        alert("Ukuran file maksimal adalah 5MB");
+                        return;
+                      }
+
                       setSantriData({
                         ...santriData,
-                        profile_image_file: e.target.files[0],
+                        profile_image_file: file,
                       });
                     }
                   }}
@@ -131,7 +145,7 @@ export default function SantriFormFields({
             </div>
 
             {(!hasData || isEditMode) && (
-              <p className="text-sm text-gray-500 text-center w-1/2">
+              <p className="text-sm text-gray-500 text-center w-full mt-2">
                 Format: JPG, PNG (Maks. 5MB)
               </p>
             )}
@@ -334,12 +348,12 @@ export default function SantriFormFields({
                 })
               }
             >
+              <option value="">Pilih Sumber Pembiayaan</option>
               <option value="Orang Tua">Orang Tua</option>
               <option value="Beasiswa">Beasiswa</option>
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-
           <div>
             <label>Kebutuhan Khusus</label>
             <select
@@ -353,6 +367,7 @@ export default function SantriFormFields({
                 })
               }
             >
+              <option value=""></option>
               <option value="Tidak Ada">Tidak Ada</option>
               <option value="Lamban Belajar">Lamban Belajar</option>
               <option value="Kesulitan Belajar Spesifik">
@@ -365,65 +380,69 @@ export default function SantriFormFields({
               <option value="Lainnya">Lainnya</option>
             </select>
           </div>
-          <div>
-            <label>Kebutuhan Disabilitas</label>
-            <select
-              required
-              disabled={hasData ? !isEditMode : false}
-              value={santriData.kebutuhan_disabilitas}
-              onChange={(e) =>
-                setSantriData({
-                  ...santriData,
-                  kebutuhan_disabilitas: e.target.value,
-                })
-              }
-            >
-              <option value="Tidak Ada">Tidak Ada</option>
-              <option value="Tuna Netra">Tuna Netra</option>
-              <option value="Tuna Rungu">Tuna Rungu</option>
-              <option value="Tuna Daksa">Tuna Daksa</option>
-              <option value="Tuna Grahita">Tuna Grahita</option>
-              <option value="Tuna Laras">Tuna Laras</option>
-              <option value="Tuna Wicara">Tuna Wicara</option>
-              <option value="Lainnya">Lainnya</option>
-            </select>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-8 gap-6">
+          <div className="col-span-6">
+            <div>
+              <label>Kebutuhan Disabilitas</label>
+              <select
+                required
+                disabled={hasData ? !isEditMode : false}
+                value={santriData.kebutuhan_disabilitas}
+                onChange={(e) =>
+                  setSantriData({
+                    ...santriData,
+                    kebutuhan_disabilitas: e.target.value,
+                  })
+                }
+              >
+                <option value="">Pilih Kebutuhan Khusus</option>
+                <option value="Tidak Ada">Tidak Ada</option>
+                <option value="Tuna Netra">Tuna Netra</option>
+                <option value="Tuna Rungu">Tuna Rungu</option>
+                <option value="Tuna Daksa">Tuna Daksa</option>
+                <option value="Tuna Grahita">Tuna Grahita</option>
+                <option value="Tuna Laras">Tuna Laras</option>
+                <option value="Tuna Wicara">Tuna Wicara</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div className="mt-6">
+              <label>Nomor KK</label>
+              <input
+                type="number"
+                required
+                disabled={hasData ? !isEditMode : false}
+                placeholder="Masukkan nomor KK"
+                value={santriData.nomor_kk ?? ""}
+                onChange={(e) =>
+                  setSantriData({ ...santriData, nomor_kk: e.target.value })
+                }
+              />
+            </div>
+            <div className="mt-6">
+              <label>Nama Kepala Keluarga</label>
+              <input
+                type="text"
+                required
+                disabled={hasData ? !isEditMode : false}
+                placeholder="Masukkan nama kepala keluarga"
+                value={santriData.nama_kepala_keluarga ?? ""}
+                onChange={(e) =>
+                  setSantriData({
+                    ...santriData,
+                    nama_kepala_keluarga: e.target.value,
+                  })
+                }
+              />
+            </div>
           </div>
-          <div>
-            <label>Nomor KK</label>
-            <input
-              type="number"
-              required
-              disabled={hasData ? !isEditMode : false}
-              placeholder="Masukkan nomor KK"
-              value={santriData.nomor_kk ?? ""}
-              onChange={(e) =>
-                setSantriData({ ...santriData, nomor_kk: e.target.value })
-              }
-            />
-          </div>
-          <div>
-            <label>Nama Kepala Keluarga</label>
-            <input
-              type="text"
-              required
-              disabled={hasData ? !isEditMode : false}
-              placeholder="Masukkan nama kepala keluarga"
-              value={santriData.nama_kepala_keluarga ?? ""}
-              onChange={(e) =>
-                setSantriData({
-                  ...santriData,
-                  nama_kepala_keluarga: e.target.value,
-                })
-              }
-            />
-          </div>
-
-          <div>
+          <div className="col-span-2">
             <div className="relative group">
               <p>Unggah KK</p>
               <label
                 className={`
-                  block aspect-square w-1/2 rounded-2xl border-4 border-dashed cursor-pointer mt-2
+                  block aspect-square w-full rounded-2xl border-4 border-dashed cursor-pointer mt-2
                   ${
                     hasData && !isEditMode
                       ? "cursor-not-allowed opacity-75"
@@ -458,13 +477,27 @@ export default function SantriFormFields({
                   id="kkInput"
                   type="file"
                   required
-                  accept="image/"
+                  accept="image/jpeg, image/png"
                   className="sr-only"
                   onChange={(e) => {
-                    if (e.target.files?.[0]) {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const validTypes = ["image/jpeg", "image/png"];
+                      const maxSize = 5242880;
+
+                      if (!validTypes.includes(file.type)) {
+                        alert("Hanya file JPG dan PNG yang diperbolehkan");
+                        return;
+                      }
+
+                      if (file.size > maxSize) {
+                        alert("Ukuran file maksimal adalah 5MB");
+                        return;
+                      }
+
                       setSantriData({
                         ...santriData,
-                        kk_image_file: e.target.files[0],
+                        kk_image_file: file,
                       });
                     }
                   }}
@@ -473,7 +506,7 @@ export default function SantriFormFields({
             </div>
 
             {(!hasData || isEditMode) && (
-              <p className="text-sm text-gray-500 text-center w-1/2">
+              <p className="text-sm text-gray-500 text-center w-full mt-2">
                 Format: JPG, PNG (Maks. 5MB)
               </p>
             )}
