@@ -7,8 +7,8 @@ import { useBerita } from "@/hooks/useBerita";
 import { useKategori } from "@/hooks/useKategori";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
+import NewsCard from "@/components/card/NewsCard";
 
-// Fungsi format tanggal
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("id-ID", {
@@ -29,7 +29,6 @@ export default function BeritaPage() {
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
-  // Infinite scroll: gunakan IntersectionObserver
   useEffect(() => {
     if (isLoading) return;
     const observer = new IntersectionObserver(
@@ -46,7 +45,6 @@ export default function BeritaPage() {
     };
   }, [isLoading, hasMore, setPage]);
 
-  // Tampilkan tombol scroll to top ketika scroll > 300px
   useEffect(() => {
     const handleScroll = () => {
       setShowScrollToTop(window.scrollY > 300);
@@ -55,12 +53,9 @@ export default function BeritaPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Jika loading dan belum ada data, tampilkan skeleton loader
   if (isLoading && berita.length === 0) return <LoadingSkeleton />;
 
-  // Preview berita: ambil entry pertama jika ada
   const previewBerita = berita[0] || null;
-  // Grid berita: berita selain preview
   const newsGrid = berita.slice(1);
 
   return (
@@ -180,41 +175,7 @@ export default function BeritaPage() {
       >
         {newsGrid.length > 0 ? (
           newsGrid.map((item, index) => (
-            <motion.article
-              key={`${item.id}-${index}`}
-              className="group cursor-pointer bg-white rounded-lg shadow hover:shadow-lg transition-shadow overflow-hidden flex flex-col sm:flex-row"
-            >
-              <Link href={`/berita/${item.id}`} className="flex flex-1">
-                {/* Gambar */}
-                <div className="relative w-34 sm:w-1/3 h-34 bg-gray-300">
-                  <Image
-                    src={item.gambar || "/placeholder.jpg"}
-                    alt={item.judul}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  />
-                </div>
-                {/* Konten */}
-                <div className="py-2 px-3 flex flex-col justify-between flex-1">
-                  <div>
-                    {item.kategori && (
-                      <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium mb-1">
-                        {item.kategori.nama}
-                      </span>
-                    )}
-                    <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
-                      {item.judul}
-                    </h3>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-500 mt-2">
-                    <span>{formatDate(item.tanggal)}</span>
-                    <span className="mx-2">•</span>
-                    <span>{item.views} views</span>
-                  </div>
-                </div>
-              </Link>
-            </motion.article>
+            <NewsCard key={`${item.id}-${index}`} item={item} />
           ))
         ) : (
           <p className="col-span-full text-center text-gray-600">
@@ -223,10 +184,8 @@ export default function BeritaPage() {
         )}
       </motion.section>
 
-      {/* Loading indicator untuk infinite scroll */}
       {isLoading && berita.length > 0 && <LoadMoreSpinner />}
 
-      {/* Sentinel element untuk infinite scroll */}
       <div ref={observerRef} className="h-1" />
 
       {showScrollToTop && <ScrollToTopButton />}

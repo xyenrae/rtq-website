@@ -24,7 +24,7 @@ const ScrollToTopButton = () => {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 group z-50"
+      className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 group z-40"
     >
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

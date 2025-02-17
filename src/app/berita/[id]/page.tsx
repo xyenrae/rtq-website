@@ -7,6 +7,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { Eye, Calendar, ChevronLeft, Clock } from "lucide-react";
 import NewsCard from "@/components/card/NewsCard";
+import { FaInstagram, FaLinkedin, FaShare, FaTwitter } from "react-icons/fa";
 
 interface Berita {
   id: string;
@@ -71,12 +72,11 @@ export default function BeritaDetailPage() {
         setBeritaDetail(detailRes.data);
         setLatestBerita(latestRes.data);
 
-        // Fetch related news after we have the category
-        if (detailRes.data?.kategori) {
+        if (detailRes.data?.kategori_id) {
           const relatedRes = await supabase
             .from("berita")
             .select("*")
-            .eq("kategori", detailRes.data.kategori)
+            .eq("kategori_id", detailRes.data.kategori_id)
             .neq("id", id)
             .limit(3);
 
@@ -108,7 +108,7 @@ export default function BeritaDetailPage() {
   if (!beritaDetail) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 w-screen overflow-hidden">
       {/* Navigation */}
       <nav className=" top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
         <div className="container mx-auto px-4 py-4">
@@ -123,67 +123,184 @@ export default function BeritaDetailPage() {
       </nav>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-4 gap-8">
-          <div className="lg:col-span-3 space-y-8">
+      <div className="lg:container lg:px-4 py-8 ">
+        <div className="grid grid-cols-12 gap-8">
+          <div className="col-span-12 lg:col-span-9 space-y-8">
             {/* Main Article */}
             <motion.article
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              className="lg:col-span-3"
+              transition={{ duration: 0.6 }}
+              className="w-full"
             >
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <div className="rounded-2xl shadow-sm overflow-hidden border border-gray-100 w-full">
+                {/* Hero Image with Parallax Effect */}
                 {beritaDetail.gambar && (
-                  <div className="relative h-[480px] w-full">
+                  <motion.div
+                    className="relative h-[560px] w-full group overflow-hidden"
+                    initial={{ scale: 1.05 }}
+                    animate={{ scale: 1 }}
+                    transition={{ duration: 0.8 }}
+                  >
                     <Image
                       src={beritaDetail.gambar}
                       alt={beritaDetail.judul}
                       fill
-                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                       priority
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent" />
-                  </div>
+                    {/* <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" /> */}
+                  </motion.div>
                 )}
 
-                <div className="p-8">
-                  <header className="mb-8">
-                    <div className="flex items-center justify-between mb-4">
-                      {beritaDetail.kategori && (
-                        <span className="px-4 py-1 bg-green-100 text-green-600 rounded-full text-sm font-medium">
-                          {beritaDetail.kategori}
-                        </span>
-                      )}
+                {/* Floating Meta Section */}
+                <div className="relative -mt-16">
+                  <div className="bg-white container py-8 rounded-2xl rounded-br-none">
+                    <header className="mb-4">
+                      <div className="flex justify-between gap-4 mb-6">
+                        <div className="flex">
+                          {beritaDetail.kategori && (
+                            <motion.span
+                              initial={{ scale: 0.9 }}
+                              animate={{ scale: 1 }}
+                              className="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium shadow-sm"
+                            >
+                              {beritaDetail.kategori}
+                            </motion.span>
+                          )}
+                          {/* Interactive Time Widget */}
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-2 text-gray-600">
+                              <Calendar className="w-5 h-5" />
+                              <span className="font-medium">
+                                {new Date(
+                                  beritaDetail.tanggal
+                                ).toLocaleDateString("id-ID", {
+                                  weekday: "long",
+                                  day: "numeric",
+                                  month: "long",
+                                  year: "numeric",
+                                })}
+                              </span>
+                            </div>
+
+                            <div className="hidden lg:flex h-5 w-0.5 bg-gray-300 rounded-full" />
+                          </div>
+                          <div className="hidden lg:flex items-center space-x-1.5 text-gray-600 ml-2">
+                            <Eye className="w-5 h-5" />
+                            <span className="font-medium">
+                              {beritaDetail.views}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="hidden lg:flex items-center space-x-3">
+                          <div className="flex items-center space-x-1.5 text-gray-600">
+                            <Clock className="w-5 h-5" />
+                            <span className="font-medium">
+                              {estimateReadTime(beritaDetail.konten)} min read
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex -mt-4 mb-4 lg:hidden justify-between">
+                        <div className="flex items-center space-x-1.5 text-gray-600">
+                          <Clock className="w-5 h-5" />
+                          <span className="font-medium">
+                            {estimateReadTime(beritaDetail.konten)} min read
+                          </span>
+                        </div>
+                        <div className="flex lg:hidden items-center space-x-1.5 text-gray-600 ml-2">
+                          <Eye className="w-5 h-5" />
+                          <span className="font-medium">
+                            {beritaDetail.views}
+                          </span>
+                        </div>
+                      </div>
+
+                      <motion.h1
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-4xl font-bold text-gray-900 leading-tight tracking-tight"
+                      >
+                        {beritaDetail.judul}
+                      </motion.h1>
+                    </header>
+
+                    {/* Content with Interactive Elements */}
+                    <div className="prose prose-xl max-w-none text-gray-700 leading-relaxed">
+                      {beritaDetail.konten
+                        .split("\n")
+                        .map((paragraph, index) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="relative group mb-8"
+                          >
+                            <p className="text-lg leading-8 text-gray-700 ">
+                              {paragraph}
+
+                              {/* Hover Annotation */}
+                              <button className="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-gray-400 hover:text-gray-600">
+                                <span className="text-2xl">·</span>
+                              </button>
+                            </p>
+                          </motion.div>
+                        ))}
+                    </div>
+                    <div className="flex justify-end">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        className="flex items-center space-x-2 text-gray-600 hover:text-green-600"
+                      >
+                        <FaShare className="w-5 h-5" />
+                        <span>Bagikan</span>
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Author & Social Proof Section */}
+                <div className="border-t border-gray-200 mt-8 py-8 px-8">
+                  <div className="max-w-4xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-green-500">
+                        <Image
+                          src="/images/logo-rtq.png"
+                          alt="Penulis"
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900">by Admin</h4>
+                        <p className="text-gray-600">RTQ AL-Hikmah</p>
+                      </div>
                     </div>
 
-                    <h1 className="text-4xl font-bold text-gray-800 mb-4 leading-tight">
-                      {beritaDetail.judul}
-                    </h1>
-
-                    <div className="flex items-center space-x-4 text-gray-500 text-sm">
-                      <span className="flex items-center">
-                        <Calendar className="w-4 h-4 mr-1" />
-                        {formatDate(beritaDetail.tanggal)}
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center">
-                        <Eye className="w-4 h-4 mr-1" />
-                        {beritaDetail.views} views
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center">
-                        <Clock className="w-4 h-4 mr-1" />
-                        {estimateReadTime(beritaDetail.konten)} menit baca
-                      </span>
+                    <div className="flex items-center space-x-4">
+                      <motion.button
+                        whileHover={{ y: -2 }}
+                        className="text-gray-600 hover:text-green-600"
+                      >
+                        <FaTwitter className="w-6 h-6" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ y: -2 }}
+                        className="text-gray-600 hover:text-green-600"
+                      >
+                        <FaInstagram className="w-6 h-6" />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ y: -2 }}
+                        className="text-gray-600 hover:text-green-600"
+                      >
+                        <FaLinkedin className="w-6 h-6" />
+                      </motion.button>
                     </div>
-                  </header>
-
-                  <div className="prose max-w-none text-gray-700 text-lg leading-relaxed">
-                    {beritaDetail.konten.split("\n").map((paragraph, index) => (
-                      <p key={index} className="mb-6">
-                        {paragraph}
-                      </p>
-                    ))}
                   </div>
                 </div>
               </div>
@@ -191,12 +308,12 @@ export default function BeritaDetailPage() {
           </div>
 
           {/* Sidebar */}
-          <aside className="lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)] overflow-y-auto space-y-8 pb-8">
+          <aside className="col-span-12 lg:col-span-3 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)] overflow-y-auto space-y-8 pb-8">
             {/* Latest News */}
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-lg p-6"
+              className="bg-white rounded-xl shadow-sm p-6"
             >
               <h2 className="text-xl font-bold mb-6 text-gray-800 border-l-4 border-green-500 pl-3">
                 Berita Terbaru
@@ -225,22 +342,25 @@ export default function BeritaDetailPage() {
         </div>
 
         {/* Related News */}
-        {relatedBerita.length > 0 && (
-          <motion.section
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-16"
-          >
-            <h2 className="text-2xl font-bold mb-8 text-gray-800 border-l-4 border-green-500 pl-3">
-              Berita Terkait
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {relatedBerita.map((item, index) => (
-                <NewsCard key={`${item.id}-${index}`} item={item} />
-              ))}
-            </div>
-          </motion.section>
-        )}
+        <h2 className="text-xl font-bold mb-8 text-gray-800 border-l-4 border-green-500 pl-3 ml-4 lg:mt-8">
+          Berita Terkait
+        </h2>
+        <motion.section
+          className="container mx-auto px-4 pb-16 grid grid-cols-1 md:grid-cols-3 gap-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          {relatedBerita.length > 0 ? (
+            relatedBerita.map((item, index) => (
+              <NewsCard key={`${item.id}-${index}`} item={item} />
+            ))
+          ) : (
+            <p className="col-span-full text-center text-gray-600">
+              Tidak ada berita untuk kategori ini.
+            </p>
+          )}{" "}
+        </motion.section>
       </div>
     </div>
   );
@@ -260,7 +380,7 @@ const SkeletonLoader = () => (
     <div className="container mx-auto px-4 py-8">
       <div className="grid lg:grid-cols-4 gap-8">
         <div className="lg:col-span-3">
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden animate-pulse">
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden animate-pulse">
             <div className="h-[480px] bg-gray-300"></div>
             <div className="p-8 space-y-6">
               <div className="space-y-4">
@@ -284,7 +404,7 @@ const SkeletonLoader = () => (
           {[...Array(2)].map((_, sectionIndex) => (
             <div
               key={sectionIndex}
-              className="bg-white rounded-xl shadow-lg p-6 animate-pulse"
+              className="bg-white rounded-xl shadow-sm p-6 animate-pulse"
             >
               <div className="h-6 w-32 bg-gray-300 rounded mb-6"></div>
               <div className="space-y-6">
@@ -311,7 +431,7 @@ const ErrorMessage = ({ message }: { message: string }) => (
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="text-center max-w-md p-8 bg-white rounded-2xl shadow-xl"
+      className="text-center max-w-md p-8 bg-white rounded-2xl shadow-sm"
     >
       <div className="text-red-500 text-6xl mb-4">⚠️</div>
       <h3 className="text-xl font-semibold text-gray-800 mb-4">{message}</h3>
