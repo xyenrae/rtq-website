@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiPlus,
@@ -14,6 +15,7 @@ import {
   FiImage,
 } from "react-icons/fi";
 import { useNews } from "@/hooks/admin/useNews";
+import Image from "next/image";
 
 const NewsTable = () => {
   const {
@@ -28,6 +30,7 @@ const NewsTable = () => {
     sortConfig,
     requestSort,
     imagePreview,
+    setImagePreview,
     formData,
     setFormData,
     itemsPerPage,
@@ -39,6 +42,14 @@ const NewsTable = () => {
     handleDelete,
     formInitState,
   } = useNews();
+
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      setError(null);
+    }
+  }, [error]);
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
@@ -75,83 +86,89 @@ const NewsTable = () => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              {["judul", "kategori", "tanggal"].map((key) => (
-                <th
-                  key={key}
-                  className="px-5 py-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
-                  onClick={() => requestSort(key as keyof typeof formData)}
-                >
-                  <div className="flex items-center gap-2">
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                    {sortConfig?.key === key &&
-                      (sortConfig.direction === "asc" ? (
-                        <FiArrowUp className="text-green-600" />
-                      ) : (
-                        <FiArrowDown className="text-green-600" />
-                      ))}
-                  </div>
-                </th>
-              ))}
-              <th className="px-5 py-4 text-center">Aksi</th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-gray-200">
-            {paginatedNews.map((item) => (
-              <tr
-                key={item.id}
-                className="hover:bg-gray-50 transition-colors group"
-              >
-                <td className="px-5 py-4 max-w-xs">
-                  <div className="font-medium text-gray-800 line-clamp-2">
-                    {item.judul}
-                  </div>
-                </td>
-                <td className="px-5 py-4">
-                  <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm">
-                    {item.kategori?.nama || "Uncategorized"}
-                  </span>
-                </td>
-                <td className="px-5 py-4 text-gray-600">
-                  {new Date(item.tanggal).toLocaleDateString("id-ID", {
-                    day: "2-digit",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </td>
-                <td className="px-5 py-4">
-                  <div className="flex justify-center gap-3">
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
-                      onClick={() => {
-                        setEditingNews(item);
-                        setFormData(item);
-                        setShowModal(true);
-                      }}
-                    >
-                      <FiEdit size={18} />
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      <FiTrash size={18} />
-                    </motion.button>
-                  </div>
-                </td>
+      {filteredNews.length > 0 ? (
+        <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                {["judul", "kategori", "tanggal"].map((key) => (
+                  <th
+                    key={key}
+                    className="px-5 py-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => requestSort(key as keyof typeof formData)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {key.charAt(0).toUpperCase() + key.slice(1)}
+                      {sortConfig?.key === key &&
+                        (sortConfig.direction === "asc" ? (
+                          <FiArrowUp className="text-green-600" />
+                        ) : (
+                          <FiArrowDown className="text-green-600" />
+                        ))}
+                    </div>
+                  </th>
+                ))}
+                <th className="px-5 py-4 text-center">Aksi</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+
+            <tbody className="divide-y divide-gray-200">
+              {paginatedNews.map((item) => (
+                <tr
+                  key={item.id}
+                  className="hover:bg-gray-50 transition-colors group"
+                >
+                  <td className="px-5 py-4 max-w-xs">
+                    <div className="font-medium text-gray-800 line-clamp-2">
+                      {item.judul}
+                    </div>
+                  </td>
+                  <td className="px-5 py-4">
+                    <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm">
+                      {item.kategori?.nama || "Uncategorized"}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-gray-600">
+                    {new Date(item.tanggal).toLocaleDateString("id-ID", {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex justify-center gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
+                        onClick={() => {
+                          setEditingNews(item);
+                          setFormData(item);
+                          setShowModal(true);
+                        }}
+                      >
+                        <FiEdit size={18} />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        <FiTrash size={18} />
+                      </motion.button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-gray-500">Tidak ada data berita ditemukan</p>
+        </div>
+      )}
 
       {/* Pagination */}
       <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
@@ -254,15 +271,21 @@ const NewsTable = () => {
                       <select
                         required
                         className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        value={formData.kategori}
+                        value={formData.kategori_id}
                         onChange={(e) =>
-                          setFormData({ ...formData, kategori: e.target.value })
+                          setFormData({
+                            ...formData,
+                            kategori_id: e.target.value,
+                          })
                         }
                       >
                         <option value="">Pilih Kategori</option>
-                        <option value="Pengumuman">Pengumuman</option>
-                        <option value="Artikel">Artikel</option>
-                        <option value="Berita">Berita</option>
+                        {/* Ambil kategori dari API atau state */}
+                        <option value="11111111-1111-1111-1111-111111111111">
+                          Pendidikan
+                        </option>
+                        <option value="2">Artikel</option>
+                        <option value="3">Pengumuman</option>
                       </select>
                     </div>
 
@@ -290,9 +313,11 @@ const NewsTable = () => {
                       <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center aspect-video">
                         {imagePreview ? (
                           <>
-                            <img
+                            <Image
                               src={imagePreview}
                               alt="Preview"
+                              width={300}
+                              height={300}
                               className="w-full h-full object-cover rounded-lg mb-4"
                             />
                             <label className="cursor-pointer text-sm text-green-600 hover:text-green-700">
@@ -300,9 +325,16 @@ const NewsTable = () => {
                               <input
                                 type="file"
                                 className="hidden"
-                                onChange={(e) => {
+                                accept="image/*"
+                                onChange={async (e) => {
                                   const file = e.target.files?.[0];
-                                  if (file) handleImageUpload(file);
+                                  if (file) {
+                                    try {
+                                      await handleImageUpload(file);
+                                    } catch (error) {
+                                      setImagePreview(null);
+                                    }
+                                  }
                                 }}
                               />
                             </label>

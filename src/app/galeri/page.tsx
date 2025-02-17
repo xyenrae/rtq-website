@@ -4,7 +4,7 @@ import Image from "next/image";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
 import { useGalleryCategories } from "@/hooks/gallery/useGalleryCategories";
-import { getCloudinaryUrl } from "@/components/utils/cloudinary";
+import { getCloudinaryUrl } from "@/utils/cloudinary";
 import { FiDownload } from "react-icons/fi";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
