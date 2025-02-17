@@ -1,28 +1,33 @@
-// app/galeri/page.tsx
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
+import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
 import { useGalleryCategories } from "@/hooks/gallery/useGalleryCategories";
 import { getCloudinaryUrl } from "@/components/utils/cloudinary";
+import { FiDownload } from "react-icons/fi";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper as SwiperType } from "swiper";
+import "swiper/css";
+import SkeletonGaleri from "@/components/skeleton/galeri/SkeletonGaleri";
 
 export default function GaleriPage() {
   const { galleryCategories, loading } = useGalleryCategories();
 
-  // State lightbox dan navigasi
   const [selectedPublicId, setSelectedPublicId] = useState<string | null>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   const lightboxRef = useRef<HTMLDivElement>(null);
 
-  // Jika pengguna memilih "Lihat Album", simpan kumpulan gambar khusus album tersebut.
-  // Jika null, berarti lightbox diakses dari grid gambar (semua gambar).
+  const [visibleCount, setVisibleCount] = useState(12);
+  const observerRef = useRef<HTMLDivElement | null>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
+
   const [albumImages, setAlbumImages] = useState<
     { publicId: string; categoryTitle: string }[] | null
   >(null);
 
-  // Gabungkan semua gambar dari setiap kategori menjadi satu array
   const sortedImages = galleryCategories
     .flatMap((category) =>
       (category.gallery || []).map((img) => ({
@@ -32,8 +37,9 @@ export default function GaleriPage() {
     )
     .sort((a, b) => b.publicId.localeCompare(a.publicId));
 
-  // Jika albumImages diset, gunakan itu; jika tidak, gunakan sortedImages
   const lightboxImages = albumImages || sortedImages;
+
+  const displayedImages = sortedImages.slice(0, visibleCount);
 
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(
     new Set()
@@ -102,7 +108,29 @@ export default function GaleriPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (loading) return <p>Loading gallery...</p>;
+  useEffect(() => {
+    if (visibleCount >= sortedImages.length) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount((prev) => Math.min(prev + 12, sortedImages.length));
+        }
+      },
+      { threshold: 0.1, rootMargin: "200px" }
+    );
+    if (observerRef.current) observer.observe(observerRef.current);
+    return () => {
+      if (observerRef.current) observer.unobserve(observerRef.current);
+    };
+  }, [visibleCount, sortedImages.length]);
+
+  useEffect(() => {
+    if (swiperRef.current) {
+      swiperRef.current.slideTo(currentIndex, 300);
+    }
+  }, [currentIndex]);
+
+  if (loading) return <SkeletonGaleri />;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
@@ -191,13 +219,13 @@ export default function GaleriPage() {
         </div>
       </section>
 
-      {/* Gallery Grid Section */}
+      {/* Gallery Grid Section dengan Infinite Scroll */}
       <section id="gallery-grid" className="container mx-auto px-4 py-16">
         <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
           Momen Terbaru
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {sortedImages.map(({ publicId, categoryTitle }, index) => (
+          {displayedImages.map(({ publicId, categoryTitle }, index) => (
             <div
               key={`${publicId}-${index}`}
               className="relative group cursor-pointer transform hover:scale-105 transition-all duration-300"
@@ -229,69 +257,184 @@ export default function GaleriPage() {
             </div>
           ))}
         </div>
+        {visibleCount < sortedImages.length && (
+          <>
+            <LoadMoreSpinner />
+            <div ref={observerRef} className="h-1" />
+          </>
+        )}
       </section>
 
       {/* Enhanced Lightbox */}
       {selectedPublicId && (
         <div
           ref={lightboxRef}
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-gray-900/95 backdrop-blur-2xl flex items-center justify-center p-4"
           onClick={(e) =>
             e.target === lightboxRef.current && setSelectedPublicId(null)
           }
         >
-          <div className="relative max-w-6xl w-full max-h-[90vh]">
-            {/* Navigation Controls */}
-            <button
-              className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-4 rounded-full backdrop-blur-lg text-white text-2xl transition-all z-50"
-              onClick={() => handleImageNavigation("prev")}
-            >
-              ←
-            </button>
-            <button
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 p-4 rounded-full backdrop-blur-lg text-white text-2xl transition-all z-50"
-              onClick={() => handleImageNavigation("next")}
-            >
-              →
-            </button>
+          <div className="w-full max-w-7xl h-full flex flex-col">
+            {/* Top Bar */}
+            <div className="flex justify-between items-center p-4 bg-gray-800/30 backdrop-blur-lg rounded-t-xl border-b border-gray-700">
+              <div className="flex items-center gap-4">
+                <button
+                  className="p-2 hover:bg-gray-700/50 rounded-full transition-colors"
+                  onClick={() => setSelectedPublicId(null)}
+                >
+                  <span className="text-2xl text-white">×</span>
+                </button>
+                <div className="text-sm text-gray-300">
+                  {currentIndex + 1} of {lightboxImages.length}
+                </div>
+              </div>
 
-            {/* Image Counter */}
-            <div className="absolute top-4 left-4 bg-black/30 px-4 py-2 rounded-full text-white text-sm z-50">
-              {currentIndex + 1} / {lightboxImages.length}
+              <div className="flex items-center gap-3">
+                <button
+                  className="p-2.5 hover:bg-gray-700/50 rounded-full transition-colors group"
+                  onClick={() => {
+                    const imageUrl = getCloudinaryUrl(
+                      selectedPublicId,
+                      "w_1920,h_1080,c_fill"
+                    );
+                    const link = document.createElement("a");
+                    link.href = imageUrl;
+                    link.download = `${selectedPublicId}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                >
+                  <FiDownload className="text-xl text-white group-hover:text-green-400 transition-colors" />
+                </button>
+              </div>
             </div>
 
-            {/* Close Button */}
-            <button
-              className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 p-3 rounded-full backdrop-blur-lg text-white text-2xl transition-colors z-50"
-              onClick={() => setSelectedPublicId(null)}
-            >
-              ✕
-            </button>
-
-            {/* Image Container */}
-            <div className="relative w-full h-full flex items-center justify-center">
-              {isImageLoading && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/20 border-t-white" />
+            {/* Main Content */}
+            <div className="relative flex-1 flex items-center justify-center">
+              {/* Image Container */}
+              <div className="relative w-full h-full flex items-center justify-center p-8">
+                {isImageLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-600 border-t-green-500" />
+                  </div>
+                )}
+                <div className="relative max-w-4xl w-full h-full shadow-2xl rounded-xl overflow-hidden">
+                  <Image
+                    key={selectedPublicId}
+                    src={getCloudinaryUrl(
+                      selectedPublicId,
+                      "w_1920,h_1080,c_fill"
+                    )}
+                    alt="Detail Kegiatan"
+                    fill
+                    className={`object-contain transition-opacity duration-300 ${
+                      isImageLoading ? "opacity-0" : "opacity-100"
+                    }`}
+                    priority
+                    onLoadingComplete={() => setIsImageLoading(false)}
+                  />
                 </div>
-              )}
-              <Image
-                key={selectedPublicId}
-                src={getCloudinaryUrl(selectedPublicId, "w_1920,h_1080,c_fill")}
-                alt="Detail Kegiatan"
-                width={1920}
-                height={1080}
-                className={`object-contain rounded-xl transition-opacity duration-300 ${
-                  isImageLoading ? "opacity-0" : "opacity-100"
-                }`}
-                style={{ maxHeight: "80vh" }}
-                priority
-                onLoadingComplete={() => setIsImageLoading(false)}
+              </div>
+
+              {/* Navigation Arrows */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4 z-10 sm:hidden">
+                <button
+                  className="p-4 hover:bg-gray-800/50 rounded-full backdrop-blur-sm transition-all"
+                  onClick={() => handleImageNavigation("prev")}
+                >
+                  <div className="text-3xl text-white bg-gray-900/30 p-3 rounded-full hover:bg-gray-900/50">
+                    ←
+                  </div>
+                </button>
+                <button
+                  className="p-4 hover:bg-gray-800/50 rounded-full backdrop-blur-sm transition-all"
+                  onClick={() => handleImageNavigation("next")}
+                >
+                  <div className="text-3xl text-white bg-gray-900/30 p-3 rounded-full hover:bg-gray-900/50">
+                    →
+                  </div>
+                </button>
+              </div>
+
+              {/* Desktop Navigation Arrows */}
+              <button
+                className="absolute left-4 z-10 p-4 hover:bg-gray-800/50 rounded-full backdrop-blur-sm transition-all -translate-x-2 hover:translate-x-0 hidden sm:block"
+                onClick={() => handleImageNavigation("prev")}
+              >
+                <div className="text-3xl text-white bg-gray-900/30 p-3 rounded-full hover:bg-gray-900/50">
+                  ←
+                </div>
+              </button>
+              <button
+                className="absolute right-4 z-10 p-4 hover:bg-gray-800/50 rounded-full backdrop-blur-sm transition-all translate-x-2 hover:translate-x-0 hidden sm:block"
+                onClick={() => handleImageNavigation("next")}
+              >
+                <div className="text-3xl text-white bg-gray-900/30 p-3 rounded-full hover:bg-gray-900/50">
+                  →
+                </div>
+              </button>
+            </div>
+
+            <div className="h-32 bg-gray-800/30 backdrop-blur-lg border-t border-gray-700 p-4">
+              <Swiper
+                spaceBetween={10}
+                slidesPerView="auto"
+                centeredSlides={true}
+                onSwiper={(swiper) => (swiperRef.current = swiper)}
+                className="h-full"
+              >
+                {lightboxImages.map((img, idx) => (
+                  <SwiperSlide
+                    key={`${img.publicId}-${idx}`}
+                    style={{ width: "auto" }}
+                  >
+                    <div
+                      className={`relative h-full aspect-video cursor-pointer transition-all ${
+                        idx === currentIndex
+                          ? "ring-4 ring-green-500 scale-105"
+                          : "opacity-70 hover:opacity-100"
+                      }`}
+                      onClick={() => {
+                        setCurrentIndex(idx);
+                        setSelectedPublicId(img.publicId);
+                      }}
+                    >
+                      <Image
+                        src={getCloudinaryUrl(
+                          img.publicId,
+                          "w_200,h_120,c_fill"
+                        )}
+                        alt="Thumbnail"
+                        fill
+                        className="object-cover rounded-sm"
+                      />
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-700/30">
+              <div
+                className="h-full bg-green-500 transition-all duration-300"
+                style={{
+                  width: `${
+                    ((currentIndex + 1) / lightboxImages.length) * 100
+                  }%`,
+                }}
               />
+            </div>
+
+            {/* Caption */}
+            <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-white">
+              {lightboxImages[currentIndex]?.categoryTitle}
             </div>
           </div>
         </div>
       )}
+
       {showScrollToTop && <ScrollToTopButton />}
     </div>
   );
