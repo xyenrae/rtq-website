@@ -1,182 +1,150 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   FiPlus,
   FiEdit,
   FiTrash,
   FiSearch,
-  FiChevronLeft,
-  FiChevronRight,
+  FiChevronsLeft,
+  FiChevronsRight,
+  FiArrowUp,
+  FiArrowDown,
+  FiX,
+  FiImage,
 } from "react-icons/fi";
-import { supabase } from "@/lib/supabase/client";
-
-interface News {
-  id: string;
-  judul: string;
-  tanggal: string;
-  konten: string;
-  gambar: string;
-  kategori: string;
-}
+import { useNews } from "@/hooks/admin/useNews";
 
 const NewsTable = () => {
-  const [news, setNews] = useState<News[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [editingNews, setEditingNews] = useState<News | null>(null);
-  const itemsPerPage = 5;
-
-  // Form state
-  const [formData, setFormData] = useState({
-    judul: "",
-    kategori: "",
-    konten: "",
-    gambar: "",
-    tanggal: new Date().toISOString().split("T")[0],
-  });
-
-  // Fetch data
-  const fetchNews = async () => {
-    const { data } = await supabase
-      .from("berita")
-      .select("*")
-      .order("tanggal", { ascending: false });
-
-    if (data) setNews(data);
-  };
-
-  useEffect(() => {
-    fetchNews();
-  }, []);
-
-  // Handle Search and Pagination
-  const filteredNews = news.filter((item) =>
-    item.judul.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
-  const paginatedNews = filteredNews.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Handle Form Submit
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (editingNews) {
-      // Update existing
-      const { error } = await supabase
-        .from("berita")
-        .update(formData)
-        .eq("id", editingNews.id);
-
-      if (!error) fetchNews();
-    } else {
-      // Create new
-      const { error } = await supabase.from("berita").insert([formData]);
-
-      if (!error) fetchNews();
-    }
-
-    setShowModal(false);
-    setFormData({
-      judul: "",
-      kategori: "",
-      konten: "",
-      gambar: "",
-      tanggal: new Date().toISOString().split("T")[0],
-    });
-  };
-
-  // Handle Delete
-  const handleDelete = async (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus berita ini?")) {
-      const { error } = await supabase.from("berita").delete().eq("id", id);
-
-      if (!error) fetchNews();
-    }
-  };
-
-  // Handle Edit
-  const handleEdit = (newsItem: News) => {
-    setEditingNews(newsItem);
-    setFormData(newsItem);
-    setShowModal(true);
-  };
+  const {
+    searchTerm,
+    setSearchTerm,
+    currentPage,
+    setCurrentPage,
+    showModal,
+    setShowModal,
+    editingNews,
+    setEditingNews,
+    sortConfig,
+    requestSort,
+    imagePreview,
+    formData,
+    setFormData,
+    itemsPerPage,
+    filteredNews,
+    totalPages,
+    paginatedNews,
+    handleSubmit,
+    handleImageUpload,
+    handleDelete,
+    formInitState,
+  } = useNews();
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200">
+    <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4 md:mb-0">
-          Kelola Berita
-        </h2>
+      <div className="flex flex-col md:flex-row gap-4 justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Kelola Berita</h1>
+          <p className="text-gray-600 mt-1">
+            Total {filteredNews.length} berita ditemukan
+          </p>
+        </div>
 
-        <div className="flex gap-4">
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1">
+            <FiSearch className="absolute left-3 top-3.5 text-gray-400" />
             <input
               type="text"
               placeholder="Cari berita..."
-              className="pl-10 pr-4 py-2 border rounded-lg w-full md:w-64"
+              className="pl-10 pr-4 py-2.5 border rounded-xl w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FiSearch className="absolute left-3 top-4 text-gray-400" />
           </div>
 
           <motion.button
             whileHover={{ scale: 1.05 }}
-            className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+            whileTap={{ scale: 0.95 }}
+            className="bg-green-600 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 hover:bg-green-700 transition-colors"
             onClick={() => setShowModal(true)}
           >
-            <FiPlus /> Tambah Baru
+            <FiPlus className="text-lg" />
+            <span>Tambah Baru</span>
           </motion.button>
         </div>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left">Judul</th>
-              <th className="px-4 py-3 text-left hidden md:table-cell">
-                Kategori
-              </th>
-              <th className="px-4 py-3 text-left hidden md:table-cell">
-                Tanggal
-              </th>
-              <th className="px-4 py-3 text-center">Aksi</th>
+              {["judul", "kategori", "tanggal"].map((key) => (
+                <th
+                  key={key}
+                  className="px-5 py-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => requestSort(key as keyof typeof formData)}
+                >
+                  <div className="flex items-center gap-2">
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    {sortConfig?.key === key &&
+                      (sortConfig.direction === "asc" ? (
+                        <FiArrowUp className="text-green-600" />
+                      ) : (
+                        <FiArrowDown className="text-green-600" />
+                      ))}
+                  </div>
+                </th>
+              ))}
+              <th className="px-5 py-4 text-center">Aksi</th>
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="divide-y divide-gray-200">
             {paginatedNews.map((item) => (
-              <tr key={item.id} className="border-t hover:bg-gray-50">
-                <td className="px-4 py-3">{item.judul}</td>
-                <td className="px-4 py-3 hidden md:table-cell">
-                  {item.kategori}
+              <tr
+                key={item.id}
+                className="hover:bg-gray-50 transition-colors group"
+              >
+                <td className="px-5 py-4 max-w-xs">
+                  <div className="font-medium text-gray-800 line-clamp-2">
+                    {item.judul}
+                  </div>
                 </td>
-                <td className="px-4 py-3 hidden md:table-cell">
-                  {new Date(item.tanggal).toLocaleDateString("id-ID")}
+                <td className="px-5 py-4">
+                  <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm">
+                    {item.kategori?.nama || "Uncategorized"}
+                  </span>
                 </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-center gap-2">
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="text-blue-500 hover:text-blue-600 p-2"
+                <td className="px-5 py-4 text-gray-600">
+                  {new Date(item.tanggal).toLocaleDateString("id-ID", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </td>
+                <td className="px-5 py-4">
+                  <div className="flex justify-center gap-3">
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
+                      onClick={() => {
+                        setEditingNews(item);
+                        setFormData(item);
+                        setShowModal(true);
+                      }}
                     >
                       <FiEdit size={18} />
-                    </button>
-                    <button
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
                       onClick={() => handleDelete(item.id)}
-                      className="text-red-500 hover:text-red-600 p-2"
                     >
                       <FiTrash size={18} />
-                    </button>
+                    </motion.button>
                   </div>
                 </td>
               </tr>
@@ -186,144 +154,223 @@ const NewsTable = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-between items-center mt-6">
-        <button
-          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
-          className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
-        >
-          <FiChevronLeft size={20} />
-        </button>
+      <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+        <div className="text-gray-600">
+          Menampilkan {(currentPage - 1) * itemsPerPage + 1} -{" "}
+          {Math.min(currentPage * itemsPerPage, filteredNews.length)} dari{" "}
+          {filteredNews.length}
+        </div>
 
-        <span>
-          Halaman {currentPage} dari {totalPages}
-        </span>
+        <div className="flex items-center gap-2">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2.5 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+          >
+            <FiChevronsLeft size={20} />
+          </motion.button>
 
-        <button
-          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-          disabled={currentPage === totalPages}
-          className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50"
-        >
-          <FiChevronRight size={20} />
-        </button>
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3.5 py-1.5 rounded-lg ${
+                currentPage === i + 1
+                  ? "bg-green-600 text-white"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2.5 rounded-lg hover:bg-gray-100 disabled:opacity-50"
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages}
+          >
+            <FiChevronsRight size={20} />
+          </motion.button>
+        </div>
       </div>
 
       {/* Modal Form */}
-      {showModal && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
-        >
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
-            <h3 className="text-xl font-bold mb-4">
-              {editingNews ? "Edit Berita" : "Tambah Berita Baru"}
-            </h3>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Judul</label>
-                <input
-                  type="text"
-                  required
-                  className="w-full p-2 border rounded-lg"
-                  value={formData.judul}
-                  onChange={(e) =>
-                    setFormData({ ...formData, judul: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Kategori
-                  </label>
-                  <select
-                    required
-                    className="w-full p-2 border rounded-lg"
-                    value={formData.kategori}
-                    onChange={(e) =>
-                      setFormData({ ...formData, kategori: e.target.value })
-                    }
-                  >
-                    <option value="">Pilih Kategori</option>
-                    <option value="Pengumuman">Pengumuman</option>
-                    <option value="Artikel">Artikel</option>
-                    <option value="Berita">Berita</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Tanggal
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    className="w-full p-2 border rounded-lg"
-                    value={formData.tanggal}
-                    onChange={(e) =>
-                      setFormData({ ...formData, tanggal: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Gambar</label>
-                <input
-                  type="file"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const { data } = await supabase.storage
-                        .from("berita-images")
-                        .upload(`/${Date.now()}-${file.name}`, file);
-
-                      if (data) {
-                        setFormData({ ...formData, gambar: data.path });
-                      }
-                    }
-                  }}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Konten</label>
-                <textarea
-                  required
-                  rows={6}
-                  className="w-full p-2 border rounded-lg"
-                  value={formData.konten}
-                  onChange={(e) =>
-                    setFormData({ ...formData, konten: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="flex justify-end gap-4">
+      <AnimatePresence>
+        {showModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ y: 50 }}
+              animate={{ y: 0 }}
+              exit={{ y: 50 }}
+              className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+            >
+              <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-xl font-semibold">
+                  {editingNews ? "Edit Berita" : "Buat Berita Baru"}
+                </h3>
                 <button
-                  type="button"
                   onClick={() => {
                     setShowModal(false);
                     setEditingNews(null);
+                    setFormData(formInitState);
                   }}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="p-2 hover:bg-gray-100 rounded-lg"
                 >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-                >
-                  {editingNews ? "Simpan Perubahan" : "Tambah Berita"}
+                  <FiX size={24} />
                 </button>
               </div>
-            </form>
-          </div>
-        </motion.div>
-      )}
+
+              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Judul Berita
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        value={formData.judul}
+                        onChange={(e) =>
+                          setFormData({ ...formData, judul: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Kategori
+                      </label>
+                      <select
+                        required
+                        className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        value={formData.kategori}
+                        onChange={(e) =>
+                          setFormData({ ...formData, kategori: e.target.value })
+                        }
+                      >
+                        <option value="">Pilih Kategori</option>
+                        <option value="Pengumuman">Pengumuman</option>
+                        <option value="Artikel">Artikel</option>
+                        <option value="Berita">Berita</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Tanggal Publikasi
+                      </label>
+                      <input
+                        type="date"
+                        required
+                        className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        value={formData.tanggal}
+                        onChange={(e) =>
+                          setFormData({ ...formData, tanggal: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Upload Gambar
+                      </label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center aspect-video">
+                        {imagePreview ? (
+                          <>
+                            <img
+                              src={imagePreview}
+                              alt="Preview"
+                              className="w-full h-full object-cover rounded-lg mb-4"
+                            />
+                            <label className="cursor-pointer text-sm text-green-600 hover:text-green-700">
+                              Ganti Gambar
+                              <input
+                                type="file"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleImageUpload(file);
+                                }}
+                              />
+                            </label>
+                          </>
+                        ) : (
+                          <label className="cursor-pointer flex flex-col items-center text-center">
+                            <FiImage className="text-3xl text-gray-400 mb-2" />
+                            <span className="text-sm text-gray-500">
+                              Seret gambar atau klik untuk upload
+                            </span>
+                            <input
+                              type="file"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleImageUpload(file);
+                              }}
+                            />
+                          </label>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Konten Berita
+                  </label>
+                  <textarea
+                    required
+                    rows={6}
+                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    value={formData.konten}
+                    onChange={(e) =>
+                      setFormData({ ...formData, konten: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="flex justify-end gap-4 pt-6">
+                  <motion.button
+                    type="button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl"
+                    onClick={() => {
+                      setShowModal(false);
+                      setEditingNews(null);
+                      setFormData(formInitState);
+                    }}
+                  >
+                    Batal
+                  </motion.button>
+                  <motion.button
+                    type="submit"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
+                  >
+                    {editingNews ? "Simpan Perubahan" : "Publikasikan Berita"}
+                  </motion.button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
