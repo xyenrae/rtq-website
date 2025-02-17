@@ -34,15 +34,39 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  // Buka submenu untuk pendaftaran secara default jika path-nya sesuai
+
   const [openSubMenu, setOpenSubMenu] = useState(
     pathname.startsWith("/admin/pendaftaran")
   );
-  // Buka submenu untuk kelola website secara default jika path-nya sesuai
   const [openWebsiteSubMenu, setOpenWebsiteSubMenu] = useState(
     pathname.startsWith("/admin/website")
   );
+  const [openBeritaSubMenu, setOpenBeritaSubMenu] = useState(
+    pathname.startsWith("/admin/berita")
+  );
+  const [openGaleriSubMenu, setOpenGaleriSubMenu] = useState(
+    pathname.startsWith("/admin/galeri")
+  );
+
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  // Update submenu Berita saat path berubah
+  useEffect(() => {
+    if (pathname.startsWith("/admin/berita")) {
+      setOpenBeritaSubMenu(true);
+    } else {
+      setOpenBeritaSubMenu(false);
+    }
+  }, [pathname]);
+
+  // Update submenu Galeri saat path berubah
+  useEffect(() => {
+    if (pathname.startsWith("/admin/galeri")) {
+      setOpenGaleriSubMenu(true);
+    } else {
+      setOpenGaleriSubMenu(false);
+    }
+  }, [pathname]);
 
   // Update submenu pendaftaran saat path berubah
   useEffect(() => {
@@ -64,8 +88,22 @@ export default function AdminLayout({
 
   const navigation: NavigationItem[] = [
     { name: "Dashboard", href: "/admin", icon: <FiHome /> },
-    { name: "Berita", href: "/admin/berita", icon: <FaNewspaper /> },
-    { name: "Galeri", href: "/admin/galeri", icon: <FaImage /> },
+    {
+      name: "Berita",
+      icon: <FaNewspaper />,
+      children: [
+        { name: "Semua Berita", href: "/admin/berita" },
+        { name: "Kategori Berita", href: "/admin/berita/kategori" },
+      ],
+    },
+    {
+      name: "Galeri",
+      icon: <FaImage />,
+      children: [
+        { name: "Semua Galeri", href: "/admin/galeri" },
+        { name: "Kategori Galeri", href: "/admin/galeri/kategori" },
+      ],
+    },
     {
       name: "Pendaftaran",
       icon: <FiUsers />,
@@ -121,8 +159,12 @@ export default function AdminLayout({
                       onClick={() =>
                         item.name === "Pendaftaran"
                           ? setOpenSubMenu(!openSubMenu)
-                          : item.name === "Kelola Website" &&
-                            setOpenWebsiteSubMenu(!openWebsiteSubMenu)
+                          : item.name === "Kelola Website"
+                          ? setOpenWebsiteSubMenu(!openWebsiteSubMenu)
+                          : item.name === "Berita"
+                          ? setOpenBeritaSubMenu(!openBeritaSubMenu)
+                          : item.name === "Galeri" &&
+                            setOpenGaleriSubMenu(!openGaleriSubMenu)
                       }
                       className="flex items-center p-3 rounded-lg transition-colors text-gray-600 hover:bg-gray-100 cursor-pointer"
                     >
@@ -136,8 +178,15 @@ export default function AdminLayout({
                             ? openSubMenu
                               ? "rotate-180"
                               : ""
-                            : item.name === "Kelola Website" &&
-                              openWebsiteSubMenu
+                            : item.name === "Kelola Website"
+                            ? openWebsiteSubMenu
+                              ? "rotate-180"
+                              : ""
+                            : item.name === "Berita"
+                            ? openBeritaSubMenu
+                              ? "rotate-180"
+                              : ""
+                            : item.name === "Galeri" && openGaleriSubMenu
                             ? "rotate-180"
                             : ""
                         }`}
@@ -162,6 +211,40 @@ export default function AdminLayout({
                       </div>
                     )}
                     {item.name === "Kelola Website" && openWebsiteSubMenu && (
+                      <div className="ml-6 space-y-1">
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.name}
+                            href={child.href!}
+                            className={`flex items-center p-2 rounded-lg transition-colors ${
+                              pathname === child.href
+                                ? "bg-green-100 text-green-600 border-l-4 border-green-500"
+                                : "text-gray-600 hover:bg-gray-100"
+                            }`}
+                          >
+                            {child.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {item.name === "Berita" && openBeritaSubMenu && (
+                      <div className="ml-6 space-y-1">
+                        {item.children.map((child) => (
+                          <Link
+                            key={child.name}
+                            href={child.href!}
+                            className={`flex items-center p-2 rounded-lg transition-colors ${
+                              pathname === child.href
+                                ? "bg-green-100 text-green-600 border-l-4 border-green-500"
+                                : "text-gray-600 hover:bg-gray-100"
+                            }`}
+                          >
+                            {child.name}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                    {item.name === "Galeri" && openGaleriSubMenu && (
                       <div className="ml-6 space-y-1">
                         {item.children.map((child) => (
                           <Link

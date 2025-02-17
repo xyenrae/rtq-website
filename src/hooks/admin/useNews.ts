@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
-import { uploadImageToSupabase } from "@/utils/uploadImage"; // Import fungsi upload
 
+// Interface News diperbarui dengan kolom baru: views, ringkasan, dan waktu_baca
 export interface News {
   id: string;
   judul: string;
@@ -10,6 +10,9 @@ export interface News {
   konten: string;
   gambar: string;
   kategori_id: string;
+  views: number; // Kolom baru: jumlah views
+  ringkasan: string; // Kolom baru: ringkasan berita
+  waktu_baca: number; // Kolom baru: waktu baca dalam menit
 }
 
 interface SortConfig {
@@ -26,26 +29,36 @@ export const useNews = () => {
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("Semua");
+
+  // Form initial state diperbarui dengan kolom baru
   const formInitState = {
     judul: "",
     kategori_id: "",
     konten: "",
     gambar: "",
     tanggal: new Date().toISOString().split("T")[0],
+    views: 0, // Default views: 0
+    ringkasan: "", // Default ringkasan: kosong
+    waktu_baca: 0, // Default waktu baca: 0 menit
   };
+
   const [formData, setFormData] = useState(formInitState);
   const itemsPerPage = 8;
 
+  // Fetch berita dari Supabase
   const fetchNews = async () => {
     try {
       let query = supabase
         .from("berita")
         .select("*, kategori_id:kategori_id")
         .order("tanggal", { ascending: false });
+
       if (selectedCategory !== "Semua") {
         query = query.eq("kategori_id", selectedCategory);
       }
+
       const { data, error } = await query;
+
       if (error) throw error;
       setNews(data || []);
     } catch {
@@ -60,7 +73,6 @@ export const useNews = () => {
   // Sorting data berita
   const sortedNews = [...news].sort((a, b) => {
     if (!sortConfig) return 0;
-
     const key = sortConfig.key;
 
     // Handle kategori khusus (nested object)
@@ -81,7 +93,6 @@ export const useNews = () => {
     } else if (typeof aValue === "number" && typeof bValue === "number") {
       return sortConfig.direction === "asc" ? aValue - bValue : bValue - aValue;
     }
-
     return 0;
   });
 
@@ -101,6 +112,7 @@ export const useNews = () => {
   const filteredNews = sortedNews.filter((item) =>
     item.judul.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
   const paginatedNews = filteredNews.slice(
     (currentPage - 1) * itemsPerPage,
@@ -111,10 +123,8 @@ export const useNews = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const loadingToast = toast.loading("Menyimpan data...");
-
     try {
       const operation = editingNews ? "update" : "insert";
-
       const { data, error } = editingNews
         ? await supabase
             .from("berita")
@@ -124,7 +134,6 @@ export const useNews = () => {
         : await supabase.from("berita").insert([formData]).select();
 
       if (error) throw error;
-
       toast.success(
         `Berita berhasil ${editingNews ? "diperbarui" : "dibuat"}!`
       );
@@ -182,7 +191,6 @@ export const useNews = () => {
   // Handle hapus berita
   const handleDelete = async (id: string) => {
     if (!confirm("Apakah Anda yakin ingin menghapus berita ini?")) return;
-
     const loadingToast = toast.loading("Menghapus berita...");
     try {
       // Hapus gambar terkait jika ada
@@ -192,9 +200,7 @@ export const useNews = () => {
       }
 
       const { error } = await supabase.from("berita").delete().eq("id", id);
-
       if (error) throw error;
-
       toast.success("Berita berhasil dihapus!");
       fetchNews();
     } catch (error) {
