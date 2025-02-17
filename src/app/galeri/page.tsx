@@ -5,7 +5,6 @@ import Image from "next/image";
 import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
 import { useGalleryCategories } from "@/hooks/gallery/useGalleryCategories";
 import { getCloudinaryUrl } from "@/components/utils/cloudinary";
-import { log } from "console";
 
 export default function GaleriPage() {
   const { galleryCategories, loading } = useGalleryCategories();
@@ -54,19 +53,16 @@ export default function GaleriPage() {
 
   const handleImageNavigation = useCallback(
     (direction: "prev" | "next") => {
-      if (!selectedPublicId) return;
-      const index = lightboxImages.findIndex(
-        (img) => img.publicId === selectedPublicId
-      );
+      if (selectedPublicId === null) return;
       const newIndex =
         direction === "next"
-          ? (index + 1) % lightboxImages.length
-          : (index - 1 + lightboxImages.length) % lightboxImages.length;
+          ? (currentIndex + 1) % lightboxImages.length
+          : (currentIndex - 1 + lightboxImages.length) % lightboxImages.length;
       setIsImageLoading(true);
       setSelectedPublicId(lightboxImages[newIndex].publicId);
       setCurrentIndex(newIndex);
     },
-    [selectedPublicId, lightboxImages]
+    [selectedPublicId, currentIndex, lightboxImages]
   );
 
   const handleKeyDown = useCallback(
@@ -165,9 +161,7 @@ export default function GaleriPage() {
                   sizes="(max-width: 768px) 100vw, 33vw"
                   priority={idx < 2}
                 />
-                <div
-                  className={`absolute inset-0 bg-gradient-to-t ${category.color_scheme} via-transparent to-transparent opacity-90`}
-                />
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                 <h3 className="text-2xl font-bold mb-2">{category.title}</h3>
@@ -178,7 +172,6 @@ export default function GaleriPage() {
                   <button
                     className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full backdrop-blur-sm transition-colors"
                     onClick={() => {
-                      // Filter hanya gambar dari kategori ini dan buka lightbox dengan album tersebut.
                       const album = sortedImages.filter(
                         (img) => img.categoryTitle === category.title
                       );
@@ -209,7 +202,6 @@ export default function GaleriPage() {
               key={`${publicId}-${index}`}
               className="relative group cursor-pointer transform hover:scale-105 transition-all duration-300"
               onClick={() => {
-                // Jika pengguna klik grid, gunakan semua gambar (reset albumImages)
                 setAlbumImages(null);
                 setIsImageLoading(true);
                 setSelectedPublicId(publicId);
