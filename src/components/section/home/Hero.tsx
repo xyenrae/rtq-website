@@ -11,7 +11,7 @@ export default function Hero() {
     }
   };
   return (
-    <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
+    <div className="container mx-auto px-4 py-16">
       <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
         {/* Text Section */}
         <div className="flex-1 order-2 lg:order-1 relative z-10">

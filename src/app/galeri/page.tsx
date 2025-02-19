@@ -1,85 +1,139 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import Image from "next/image";
-import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
-import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
-import { useGalleryCategories } from "@/hooks/gallery/useGalleryCategories";
-import { getCloudinaryUrl } from "@/utils/cloudinary";
 import { FiDownload } from "react-icons/fi";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Swiper as SwiperType } from "swiper";
 import "swiper/css";
 import SkeletonGaleri from "@/components/skeleton/galeri/SkeletonGaleri";
+import { useGaleri, GaleriImage } from "@/hooks/santri/galeri/useGaleri";
+import { useGaleriKategori } from "@/hooks/santri/galeri/useGaleriKategori";
+import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
+
+type GaleriImageWithCategory = GaleriImage;
+
+const INITIAL_LOAD_COUNT = 12;
+const LOAD_MORE_COUNT = 8;
 
 export default function GaleriPage() {
-  const { galleryCategories, loading } = useGalleryCategories();
+  const { galeri, loading: loadingGaleri } = useGaleri();
+  const { kategori, loading: loadingKategori } = useGaleriKategori();
+  const loading = loadingGaleri || loadingKategori;
 
-  const [selectedPublicId, setSelectedPublicId] = useState<string | null>(null);
+  const sortedImages = useMemo(
+    () =>
+      galeri
+        .slice()
+        .sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ),
+    [galeri]
+  );
+
+  const categories = useMemo(
+    () =>
+      kategori.map((cat) => ({
+        id: cat.id,
+        title: cat.nama,
+        images: sortedImages.filter((img) => img.galeri_kategori_id === cat.id),
+      })),
+    [kategori, sortedImages]
+  );
+
+  const [selectedImageId, setSelectedImageId] = useState<string | null>(null);
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [showScrollToTop, setShowScrollToTop] = useState(false);
-  const lightboxRef = useRef<HTMLDivElement>(null);
-
-  const [visibleCount, setVisibleCount] = useState(12);
-  const observerRef = useRef<HTMLDivElement | null>(null);
-  const swiperRef = useRef<SwiperType | null>(null);
-
+  const [visibleCount, setVisibleCount] = useState(INITIAL_LOAD_COUNT);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [albumImages, setAlbumImages] = useState<
-    { publicId: string; categoryTitle: string }[] | null
+    GaleriImageWithCategory[] | null
   >(null);
-
-  const sortedImages = galleryCategories
-    .flatMap((category) =>
-      (category.gallery || []).map((img) => ({
-        publicId: img.public_id,
-        categoryTitle: category.title,
-      }))
-    )
-    .sort((a, b) => b.publicId.localeCompare(a.publicId));
-
-  const lightboxImages = albumImages || sortedImages;
-
-  const displayedImages = sortedImages.slice(0, visibleCount);
-
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(
     new Set()
   );
+
+  const lightboxRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const swiperRef = useRef<SwiperType | null>(null);
+
+  const lightboxImages = albumImages || sortedImages;
+  const displayedImages = sortedImages.slice(0, visibleCount);
+  const hasMoreImages = visibleCount < sortedImages.length;
+
   const preloadImage = useCallback(
-    (publicId: string) => {
-      if (typeof window !== "undefined" && !preloadedImages.has(publicId)) {
+    (imageObj: GaleriImageWithCategory) => {
+      if (typeof window !== "undefined" && !preloadedImages.has(imageObj.id)) {
         const img = new window.Image();
-        img.src = getCloudinaryUrl(publicId, "w_1920,h_1080,c_fill");
+        img.src = imageObj.image;
         img.onload = () => {
-          setPreloadedImages((prev) => new Set(prev).add(publicId));
+          setPreloadedImages((prev) => new Set(prev).add(imageObj.id));
         };
       }
     },
     [preloadedImages]
   );
 
+  const loadMore = useCallback(() => {
+    if (!isLoadingMore && hasMoreImages) {
+      setIsLoadingMore(true);
+      setTimeout(() => {
+        setVisibleCount((prev) =>
+          Math.min(prev + LOAD_MORE_COUNT, sortedImages.length)
+        );
+        setIsLoadingMore(false);
+      }, 500); // Simulate network delay
+    }
+  }, [isLoadingMore, hasMoreImages, sortedImages.length]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (loading || !hasMoreImages) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1, rootMargin: "200px" }
+    );
+
+    const currentLoadMoreRef = loadMoreRef.current;
+    if (currentLoadMoreRef) {
+      observer.observe(currentLoadMoreRef);
+    }
+
+    return () => {
+      if (currentLoadMoreRef) {
+        observer.unobserve(currentLoadMoreRef);
+      }
+    };
+  }, [loading, hasMoreImages, loadMore]);
+
   const handleImageNavigation = useCallback(
     (direction: "prev" | "next") => {
-      if (selectedPublicId === null) return;
+      if (selectedImageId === null) return;
       const newIndex =
         direction === "next"
           ? (currentIndex + 1) % lightboxImages.length
           : (currentIndex - 1 + lightboxImages.length) % lightboxImages.length;
       setIsImageLoading(true);
-      setSelectedPublicId(lightboxImages[newIndex].publicId);
+      setSelectedImageId(lightboxImages[newIndex].id);
       setCurrentIndex(newIndex);
     },
-    [selectedPublicId, currentIndex, lightboxImages]
+    [selectedImageId, currentIndex, lightboxImages]
   );
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (selectedPublicId) {
+      if (selectedImageId) {
         if (e.key === "ArrowRight") handleImageNavigation("next");
         if (e.key === "ArrowLeft") handleImageNavigation("prev");
-        if (e.key === "Escape") setSelectedPublicId(null);
+        if (e.key === "Escape") setSelectedImageId(null);
       }
     },
-    [selectedPublicId, handleImageNavigation]
+    [selectedImageId, handleImageNavigation]
   );
 
   useEffect(() => {
@@ -88,41 +142,17 @@ export default function GaleriPage() {
   }, [handleKeyDown]);
 
   useEffect(() => {
-    if (selectedPublicId && lightboxImages.length > 0) {
+    if (selectedImageId && lightboxImages.length > 0) {
       const nextIndex = (currentIndex + 1) % lightboxImages.length;
       const prevIndex =
         (currentIndex - 1 + lightboxImages.length) % lightboxImages.length;
-      preloadImage(lightboxImages[nextIndex].publicId);
-      preloadImage(lightboxImages[prevIndex].publicId);
+      preloadImage(lightboxImages[nextIndex]);
+      preloadImage(lightboxImages[prevIndex]);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-  }, [selectedPublicId, currentIndex, preloadImage, lightboxImages]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollToTop(window.scrollY > 300);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    if (visibleCount >= sortedImages.length) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((prev) => Math.min(prev + 12, sortedImages.length));
-        }
-      },
-      { threshold: 0.1, rootMargin: "200px" }
-    );
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
-    };
-  }, [visibleCount, sortedImages.length]);
+  }, [selectedImageId, currentIndex, preloadImage, lightboxImages]);
 
   useEffect(() => {
     if (swiperRef.current) {
@@ -132,21 +162,24 @@ export default function GaleriPage() {
 
   if (loading) return <SkeletonGaleri />;
 
+  const selectedImage = lightboxImages.find(
+    (img) => img.id === selectedImageId
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Hero Section */}
       <section className="relative h-96 flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          <Image
-            src={getCloudinaryUrl(
-              "RTQ AL-Hikmah/wisuda/image-1",
-              "w_1920,h_1080,c_fill"
-            )}
-            alt="Background Hero"
-            fill
-            className="object-cover transform scale-105"
-            priority
-          />
+          {sortedImages.length > 0 && (
+            <Image
+              src={sortedImages[0].image}
+              alt="Hero Background"
+              fill
+              className="object-cover transform scale-105"
+              priority
+            />
+          )}
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
         </div>
         <div className="relative z-10 text-center space-y-6 px-4">
@@ -154,7 +187,8 @@ export default function GaleriPage() {
             Galeri Kegiatan
           </h1>
           <p className="text-xl text-gray-200 max-w-2xl mx-auto animate-fade-in-up delay-100">
-            Jejak Kenangan, Cerita Inspirasi - Dokumentasi Setiap Momen Berharga
+            Jejak kenangan dan cerita inspiratif – dokumentasi setiap momen
+            berharga.
           </p>
           <button
             className="bg-white/10 hover:bg-white/20 backdrop-blur-lg text-white px-8 py-3 rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg animate-fade-in-up delay-200"
@@ -169,43 +203,40 @@ export default function GaleriPage() {
         </div>
       </section>
 
-      {/* Kategori Section */}
+      {/* Categories Section */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
           Kategori Kegiatan
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {galleryCategories.map((category, idx) => (
+          {categories.map((category) => (
             <div
-              key={`${category.id}-${idx}`}
+              key={category.id}
               className="relative group overflow-hidden rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500"
             >
               <div className="relative h-80">
-                <Image
-                  src={getCloudinaryUrl(category.gallery[0]?.public_id)}
-                  alt={category.title}
-                  fill
-                  className="object-cover transform group-hover:scale-110 transition-transform duration-500"
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  priority={idx < 2}
-                />
+                {category.images.length > 0 && (
+                  <Image
+                    src={category.images[0].image}
+                    alt={category.title}
+                    fill
+                    className="object-cover transform group-hover:scale-110 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    priority
+                  />
+                )}
                 <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                 <h3 className="text-2xl font-bold mb-2">{category.title}</h3>
                 <div className="flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <p className="text-sm">
-                    {category.gallery?.length || 0}+ Foto
-                  </p>
+                  <p className="text-sm">{category.images.length} Foto</p>
                   <button
                     className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-full backdrop-blur-sm transition-colors"
                     onClick={() => {
-                      const album = sortedImages.filter(
-                        (img) => img.categoryTitle === category.title
-                      );
-                      if (album.length > 0) {
-                        setAlbumImages(album);
-                        setSelectedPublicId(album[0].publicId);
+                      if (category.images.length > 0) {
+                        setAlbumImages(category.images);
+                        setSelectedImageId(category.images[0].id);
                         setCurrentIndex(0);
                       }
                     }}
@@ -219,59 +250,69 @@ export default function GaleriPage() {
         </div>
       </section>
 
-      {/* Gallery Grid Section dengan Infinite Scroll */}
+      {/* Gallery Grid with Infinite Scroll */}
       <section id="gallery-grid" className="container mx-auto px-4 py-16">
         <h2 className="text-4xl font-bold text-center mb-12 text-gray-800">
           Momen Terbaru
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {displayedImages.map(({ publicId, categoryTitle }, index) => (
+          {displayedImages.map((img, index) => (
             <div
-              key={`${publicId}-${index}`}
+              key={img.id}
               className="relative group cursor-pointer transform hover:scale-105 transition-all duration-300"
               onClick={() => {
                 setAlbumImages(null);
                 setIsImageLoading(true);
-                setSelectedPublicId(publicId);
+                setSelectedImageId(img.id);
                 setCurrentIndex(
-                  sortedImages.findIndex((img) => img.publicId === publicId)
+                  sortedImages.findIndex((item) => item.id === img.id)
                 );
               }}
-              onMouseEnter={() => preloadImage(publicId)}
+              onMouseEnter={() => preloadImage(img)}
             >
               <div className="relative h-72 rounded-xl overflow-hidden shadow-lg">
                 <Image
-                  src={getCloudinaryUrl(publicId, "w_800,h_600,c_fill")}
-                  alt={`Kegiatan ${index + 1}`}
+                  src={img.image}
+                  alt={`Activity ${index + 1}`}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 640px) 100vw, 50vw, 33vw, 25vw"
-                  priority={index < 8}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  priority={index < INITIAL_LOAD_COUNT}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                  <h3 className="font-semibold truncate">{categoryTitle}</h3>
-                  <p className="text-sm">{new Date().toLocaleDateString()}</p>
+                  <h3 className="font-semibold truncate">{img.galeri_nama}</h3>
+                  <p className="text-sm">
+                    {new Date(img.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
             </div>
           ))}
         </div>
-        {visibleCount < sortedImages.length && (
-          <>
-            <LoadMoreSpinner />
-            <div ref={observerRef} className="h-1" />
-          </>
+
+        {/* Load More Indicator */}
+        {hasMoreImages && (
+          <div
+            ref={loadMoreRef}
+            className="flex justify-center items-center mt-8 h-16"
+          >
+            {isLoadingMore ? (
+              <LoadMoreSpinner />
+            ) : (
+              <div className="h-8 w-8" /> // Placeholder to maintain height
+            )}
+          </div>
         )}
       </section>
 
-      {/* Enhanced Lightbox */}
-      {selectedPublicId && (
+      {/* Lightbox Component */}
+      {selectedImageId && selectedImage && (
         <div
           ref={lightboxRef}
           className="fixed inset-0 z-50 bg-gray-900/95 backdrop-blur-2xl flex items-center justify-center p-4"
           onClick={(e) =>
-            e.target === lightboxRef.current && setSelectedPublicId(null)
+            e.target === lightboxRef.current && setSelectedImageId(null)
           }
         >
           <div className="w-full max-w-7xl h-full flex flex-col">
@@ -280,29 +321,28 @@ export default function GaleriPage() {
               <div className="flex items-center gap-4">
                 <button
                   className="p-2 hover:bg-gray-700/50 rounded-full transition-colors"
-                  onClick={() => setSelectedPublicId(null)}
+                  onClick={() => setSelectedImageId(null)}
                 >
                   <span className="text-2xl text-white">×</span>
                 </button>
                 <div className="text-sm text-gray-300">
-                  {currentIndex + 1} of {lightboxImages.length}
+                  {currentIndex + 1} dari {lightboxImages.length}
                 </div>
               </div>
-
               <div className="flex items-center gap-3">
                 <button
                   className="p-2.5 hover:bg-gray-700/50 rounded-full transition-colors group"
                   onClick={() => {
-                    const imageUrl = getCloudinaryUrl(
-                      selectedPublicId,
-                      "w_1920,h_1080,c_fill"
-                    );
-                    const link = document.createElement("a");
-                    link.href = imageUrl;
-                    link.download = `${selectedPublicId}.jpg`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
+                    if (selectedImage) {
+                      const link = document.createElement("a");
+                      link.href = selectedImage.image;
+                      link.download = `${
+                        selectedImage.galeri_nama || selectedImage.id
+                      }.jpg`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }
                   }}
                 >
                   <FiDownload className="text-xl text-white group-hover:text-green-400 transition-colors" />
@@ -312,7 +352,6 @@ export default function GaleriPage() {
 
             {/* Main Content */}
             <div className="relative flex-1 flex items-center justify-center">
-              {/* Image Container */}
               <div className="relative w-full h-full flex items-center justify-center p-8">
                 {isImageLoading && (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -321,12 +360,9 @@ export default function GaleriPage() {
                 )}
                 <div className="relative max-w-4xl w-full h-full shadow-2xl rounded-xl overflow-hidden">
                   <Image
-                    key={selectedPublicId}
-                    src={getCloudinaryUrl(
-                      selectedPublicId,
-                      "w_1920,h_1080,c_fill"
-                    )}
-                    alt="Detail Kegiatan"
+                    key={selectedImage.id}
+                    src={selectedImage.image}
+                    alt={selectedImage.galeri_nama || "Detail Kegiatan"}
                     fill
                     className={`object-contain transition-opacity duration-300 ${
                       isImageLoading ? "opacity-0" : "opacity-100"
@@ -337,7 +373,7 @@ export default function GaleriPage() {
                 </div>
               </div>
 
-              {/* Navigation Arrows */}
+              {/* Mobile Navigation Arrows */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4 z-10 sm:hidden">
                 <button
                   className="p-4 hover:bg-gray-800/50 rounded-full backdrop-blur-sm transition-all"
@@ -376,6 +412,7 @@ export default function GaleriPage() {
               </button>
             </div>
 
+            {/* Thumbnail Slider */}
             <div className="h-32 bg-gray-800/30 backdrop-blur-lg border-t border-gray-700 p-4">
               <Swiper
                 spaceBetween={10}
@@ -383,10 +420,11 @@ export default function GaleriPage() {
                 centeredSlides={true}
                 onSwiper={(swiper) => (swiperRef.current = swiper)}
                 className="h-full"
+                initialSlide={currentIndex}
               >
                 {lightboxImages.map((img, idx) => (
                   <SwiperSlide
-                    key={`${img.publicId}-${idx}`}
+                    key={`${img.id}-${idx}`}
                     style={{ width: "auto" }}
                   >
                     <div
@@ -397,17 +435,16 @@ export default function GaleriPage() {
                       }`}
                       onClick={() => {
                         setCurrentIndex(idx);
-                        setSelectedPublicId(img.publicId);
+                        setSelectedImageId(img.id);
+                        setIsImageLoading(true);
                       }}
                     >
                       <Image
-                        src={getCloudinaryUrl(
-                          img.publicId,
-                          "w_200,h_120,c_fill"
-                        )}
-                        alt="Thumbnail"
+                        src={img.image}
+                        alt={img.galeri_nama || "Thumbnail"}
                         fill
                         className="object-cover rounded-sm"
+                        sizes="150px"
                       />
                     </div>
                   </SwiperSlide>
@@ -429,13 +466,11 @@ export default function GaleriPage() {
 
             {/* Caption */}
             <div className="absolute bottom-24 left-1/2 -translate-x-1/2 bg-gray-800/50 backdrop-blur-sm px-4 py-2 rounded-full text-sm text-white">
-              {lightboxImages[currentIndex]?.categoryTitle}
+              {selectedImage.galeri_nama || "Detail Kegiatan"}
             </div>
           </div>
         </div>
       )}
-
-      {showScrollToTop && <ScrollToTopButton />}
     </div>
   );
 }

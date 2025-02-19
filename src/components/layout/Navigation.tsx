@@ -140,54 +140,6 @@ export default function Navigation() {
                   isScrolled={isScrolled}
                 />
               </div>
-              {userFullName ? (
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                    className="flex items-center gap-2 bg-green-50 px-4 py-2 rounded-full hover:bg-green-100 transition-colors duration-300"
-                  >
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <span className="text-white font-medium">
-                        {userFullName.charAt(0)}
-                      </span>
-                    </div>
-                    <span className="text-green-700 font-medium">
-                      {userFullName}
-                    </span>
-                    <ChevronDown
-                      size={16}
-                      className={`text-green-700 transition-transform duration-300 ${
-                        isDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  <AnimatePresence>
-                    {isDropdownOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-100 overflow-hidden"
-                      >
-                        <button
-                          onClick={() => setIsLogoutModalOpen(true)}
-                          className="flex items-center w-full px-4 py-3 text-left text-red-600 hover:bg-red-50 transition-colors duration-300"
-                        >
-                          <FiLogOut size={20} className="mr-2" />
-                          <span>Logout</span>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <Link
-                  href="/login"
-                  className="bg-yellow-400 text-white px-6 py-2 rounded-full hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
-                >
-                  Login Sekarang
-                </Link>
-              )}
             </div>
 
             <button
@@ -248,37 +200,6 @@ export default function Navigation() {
                     label="Kontak"
                     onClick={() => setIsMobileMenuOpen(false)}
                   />
-                  {userFullName ? (
-                    <div className="border-t pt-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-medium">
-                              {userFullName.charAt(0)}
-                            </span>
-                          </div>
-                          <span className="text-green-700 font-medium">
-                            {userFullName}
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => setIsLogoutModalOpen(true)}
-                          className="text-red-600 hover:text-red-700 flex items-center gap-1"
-                        >
-                          <FiLogOut size={20} />
-                          <span>Logout</span>
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <Link
-                      href="/login"
-                      className="bg-yellow-400 text-white text-center py-3 rounded-full hover:bg-yellow-500 transition-all duration-300"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Login Sekarang
-                    </Link>
-                  )}
                 </div>
               </motion.div>
             )}

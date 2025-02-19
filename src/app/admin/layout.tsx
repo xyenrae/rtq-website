@@ -68,15 +68,6 @@ export default function AdminLayout({
     }
   }, [pathname]);
 
-  // Update submenu pendaftaran saat path berubah
-  useEffect(() => {
-    if (pathname.startsWith("/admin/pendaftaran")) {
-      setOpenSubMenu(true);
-    } else {
-      setOpenSubMenu(false);
-    }
-  }, [pathname]);
-
   // Update submenu kelola website saat path berubah
   useEffect(() => {
     if (pathname.startsWith("/admin/website")) {
@@ -102,15 +93,6 @@ export default function AdminLayout({
       children: [
         { name: "Semua Galeri", href: "/admin/galeri" },
         { name: "Kategori Galeri", href: "/admin/galeri/kategori" },
-      ],
-    },
-    {
-      name: "Pendaftaran",
-      icon: <FiUsers />,
-      children: [
-        { name: "Data Santri", href: "/admin/pendaftaran/santri" },
-        { name: "Data Orang Tua", href: "/admin/pendaftaran/orangtua" },
-        { name: "Data Alamat", href: "/admin/pendaftaran/alamat" },
       ],
     },
     {

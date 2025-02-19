@@ -2,13 +2,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 
-export interface Kategori {
+export interface BeritaKategori {
   id: string;
   nama: string;
 }
 
 export function useKategori() {
-  const [kategori, setKategori] = useState<Kategori[]>([]);
+  const [kategori, setKategori] = useState<BeritaKategori[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -16,7 +16,7 @@ import {
   FiClock,
   FiEye,
 } from "react-icons/fi";
-import { useNews } from "@/hooks/admin/useNews";
+import { useNews } from "@/hooks/admin/berita/useNews";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import { supabase } from "@/lib/supabase/client";

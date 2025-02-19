@@ -12,10 +12,10 @@ import {
   FiArrowDown,
   FiX,
 } from "react-icons/fi";
-import { useKategori } from "@/hooks/admin/useKategori";
+import { useKategori } from "@/hooks/admin/berita/useNewsCategory";
 import { toast } from "react-toastify";
 
-const KategoriTable = () => {
+const KategoriTable: React.FC = () => {
   const {
     searchTerm,
     setSearchTerm,
@@ -90,23 +90,20 @@ const KategoriTable = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                {["id", "nama"].map((key) => (
-                  <th
-                    key={key}
-                    className="px-5 py-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
-                    onClick={() => requestSort(key as keyof Kategori)}
-                  >
-                    <div className="flex items-center gap-2">
-                      {key.charAt(0).toUpperCase() + key.slice(1)}
-                      {sortConfig?.key === key &&
-                        (sortConfig.direction === "asc" ? (
-                          <FiArrowUp className="text-green-600" />
-                        ) : (
-                          <FiArrowDown className="text-green-600" />
-                        ))}
-                    </div>
-                  </th>
-                ))}
+                <th
+                  className="px-5 py-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                  onClick={() => requestSort("nama")}
+                >
+                  <div className="flex items-center gap-2">
+                    Nama
+                    {sortConfig?.key === "nama" &&
+                      (sortConfig.direction === "asc" ? (
+                        <FiArrowUp className="text-green-600" />
+                      ) : (
+                        <FiArrowDown className="text-green-600" />
+                      ))}
+                  </div>
+                </th>
                 <th className="px-5 py-4 text-center">Aksi</th>
               </tr>
             </thead>
@@ -117,9 +114,6 @@ const KategoriTable = () => {
                   key={item.id}
                   className="hover:bg-gray-50 transition-colors group"
                 >
-                  <td className="px-5 py-4 font-medium text-gray-800">
-                    {item.id}
-                  </td>
                   <td className="px-5 py-4 max-w-xs">
                     <div className="line-clamp-2">{item.nama}</div>
                   </td>

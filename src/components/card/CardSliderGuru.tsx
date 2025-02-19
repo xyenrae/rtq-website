@@ -54,7 +54,7 @@ export default function CardSliderGuru() {
               <div className="relative flex flex-col w-full h-full">
                 {/* Gambar Guru */}
                 <Image
-                  src={guru.image_url}
+                  src="/images/gallery-1.png"
                   alt={guru.name}
                   width={200}
                   height={100}

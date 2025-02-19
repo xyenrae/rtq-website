@@ -3,9 +3,8 @@ import { useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { useBerita } from "@/hooks/berita/useBerita";
-import { useKategori } from "@/hooks/berita/useKategori";
-import ScrollToTopButton from "@/components/ui/ScrollToTopButton";
+import { useBerita } from "@/hooks/santri/berita/useBerita";
+import { useKategori } from "@/hooks/santri/berita/useBeritaKategori";
 import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
 import NewsCard from "@/components/card/NewsCard";
 
@@ -26,7 +25,6 @@ export default function BeritaPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("Semua");
   const { berita, isLoading, setPage, hasMore } = useBerita(selectedCategory);
   const { kategori } = useKategori();
-  const [showScrollToTop, setShowScrollToTop] = useState(false);
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -39,19 +37,14 @@ export default function BeritaPage() {
       },
       { threshold: 0.1, rootMargin: "200px" }
     );
-    if (observerRef.current) observer.observe(observerRef.current);
+
+    const currentElement = observerRef.current;
+    if (currentElement) observer.observe(currentElement);
+
     return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
+      if (currentElement) observer.unobserve(currentElement);
     };
   }, [isLoading, hasMore, setPage]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollToTop(window.scrollY > 300);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   if (isLoading && berita.length === 0) return <LoadingSkeleton />;
 
@@ -187,8 +180,6 @@ export default function BeritaPage() {
       {isLoading && berita.length > 0 && <LoadMoreSpinner />}
 
       <div ref={observerRef} className="h-1" />
-
-      {showScrollToTop && <ScrollToTopButton />}
     </div>
   );
 }
@@ -230,5 +221,4 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-// Dummy array untuk skeleton filter desktop
 const kategoriDummy = [1, 2, 3, 4];

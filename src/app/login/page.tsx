@@ -50,7 +50,7 @@ export default function Login() {
             Masuk ke Akun Anda
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Silahkan login untuk melanjutkan dan menikmati layanan kami.
+            Silahkan login ke akun anda untuk melanjutkan ke halaman Admin.
           </p>
         </div>
 
@@ -119,25 +119,6 @@ export default function Login() {
             {isLoading ? "Memproses..." : "Masuk"}
           </button>
         </form>
-
-        {/* Link Tambahan */}
-        <div className="mt-6 text-center">
-          <Link
-            href="/forgot-password"
-            className="text-sm text-emerald-600 hover:text-emerald-800 font-medium"
-          >
-            Lupa Password?
-          </Link>
-        </div>
-        <div className="mt-8 text-center text-sm text-gray-600">
-          Belum punya akun?{" "}
-          <Link
-            href="/register"
-            className="font-medium text-emerald-600 hover:text-emerald-800 underline underline-offset-4"
-          >
-            Daftar di sini
-          </Link>
-        </div>
       </div>
     </div>
   );

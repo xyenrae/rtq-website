@@ -42,7 +42,7 @@ export default function Footer() {
             <div className="space-y-2">
               <FooterLink href="/galeri" label="Galeri" />
               <FooterLink href="/kontak" label="Kontak" />
-              <FooterLink href="/admin" label="Admin" />
+              <FooterLink href="/login" label="Admin" />
             </div>
           </div>
         </div>
