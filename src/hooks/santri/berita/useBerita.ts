@@ -2,65 +2,49 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 
-// Definisikan tipe untuk kategori dan berita
-export interface Kategori {
-  nama: string;
-}
-
-export interface Berita {
-  id: string;
-  judul: string;
-  tanggal: string;
-  konten: string;
-  views: number;
-  gambar: string;
-  kategori_id: string;
-  ringkasan: string;
-  waktu_baca: number;
-  // Pastikan properti kategori didefinisikan sebagai objek, bukan string.
-  kategori?: Kategori;
-}
-
 export function useBerita(selectedCategory: string = "Semua") {
-  const [berita, setBerita] = useState<Berita[]>([]);
+  const [berita, setBerita] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const pageSize = 6; // Reduced for better UX
 
-  const pageSize = 10;
-
-  // Reset berita ketika kategori berubah
   useEffect(() => {
+    // Reset when category changes
     setBerita([]);
     setPage(1);
     setHasMore(true);
+    setIsLoading(true);
   }, [selectedCategory]);
 
   useEffect(() => {
     const fetchBerita = async () => {
-      setIsLoading(true);
-      let query = supabase
-        .from("berita")
-        // Lakukan join ke tabel kategori (alias: kategori) untuk mengambil nama kategori
-        .select("*, kategori:kategori_id (nama)")
-        .order("tanggal", { ascending: false })
-        .range((page - 1) * pageSize, page * pageSize - 1);
+      try {
+        setIsLoading(true);
 
-      // Jika kategori terpilih bukan "Semua", filter berdasarkan kategori_id
-      if (selectedCategory !== "Semua") {
-        query = query.eq("kategori_id", selectedCategory);
-      }
+        let query = supabase
+          .from("berita")
+          .select("*, kategori_berita:kategori_id (nama)")
+          .order("created_at", { ascending: false })
+          .range((page - 1) * pageSize, page * pageSize - 1);
 
-      const { data, error } = await query;
-      if (error) {
-        console.error("Error fetching berita:", error);
-      } else if (data) {
-        setBerita((prev) => [...prev, ...data]);
-        if (data.length < pageSize) {
-          setHasMore(false);
+        if (selectedCategory !== "Semua") {
+          query = query.eq("kategori_id", selectedCategory);
         }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+
+        if (data) {
+          setBerita((prev) => (page === 1 ? data : [...prev, ...data]));
+          setHasMore(data.length === pageSize);
+        }
+      } catch (error) {
+        console.error("Error fetching berita:", error);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     fetchBerita();

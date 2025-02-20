@@ -135,7 +135,14 @@ export const useNews = () => {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.gambar === "") {
+      toast.error(`Gambar wajid diisi`);
+      return;
+    }
     const loadingToast = toast.loading("Menyimpan data...");
+
+    console.log(formData);
 
     try {
       const now = new Date().toISOString();

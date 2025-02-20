@@ -15,7 +15,7 @@ export function useKategori() {
   useEffect(() => {
     const fetchKategori = async () => {
       const { data, error } = await supabase
-        .from("kategori")
+        .from("berita_kategori")
         .select("*")
         .order("nama", { ascending: true });
       if (error) {

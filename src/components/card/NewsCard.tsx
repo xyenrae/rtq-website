@@ -2,16 +2,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useBerita } from "@/hooks/santri/berita/useBerita"; // Import hook useBerita
 
 // Interface untuk data berita
 export interface Berita {
   id: string;
   judul: string;
-  tanggal: string;
+  created_at: string;
   konten: string;
   views: number;
   gambar?: string;
-  kategori?: string | { nama: string }; // Memperbaiki tipe kategori
+  kategori?: { nama: string };
   ringkasan?: string;
   waktu_baca?: number;
 }
@@ -27,13 +28,13 @@ const formatDate = (dateString: string) => {
 // Props untuk komponen NewsCard
 interface NewsCardProps {
   item: Berita;
-  index?: number; // Membuat index opsional
 }
 
-export default function NewsCard({ item, index }: NewsCardProps) {
+// Komponen NewsCard
+function NewsCard({ item }: NewsCardProps) {
   return (
     <motion.article
-      key={index !== undefined ? `${item.id}-${index}` : item.id} // Memastikan index hanya digunakan jika tersedia
+      key={item.id}
       className="group cursor-pointer bg-white rounded-lg shadow hover:shadow-lg transition-shadow flex flex-col sm:flex-row"
     >
       <Link href={`/berita/${item.id}`} className="grid grid-cols-6">
@@ -52,10 +53,7 @@ export default function NewsCard({ item, index }: NewsCardProps) {
           <div>
             {item.kategori && (
               <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium mb-1">
-                {typeof item.kategori === "string"
-                  ? item.kategori // Jika kategori adalah string
-                  : item.kategori.nama}{" "}
-                {/* Jika kategori adalah objek */}
+                {item.kategori.nama}
               </span>
             )}
             <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
@@ -63,12 +61,48 @@ export default function NewsCard({ item, index }: NewsCardProps) {
             </h3>
           </div>
           <div className="flex items-center text-sm text-gray-500 mt-2">
-            <span>{formatDate(item.tanggal)}</span>
+            <span>{formatDate(item.created_at)}</span>
             <span className="mx-2">•</span>
             <span>{item.views} views</span>
           </div>
         </div>
       </Link>
     </motion.article>
+  );
+}
+
+// Komponen utama untuk menampilkan daftar berita
+export default function BeritaList({
+  selectedCategory,
+}: {
+  selectedCategory: string;
+}) {
+  const { berita, isLoading, setPage, hasMore } = useBerita(selectedCategory);
+
+  const handleLoadMore = () => {
+    setPage((prev) => prev + 1);
+  };
+
+  return (
+    <div>
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <div>
+          {berita.map((item, index) => (
+            <NewsCard key={index} item={item} />
+          ))}
+        </div>
+      )}
+      {hasMore && (
+        <button
+          onClick={handleLoadMore}
+          disabled={isLoading}
+          className="mt-4 w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors"
+        >
+          Load More
+        </button>
+      )}
+    </div>
   );
 }

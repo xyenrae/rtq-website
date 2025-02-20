@@ -12,7 +12,7 @@ import { FaInstagram, FaLinkedin, FaShare, FaTwitter } from "react-icons/fa";
 interface Berita {
   id: string;
   judul: string;
-  tanggal: string;
+  created_at: string;
   konten: string;
   views: number;
   gambar?: string;
@@ -47,6 +47,7 @@ export default function BeritaDetailPage() {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
+        // Ambil detail berita, berita terbaru, dan berita populer secara bersamaan
         const [detailRes, latestRes, popularRes] = await Promise.all([
           supabase
             .from("berita")
@@ -56,7 +57,7 @@ export default function BeritaDetailPage() {
           supabase
             .from("berita")
             .select("*")
-            .order("tanggal", { ascending: false })
+            .order("created_at", { ascending: false })
             .limit(5),
           supabase
             .from("berita")
@@ -84,14 +85,18 @@ export default function BeritaDetailPage() {
           setRelatedBerita(relatedRes.data);
         }
 
-        // Update views
-        await supabase
-          .from("berita")
-          .update({ views: (detailRes.data.views || 0) + 1 })
-          .eq("id", id);
+        // Update views dengan memanggil fungsi RPC untuk increment secara atomik
+        const { data: newViews, error: rpcError } = await supabase.rpc(
+          "increment_views",
+          { row_id: id }
+        );
+        if (rpcError) throw rpcError;
+
+        // Perbarui state beritaDetail dengan nilai views terbaru dari RPC
+        setBeritaDetail((prev) => (prev ? { ...prev, views: newViews } : prev));
 
         setError(null);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error:", error);
         setError("Gagal memuat berita. Silakan coba kembali.");
         router.push("/berita");
@@ -175,7 +180,7 @@ export default function BeritaDetailPage() {
                               <Calendar className="w-5 h-5" />
                               <span className="font-medium">
                                 {new Date(
-                                  beritaDetail.tanggal
+                                  beritaDetail.created_at
                                 ).toLocaleDateString("id-ID", {
                                   weekday: "long",
                                   day: "numeric",
@@ -331,7 +336,7 @@ export default function BeritaDetailPage() {
                       </h3>
                       <p className="text-sm text-gray-500 mt-2 flex items-center">
                         <Calendar className="w-4 h-4 mr-1" />
-                        {formatDate(item.tanggal)}
+                        {formatDate(item.created_at)}
                       </p>
                     </div>
                   </Link>
