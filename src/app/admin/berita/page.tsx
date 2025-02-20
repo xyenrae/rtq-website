@@ -15,6 +15,7 @@ import {
   FiImage,
   FiClock,
   FiEye,
+  FiCalendar,
 } from "react-icons/fi";
 import { useNews } from "@/hooks/admin/berita/useNews";
 import Image from "next/image";
@@ -47,12 +48,10 @@ const NewsTable = () => {
     formInitState,
     selectedCategory,
     setSelectedCategory,
-    fetchNews,
   } = useNews();
 
   const [categories, setCategories] = useState<any[]>([]);
 
-  // Fetch categories untuk filter dan form select
   useEffect(() => {
     const fetchCategories = async () => {
       const { data, error } = await supabase
@@ -62,15 +61,6 @@ const NewsTable = () => {
     };
     fetchCategories();
   }, []);
-
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      setError(null);
-    }
-  }, [error]);
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
@@ -129,34 +119,41 @@ const NewsTable = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                {["judul", "kategori", "tanggal", "views", "waktu_baca"].map(
-                  (key) => (
-                    <th
-                      key={key}
-                      className="px-5 py-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
-                      onClick={() => requestSort(key as keyof typeof formData)}
-                    >
-                      <div className="flex items-center gap-2">
-                        {key === "waktu_baca"
-                          ? "Waktu Baca"
-                          : key.charAt(0).toUpperCase() + key.slice(1)}
-                        {sortConfig?.key === key &&
-                          (sortConfig.direction === "asc" ? (
-                            <FiArrowUp className="text-green-600" />
-                          ) : (
-                            <FiArrowDown className="text-green-600" />
-                          ))}
-                      </div>
-                    </th>
-                  )
-                )}
+                {[
+                  "judul",
+                  "kategori_id",
+                  "created_at",
+                  "views",
+                  "waktu_baca",
+                ].map((key) => (
+                  <th
+                    key={key}
+                    className="px-5 py-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
+                    onClick={() => requestSort(key as keyof typeof formData)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {key === "waktu_baca"
+                        ? "Waktu Baca"
+                        : key === "created_at"
+                        ? "Tanggal Dibuat"
+                        : key === "kategori_id"
+                        ? "Kategori"
+                        : key.charAt(0).toUpperCase() + key.slice(1)}
+                      {sortConfig?.key === key &&
+                        (sortConfig.direction === "asc" ? (
+                          <FiArrowUp className="text-green-600" />
+                        ) : (
+                          <FiArrowDown className="text-green-600" />
+                        ))}
+                    </div>
+                  </th>
+                ))}
                 <th className="px-5 py-4 text-center">Aksi</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-gray-200">
               {paginatedNews.map((item) => {
-                // Lakukan lookup kategori berdasarkan kategori_id
                 const categoryData = categories.find(
                   (cat) => cat.id === item.kategori_id
                 );
@@ -176,11 +173,14 @@ const NewsTable = () => {
                       </span>
                     </td>
                     <td className="px-5 py-4 text-gray-600">
-                      {new Date(item.tanggal).toLocaleDateString("id-ID", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })}
+                      <div className="flex items-center gap-1">
+                        <FiCalendar className="text-gray-400" />
+                        {new Date(item.created_at).toLocaleDateString("id-ID", {
+                          day: "2-digit",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </div>
                     </td>
                     <td className="px-5 py-4 text-gray-600">
                       <div className="flex items-center gap-1">
@@ -202,7 +202,10 @@ const NewsTable = () => {
                           className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
                           onClick={() => {
                             setEditingNews(item);
-                            setFormData(item);
+                            setFormData({
+                              ...item,
+                              updated_at: new Date().toISOString(),
+                            });
                             setShowModal(true);
                             setImagePreview(item.gambar);
                           }}
@@ -283,7 +286,7 @@ const NewsTable = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 backdrop-blur-sm z-50"
           >
             <motion.div
               initial={{ y: 50 }}
@@ -352,57 +355,20 @@ const NewsTable = () => {
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Tanggal Publikasi
+                        Ringkasan
                       </label>
-                      <input
-                        type="date"
+                      <textarea
                         required
+                        rows={3}
                         className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        value={formData.tanggal}
+                        value={formData.ringkasan}
                         onChange={(e) =>
-                          setFormData({ ...formData, tanggal: e.target.value })
+                          setFormData({
+                            ...formData,
+                            ringkasan: e.target.value,
+                          })
                         }
                       />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Waktu Baca (menit)
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          required
-                          className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          value={formData.waktu_baca}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              waktu_baca: parseInt(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-2">
-                          Views
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          required
-                          className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                          value={formData.views}
-                          onChange={(e) =>
-                            setFormData({
-                              ...formData,
-                              views: parseInt(e.target.value),
-                            })
-                          }
-                        />
-                      </div>
                     </div>
                   </div>
 
@@ -450,6 +416,7 @@ const NewsTable = () => {
                             <input
                               type="file"
                               className="hidden"
+                              accept="image/*"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) handleImageUpload(file);
@@ -460,21 +427,6 @@ const NewsTable = () => {
                       </div>
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Ringkasan
-                  </label>
-                  <textarea
-                    required
-                    rows={2}
-                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    value={formData.ringkasan}
-                    onChange={(e) =>
-                      setFormData({ ...formData, ringkasan: e.target.value })
-                    }
-                  />
                 </div>
 
                 <div>
