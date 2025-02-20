@@ -32,7 +32,7 @@ const LoadMoreSpinner = () => {
         }}
         className="text-sm font-medium text-gray-600"
       >
-        Memuat lebih banyak data...
+        Memuat data...
       </motion.span>
     </div>
   );

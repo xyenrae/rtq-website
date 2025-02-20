@@ -2,8 +2,28 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 
+// Define the Kategori interface
+interface Kategori {
+  nama: string;
+}
+
+// Define the Berita interface based on the provided fields
+interface Berita {
+  id: string;
+  judul: string;
+  konten: string;
+  gambar: string;
+  views: number;
+  kategori_id: string;
+  ringkasan: string;
+  waktu_baca: number;
+  created_at: string;
+  updated_at: string;
+  kategori: Kategori; // This matches the "kategori:kategori_id (nama)" in your query
+}
+
 export function useBerita(selectedCategory: string = "Semua") {
-  const [berita, setBerita] = useState([]);
+  const [berita, setBerita] = useState<Berita[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -21,10 +41,9 @@ export function useBerita(selectedCategory: string = "Semua") {
     const fetchBerita = async () => {
       try {
         setIsLoading(true);
-
         let query = supabase
           .from("berita")
-          .select("*, kategori_berita:kategori_id (nama)")
+          .select("*, kategori:kategori_id (nama)")
           .order("created_at", { ascending: false })
           .range((page - 1) * pageSize, page * pageSize - 1);
 

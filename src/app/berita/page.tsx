@@ -53,7 +53,7 @@ const PreviewBerita = ({ previewBerita }: { previewBerita: any }) => {
             <motion.h1
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-lg"
+              className="text-3xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-lg line-clamp-2"
             >
               {previewBerita.judul}
             </motion.h1>
@@ -61,7 +61,7 @@ const PreviewBerita = ({ previewBerita }: { previewBerita: any }) => {
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="text-base sm:text-xl text-gray-200"
+              className="text-base sm:text-xl text-gray-200 line-clamp-3"
             >
               {previewBerita.ringkasan}
             </motion.p>
@@ -94,7 +94,7 @@ const CategoryFilter = ({
   kategori: any[];
 }) => {
   return (
-    <section className="sticky top-24 z-10 bg-white/80 backdrop-blur-sm shadow-sm">
+    <section className="relative shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           {/* Dropdown untuk mobile */}
@@ -199,7 +199,6 @@ export default function BeritaPage() {
   const { berita, isLoading, setPage, hasMore } = useBerita(selectedCategory);
   const { kategori } = useKategori();
 
-  // Infinite scroll trigger
   const [ref, inView] = useInView({ threshold: 0 });
   useEffect(() => {
     if (inView && hasMore && !isLoading) {
@@ -207,9 +206,9 @@ export default function BeritaPage() {
     }
   }, [inView, hasMore, isLoading, setPage]);
 
-  // Ambil berita pertama sebagai preview dan sisanya untuk grid
   const previewBerita = berita.length > 0 ? berita[0] : null;
   const newsGrid = berita.slice(1);
+  console.log(berita);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
