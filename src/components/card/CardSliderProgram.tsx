@@ -98,17 +98,10 @@ export default function CardSliderProgram() {
       >
         {programs.map((program) => (
           <SwiperSlide key={program.id}>
-            <motion.div
-              className="rounded-xl border-2 border-yellow-200 border-dotted overflow-hidden bg-white transition-shadow duration-300 py-6"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.3 }}
-            >
+            <div className="rounded-xl border-2 border-yellow-200 border-dotted overflow-hidden bg-white transition-shadow duration-300 py-6 hover:shadow-lg">
               {/* Icon Section */}
               <div className="relative flex justify-center">
-                <motion.div
-                  className="bg-yellow-50 p-6 w-fit rounded-full transition-transform duration-300 hover:scale-110"
-                  transition={{ duration: 0.3 }}
-                >
+                <div className="bg-yellow-50 p-6 w-fit rounded-full transition-transform duration-300 hover:scale-110">
                   <Image
                     src={program.image}
                     alt={program.title}
@@ -117,7 +110,7 @@ export default function CardSliderProgram() {
                     className="object-cover"
                     sizes="(max-width: 768px) 100vw, 33vw"
                   />
-                </motion.div>
+                </div>
               </div>
               {/* Content Section */}
               <div className="px-6 mt-6 flex flex-col flex-1">
@@ -138,12 +131,12 @@ export default function CardSliderProgram() {
                   </button>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* Modal Popup */}
+      {/* Modal Popup (menggunakan Framer Motion) */}
       <AnimatePresence>
         {selectedProgram && (
           <motion.div

@@ -10,6 +10,7 @@ export default function Hero() {
       section.scrollIntoView({ behavior: "smooth" });
     }
   };
+
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
@@ -47,10 +48,10 @@ export default function Hero() {
           </div>
         </div>
         {/* Image Section */}
-        <div className="flex-1 order-1 lg:order-2  relative w-full h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0">
+        <div className="flex-1 order-1 lg:order-2 relative w-full h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0">
           <Image
             src="/images/hero-1.svg"
-            alt=""
+            alt="Hero Image"
             fill
             className="object-center"
             priority

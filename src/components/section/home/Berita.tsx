@@ -1,21 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/client";
 import Link from "next/link";
 import Image from "next/image";
+import { useBerita } from "@/hooks/santri/berita/useBerita";
 
-// Interface untuk berita
-interface Berita {
-  id: string;
-  judul: string;
-  tanggal: string;
-  konten: string;
-  views: number;
-  gambar?: string;
-  kategori?: string;
-}
-
-// Fungsi untuk memformat tanggal
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return new Intl.DateTimeFormat("id-ID", {
@@ -24,39 +12,14 @@ const formatDate = (dateString: string) => {
 };
 
 export default function Berita() {
-  const [berita, setBerita] = useState<Berita[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const { berita, isLoading } = useBerita("Semua");
 
   useEffect(() => {
-    // Check screen width after component mounts (on the client side)
     setIsMobile(window.innerWidth < 768);
   }, []);
 
-  useEffect(() => {
-    const fetchBerita = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("berita")
-          .select("*")
-          .order("tanggal", { ascending: false })
-          .limit(6); // Mengambil 6 berita terbaru
-        if (error) throw error;
-        setBerita(data);
-        setError(null);
-      } catch (error) {
-        console.error("Error fetching berita:", error);
-        setError("Gagal memuat berita. Silakan coba kembali.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchBerita();
-  }, []);
-
   if (isLoading) return <SkeletonLoader />;
-  if (error) return <ErrorMessage message={error} />;
 
   return (
     <div className="container mx-auto px-4 pb-16">
@@ -95,7 +58,7 @@ export default function Berita() {
                   {/* Kategori */}
                   {item.kategori && (
                     <span className="inline-block px-3 py-1 bg-green-100 text-green-600 rounded-full text-xs font-medium mb-1">
-                      {item.kategori}
+                      {item.kategori.nama}
                     </span>
                   )}
                   {/* Judul dengan line-clamp */}
@@ -106,7 +69,7 @@ export default function Berita() {
                 {/* Tanggal */}
                 <div className="flex justify-end">
                   <p className="text-sm text-gray-500">
-                    {formatDate(item.tanggal)}
+                    {formatDate(item.created_at)}
                   </p>
                 </div>
               </div>
@@ -127,12 +90,11 @@ export default function Berita() {
   );
 }
 
-// Skeleton Loader
+// Skeleton Loader tanpa Framer Motion
 const SkeletonLoader = () => {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Check screen width after component mounts (on the client side)
     setIsMobile(window.innerWidth < 768);
   }, []);
 
@@ -148,15 +110,10 @@ const SkeletonLoader = () => {
             key={index}
             className="bg-white rounded-lg shadow-lg overflow-hidden flex flex-col sm:flex-row"
           >
-            {/* Gambar Placeholder */}
             <div className="relative w-4/12 sm:w-1/3 h-32 sm:h-auto bg-gray-300"></div>
-            {/* Konten Placeholder */}
             <div className="p-2 sm:p-4 flex flex-col justify-between flex-1 space-y-4">
-              {/* Kategori Placeholder */}
               <div className="h-4 w-24 bg-gray-300 rounded-full"></div>
-              {/* Judul Placeholder */}
               <div className="h-6 w-48 bg-gray-300 rounded-full"></div>
-              {/* Tanggal Placeholder */}
               <div className="h-4 w-32 bg-gray-300 rounded-full self-end"></div>
             </div>
           </div>
@@ -165,19 +122,3 @@ const SkeletonLoader = () => {
     </div>
   );
 };
-
-// Error Message Component
-const ErrorMessage = ({ message }: { message: string }) => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <div className="text-center max-w-md p-8 bg-white rounded-2xl shadow-xl">
-      <div className="text-red-500 text-6xl mb-4">⚠️</div>
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">{message}</h3>
-      <button
-        onClick={() => window.location.reload()}
-        className="px-6 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors"
-      >
-        Coba Lagi
-      </button>
-    </div>
-  </div>
-);

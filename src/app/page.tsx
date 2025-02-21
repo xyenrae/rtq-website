@@ -1,3 +1,4 @@
+"use client";
 import ProgramMembaca from "@/components/section/home/ProgramMembaca";
 import ProgramKami from "@/components/section/home/ProgramKami";
 import KenaliKami from "@/components/section/home/KenaliKami";
@@ -6,6 +7,12 @@ import VisiMisi from "@/components/section/home/VisiMisi";
 import Guru from "@/components/section/home/Guru";
 import Berita from "@/components/section/home/Berita";
 import Hero from "@/components/section/home/Hero";
+import { motion } from "framer-motion";
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
 export default function Home() {
   return (
@@ -16,42 +23,81 @@ export default function Home() {
       </section>
 
       {/* Program Unggulan Section */}
-      <section
+      <motion.section
         id="program-section"
         className="container mt-32 !overflow-hidden"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={sectionVariants}
       >
         <ProgramUnggulan />
-      </section>
+      </motion.section>
 
       {/* Program Kami Section */}
-      <section className="mt-12">
+      <motion.section
+        className="mt-12"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={sectionVariants}
+      >
         <ProgramKami />
-      </section>
+      </motion.section>
 
       {/* Program Membaca Section */}
-      <section className="mt-32">
+      <motion.section
+        className="mt-32"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={sectionVariants}
+      >
         <ProgramMembaca />
-      </section>
+      </motion.section>
 
       {/* Kenali Kami Section */}
-      <section className="mt-12">
+      <motion.section
+        className="mt-12"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={sectionVariants}
+      >
         <KenaliKami />
-      </section>
+      </motion.section>
 
       {/* Visi Misi Section */}
-      <section>
+      <motion.section
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={sectionVariants}
+      >
         <VisiMisi />
-      </section>
+      </motion.section>
 
       {/* Guru Section */}
-      <section className="mt-32">
+      <motion.section
+        className="mt-32"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={sectionVariants}
+      >
         <Guru />
-      </section>
+      </motion.section>
 
       {/* Berita Section */}
-      <section className="mt-12">
+      <motion.section
+        className="mt-12"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={sectionVariants}
+      >
         <Berita />
-      </section>
+      </motion.section>
     </div>
   );
 }

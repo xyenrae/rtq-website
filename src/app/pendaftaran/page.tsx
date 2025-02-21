@@ -1,5 +1,6 @@
 "use client";
 
+import React, { ReactNode } from "react";
 import {
   FaPhone,
   FaWhatsapp,
@@ -10,6 +11,45 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import Image from "next/image";
+import { motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+
+// Variants untuk animasi hero section
+const heroVariants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+// Variants untuk animasi pada AnimatedCard
+const newsCardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+interface AnimatedCardProps {
+  children: ReactNode;
+  className?: string;
+}
+
+// Komponen pembungkus animasi dengan tipe props
+const AnimatedCard: React.FC<AnimatedCardProps> = ({ children, className }) => {
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={newsCardVariants}
+      initial="hidden"
+      animate={inView ? "visible" : "hidden"}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 const RegistrationPage = () => {
   const steps = [
@@ -58,9 +98,14 @@ const RegistrationPage = () => {
   ];
 
   return (
-    <div className="min-h-screen ">
-      {/* Hero Section */}
-      <div className="container mx-auto px-4 py-16">
+    <div className="min-h-screen">
+      {/* Hero Section dengan Framer Motion */}
+      <motion.div
+        className="container mx-auto px-4 py-16"
+        variants={heroVariants}
+        initial="hidden"
+        animate="visible"
+      >
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
           {/* Text Section */}
           <div className="flex-1 order-2 lg:order-1 relative z-10">
@@ -74,7 +119,6 @@ const RegistrationPage = () => {
                 Informasi <br />
                 <span className="relative whitespace-nowrap text-green-600">
                   <span className="relative z-10">
-                    {" "}
                     Pendaftaran <br />
                   </span>
                 </span>
@@ -86,18 +130,19 @@ const RegistrationPage = () => {
               </p>
             </div>
           </div>
+
           {/* Image Section */}
-          <div className="flex-1 order-1 lg:order-2  relative w-full h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0">
+          <div className="flex-1 order-1 lg:order-2 relative w-full h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0">
             <Image
               src="/images/hero-1.svg"
-              alt=""
+              alt="Hero Image"
               fill
               className="object-center"
               priority
             />
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Registration Steps */}
       <section className="container mx-auto px-4 py-16">
@@ -107,9 +152,9 @@ const RegistrationPage = () => {
 
         <div className="grid md:grid-cols-3 gap-8">
           {steps.map((step, index) => (
-            <div
+            <AnimatedCard
               key={index}
-              className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
+              className="bg-white p-8 rounded-2xl shadow-lg transition-shadow hover:shadow-xl"
             >
               <div className="text-green-600 flex justify-center">
                 {step.icon}
@@ -120,14 +165,14 @@ const RegistrationPage = () => {
                 </h3>
                 <p className="text-gray-600">{step.description}</p>
               </div>
-            </div>
+            </AnimatedCard>
           ))}
         </div>
       </section>
 
       {/* Contact Section */}
       <section className="container mx-auto px-4 py-20">
-        <div className="bg-green-500 rounded-2xl p-8 md:p-12 text-center text-white">
+        <AnimatedCard className="bg-green-500 rounded-2xl p-8 md:p-12 text-center text-white">
           <h2 className="text-3xl font-bold mb-6">Butuh Bantuan?</h2>
           <p className="text-lg mb-8">Hubungi kami melalui kontak berikut:</p>
 
@@ -150,10 +195,10 @@ const RegistrationPage = () => {
               Telepon
             </a>
           </div>
-        </div>
+        </AnimatedCard>
       </section>
 
-      {/* Additional Info - Updated Section */}
+      {/* Additional Info Section */}
       <section className="container mx-auto px-4 pb-20">
         <div className="text-center max-w-4xl mx-auto">
           <h3 className="text-3xl font-semibold text-gray-700 mb-4">
@@ -166,9 +211,9 @@ const RegistrationPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {infoItems.map((item, index) => (
-              <div
+              <AnimatedCard
                 key={index}
-                className="flex items-start bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-transform"
+                className="flex items-start bg-white p-6 rounded-xl shadow-md transition-transform hover:scale-105"
               >
                 <div className="text-green-600 mr-8">{item.icon}</div>
                 <div className="text-left">
@@ -177,7 +222,7 @@ const RegistrationPage = () => {
                   </h4>
                   <p className="text-gray-600 mt-2">{item.description}</p>
                 </div>
-              </div>
+              </AnimatedCard>
             ))}
           </div>
         </div>

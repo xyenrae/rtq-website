@@ -9,16 +9,28 @@ import SkeletonGaleri from "@/components/skeleton/galeri/SkeletonGaleri";
 import { useGaleri, GaleriImage } from "@/hooks/santri/galeri/useGaleri";
 import { useGaleriKategori } from "@/hooks/santri/galeri/useGaleriKategori";
 import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
+import { motion, AnimatePresence } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 type GaleriImageWithCategory = GaleriImage;
 
-const INITIAL_LOAD_COUNT = 12;
-const LOAD_MORE_COUNT = 8;
+const INITIAL_LOAD_COUNT = 4;
+const LOAD_MORE_COUNT = 4;
+
+const newsCardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
 export default function GaleriPage() {
   const { galeri, loading: loadingGaleri } = useGaleri();
   const { kategori, loading: loadingKategori } = useGaleriKategori();
   const loading = loadingGaleri || loadingKategori;
+
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
 
   const sortedImages = useMemo(
     () =>
@@ -256,39 +268,50 @@ export default function GaleriPage() {
           Momen Terbaru
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {displayedImages.map((img, index) => (
-            <div
-              key={img.id}
-              className="relative group cursor-pointer transform hover:scale-105 transition-all duration-300"
-              onClick={() => {
-                setAlbumImages(null);
-                setIsImageLoading(true);
-                setSelectedImageId(img.id);
-                setCurrentIndex(
-                  sortedImages.findIndex((item) => item.id === img.id)
-                );
-              }}
-              onMouseEnter={() => preloadImage(img)}
-            >
-              <div className="relative h-72 rounded-xl overflow-hidden shadow-lg">
-                <Image
-                  src={img.image}
-                  alt={`Activity ${index + 1}`}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  priority={index < INITIAL_LOAD_COUNT}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                  <h3 className="font-semibold truncate">{img.galeri_nama}</h3>
-                  <p className="text-sm">
-                    {new Date(img.created_at).toLocaleDateString()}
-                  </p>
-                </div>
+          <AnimatePresence mode="popLayout">
+            {displayedImages.map((img, index) => (
+              <div
+                key={img.id}
+                className="relative group cursor-pointer transform hover:scale-105 transition-all duration-300"
+                onClick={() => {
+                  setAlbumImages(null);
+                  setIsImageLoading(true);
+                  setSelectedImageId(img.id);
+                  setCurrentIndex(
+                    sortedImages.findIndex((item) => item.id === img.id)
+                  );
+                }}
+                onMouseEnter={() => preloadImage(img)}
+              >
+                <motion.div
+                  variants={newsCardVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.1 }}
+                >
+                  <div className="relative h-72 rounded-xl overflow-hidden shadow-lg">
+                    <Image
+                      src={img.image}
+                      alt={`Activity ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      priority={index < INITIAL_LOAD_COUNT}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                      <h3 className="font-semibold truncate">
+                        {img.galeri_nama}
+                      </h3>
+                      <p className="text-sm">
+                        {new Date(img.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
-            </div>
-          ))}
+            ))}
+          </AnimatePresence>
         </div>
 
         {/* Load More Indicator */}
@@ -297,11 +320,7 @@ export default function GaleriPage() {
             ref={loadMoreRef}
             className="flex justify-center items-center mt-8 h-16"
           >
-            {isLoadingMore ? (
-              <LoadMoreSpinner />
-            ) : (
-              <div className="h-8 w-8" /> // Placeholder to maintain height
-            )}
+            {isLoadingMore ? <LoadMoreSpinner /> : <div className="h-8 w-8" />}
           </div>
         )}
       </section>

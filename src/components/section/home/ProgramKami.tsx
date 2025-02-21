@@ -1,8 +1,8 @@
 "use client";
 import Image from "next/image";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { FiX } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function ProgramKami() {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -16,7 +16,7 @@ export default function ProgramKami() {
             src="/images/hero-2.svg"
             alt=""
             fill
-            className=" object-center"
+            className="object-center"
             priority
           />
         </div>
@@ -85,7 +85,7 @@ export default function ProgramKami() {
         </div>
       </div>
 
-      {/* Modal Popup */}
+      {/* Modal Popup dengan Framer Motion */}
       <AnimatePresence>
         {isModalOpen && (
           <motion.div
@@ -106,8 +106,8 @@ export default function ProgramKami() {
                 Detail Program Kami
               </h3>
               <p className="text-gray-600 mb-6">
-                Belajar Al-Qur’an di RTQ Al-Hikmah tidak hanya tentang membaca,
-                tapi juga tentang{" "}
+                Belajar Al-Qur&#39;an di RTQ Al-Hikmah tidak hanya tentang
+                membaca, tapi juga tentang{" "}
                 <span className="font-semibold">
                   memahami nilai-nilai Islam
                 </span>{" "}

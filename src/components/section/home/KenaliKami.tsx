@@ -2,6 +2,12 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { motion } from "framer-motion";
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
 export default function KenaliKami() {
   const [activeIndex, setActiveIndex] = useState<number | null>(0);
@@ -25,7 +31,12 @@ export default function KenaliKami() {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row w-full gap-8 px-4 py-8 sm:px-0 sm:container">
+    <motion.div
+      className="flex flex-col lg:flex-row w-full gap-8 px-4 py-8 sm:px-0 sm:container"
+      variants={sectionVariants}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Text Section */}
       <div className="flex-1 flex flex-col gap-6">
         <p className="text-2xl lg:text-3xl font-semibold text-gray-800">
@@ -85,6 +96,6 @@ export default function KenaliKami() {
           priority
         />
       </div>
-    </div>
+    </motion.div>
   );
 }

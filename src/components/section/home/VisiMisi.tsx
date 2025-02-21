@@ -1,8 +1,21 @@
+"use client";
+
 import Image from "next/image";
+import { motion } from "framer-motion";
+
+const sectionVariants = {
+  hidden: { opacity: 0, y: -20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
 
 export default function VisiMisi() {
   return (
-    <section className="relative w-screen h-fit py-24">
+    <motion.section
+      className="relative w-screen h-fit py-24"
+      variants={sectionVariants}
+      initial="hidden"
+      animate="visible"
+    >
       <div className="bg-yellow-400 w-full absolute bottom-0 h-4 z-20"></div>
       <div className="bg-green-500 opacity-90 w-full h-full absolute inset-0 z-10"></div>
       <div className="absolute inset-0">
@@ -35,6 +48,6 @@ export default function VisiMisi() {
           </ul>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
