@@ -10,7 +10,6 @@ import { useGaleri, GaleriImage } from "@/hooks/santri/galeri/useGaleri";
 import { useGaleriKategori } from "@/hooks/santri/galeri/useGaleriKategori";
 import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
 import { motion, AnimatePresence } from "framer-motion";
-import { useInView } from "react-intersection-observer";
 
 type GaleriImageWithCategory = GaleriImage;
 
@@ -26,11 +25,6 @@ export default function GaleriPage() {
   const { galeri, loading: loadingGaleri } = useGaleri();
   const { kategori, loading: loadingKategori } = useGaleriKategori();
   const loading = loadingGaleri || loadingKategori;
-
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
 
   const sortedImages = useMemo(
     () =>
