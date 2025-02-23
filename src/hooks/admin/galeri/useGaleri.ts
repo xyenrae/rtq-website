@@ -59,7 +59,7 @@ export function useGallery() {
         .order("created_at", { ascending: false });
       if (error) throw error;
       setGalleryItems(data || []);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat galeri");
     }
   };
@@ -72,7 +72,7 @@ export function useGallery() {
         .select("id, nama");
       if (error) throw error;
       setCategories(data || []);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat kategori");
     }
   };
@@ -155,7 +155,7 @@ export function useGallery() {
       setFormData(formInitState);
       setImagePreview(null);
       await fetchGallery();
-    } catch (error) {
+    } catch {
       toast.error("Gagal menyimpan data");
       if (formData.image) {
         const filePath = formData.image.split("/").pop();
@@ -184,7 +184,7 @@ export function useGallery() {
       }
       setFormData((prev) => ({ ...prev, image: publicUrl }));
       return publicUrl;
-    } catch (error) {
+    } catch {
       toast.error("Gagal mengupload gambar");
       throw new Error("Gagal mengupload gambar");
     }
@@ -207,7 +207,7 @@ export function useGallery() {
       if (error) throw error;
       toast.success("Item berhasil dihapus");
       await fetchGallery();
-    } catch (error) {
+    } catch {
       toast.error("Gagal menghapus item");
     }
   };

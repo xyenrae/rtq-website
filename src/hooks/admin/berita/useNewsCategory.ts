@@ -1,5 +1,4 @@
-"use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
 
@@ -60,19 +59,16 @@ export function useKategori() {
     currentPage * itemsPerPage
   );
 
-  const fetchKategories = async () => {
+  const fetchKategories = useCallback(async () => {
     setIsLoading(true);
     try {
       let query = supabase
         .from("berita_kategori")
         .select("*", { count: "exact" });
-
       if (searchTerm) {
         query = query.ilike("nama", `%${searchTerm}%`);
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
       setKategories(data || []);
     } catch (error) {
@@ -83,7 +79,7 @@ export function useKategori() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchTerm]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,7 +132,7 @@ export function useKategori() {
 
   useEffect(() => {
     fetchKategories();
-  }, [searchTerm]);
+  }, [fetchKategories]);
 
   return {
     kategories,

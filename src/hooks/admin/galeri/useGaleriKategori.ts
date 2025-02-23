@@ -1,16 +1,13 @@
-"use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
 
-// Interface untuk kategori galeri
 export interface GalleryCategory {
   id: string;
-  nama: string; // Kolom 'nama' sesuai dengan tabel Supabase
+  nama: string;
 }
 
 export function useGalleryCategory() {
-  // State management
   const [categories, setCategories] = useState<GalleryCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,26 +21,21 @@ export function useGalleryCategory() {
     direction: "asc" | "desc";
   } | null>(null);
 
-  // Form state
-  const formInitState = { id: "", nama: "" }; // Kolom 'nama' sesuai dengan tabel Supabase
+  const formInitState = { id: "", nama: "" };
   const [formData, setFormData] = useState<GalleryCategory>(formInitState);
 
   const itemsPerPage = 10;
 
-  // Fetch data kategori galeri dari Supabase
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     setIsLoading(true);
     try {
       let query = supabase
-        .from("galeri_kategori") // Nama tabel di Supabase
+        .from("galeri_kategori")
         .select("*", { count: "exact" });
-
       if (searchTerm) {
-        query = query.ilike("nama", `%${searchTerm}%`); // Kolom 'nama' sesuai dengan tabel Supabase
+        query = query.ilike("nama", `%${searchTerm}%`);
       }
-
       const { data, error } = await query;
-
       if (error) throw error;
       setCategories(data || []);
     } catch (err) {
@@ -52,9 +44,8 @@ export function useGalleryCategory() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [searchTerm]);
 
-  // Fungsi untuk mengatur pengurutan
   const requestSort = (key: keyof GalleryCategory) => {
     let direction: "asc" | "desc" = "asc";
     if (sortConfig?.key === key && sortConfig.direction === "asc") {
@@ -63,7 +54,6 @@ export function useGalleryCategory() {
     setSortConfig({ key, direction });
   };
 
-  // Mengurutkan kategori berdasarkan konfigurasi pengurutan
   const sortedCategories = [...categories].sort((a, b) => {
     if (!sortConfig) return 0;
 
@@ -78,8 +68,8 @@ export function useGalleryCategory() {
     return 0;
   });
 
-  const filteredCategories = sortedCategories.filter(
-    (category) => category.nama.toLowerCase().includes(searchTerm.toLowerCase()) // Kolom 'nama' sesuai dengan tabel Supabase
+  const filteredCategories = sortedCategories.filter((category) =>
+    category.nama.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredCategories.length / itemsPerPage);
@@ -100,16 +90,14 @@ export function useGalleryCategory() {
         if (error) throw error;
         toast.success("Kategori berhasil diperbarui");
       } else {
-        // Tambah kategori baru
         const { error } = await supabase
-          .from("galeri_kategori") // Nama tabel di Supabase
-          .insert([{ nama: formData.nama }]); // Kolom 'nama' sesuai dengan tabel Supabase
+          .from("galeri_kategori")
+          .insert([{ nama: formData.nama }]);
 
         if (error) throw error;
         toast.success("Kategori berhasil ditambahkan");
       }
 
-      // Reset state setelah submit
       setShowModal(false);
       setEditingCategory(null);
       setFormData(formInitState);
@@ -119,13 +107,12 @@ export function useGalleryCategory() {
     }
   };
 
-  // Handle hapus kategori
   const handleDelete = async (id: string) => {
     if (!confirm("Apakah Anda yakin ingin menghapus kategori ini?")) return;
 
     try {
       const { error } = await supabase
-        .from("galeri_kategori") // Nama tabel di Supabase
+        .from("galeri_kategori")
         .delete()
         .eq("id", id);
 
@@ -139,12 +126,10 @@ export function useGalleryCategory() {
     }
   };
 
-  // Efek samping untuk memuat data kategori saat searchTerm berubah
   useEffect(() => {
     fetchCategories();
-  }, [searchTerm]);
+  }, [fetchCategories]);
 
-  // Return semua state dan fungsi yang dibutuhkan
   return {
     categories,
     isLoading,

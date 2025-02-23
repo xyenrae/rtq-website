@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
 
@@ -53,8 +53,8 @@ export const useNews = () => {
     return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
   };
 
-  // Fetch news from Supabase
-  const fetchNews = async () => {
+  // Fetch news from Supabase, dibungkus dalam useCallback agar stabil sebagai dependency
+  const fetchNews = useCallback(async () => {
     try {
       let query = supabase
         .from("berita")
@@ -68,14 +68,14 @@ export const useNews = () => {
       const { data, error } = await query;
       if (error) throw error;
       setNews(data || []);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memuat berita");
     }
-  };
+  }, [selectedCategory]);
 
   useEffect(() => {
     fetchNews();
-  }, [selectedCategory]);
+  }, [fetchNews]);
 
   // Auto-update reading time when content changes
   useEffect(() => {
@@ -137,12 +137,10 @@ export const useNews = () => {
     e.preventDefault();
 
     if (formData.gambar === "") {
-      toast.error(`Gambar wajid diisi`);
+      toast.error(`Gambar wajib diisi`);
       return;
     }
     const loadingToast = toast.loading("Menyimpan data...");
-
-    console.log(formData);
 
     try {
       const now = new Date().toISOString();
@@ -152,7 +150,7 @@ export const useNews = () => {
         created_at: editingNews ? formData.created_at : now,
       };
 
-      const { data, error } = editingNews
+      const { error } = editingNews
         ? await supabase
             .from("berita")
             .update(updatedFormData)
@@ -170,7 +168,7 @@ export const useNews = () => {
       setFormData(formInitState);
       setImagePreview(null);
       setEditingNews(null);
-    } catch (error) {
+    } catch {
       toast.error("Gagal menyimpan data");
       if (formData.gambar) {
         const filePath = formData.gambar.split("/").pop();
@@ -231,7 +229,7 @@ export const useNews = () => {
 
       toast.success("Berita berhasil dihapus!");
       fetchNews();
-    } catch (error) {
+    } catch {
       toast.error("Gagal menghapus berita");
     } finally {
       toast.dismiss(loadingToast);
