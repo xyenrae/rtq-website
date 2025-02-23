@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+"use client";
+import { useEffect, useCallback } from "react";
 import { useMotionTemplate, useMotionValue, motion } from "framer-motion";
 
 const ScrollToTopButton = () => {
@@ -7,16 +8,16 @@ const ScrollToTopButton = () => {
   const radius = 22;
   const circumference = 2 * Math.PI * radius;
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     const totalHeight =
       document.documentElement.scrollHeight - window.innerHeight;
     progress.set(window.scrollY / totalHeight);
-  };
+  }, [progress]);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [handleScroll]);
 
   return (
     <motion.div

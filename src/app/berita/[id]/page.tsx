@@ -6,8 +6,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Eye, Calendar, ChevronLeft, Clock } from "lucide-react";
-import NewsCard from "@/components/card/NewsCard";
 import { FaInstagram, FaLinkedin, FaShare, FaTwitter } from "react-icons/fa";
+import RelatedNewsCard from "@/components/card/RelatedNewsCard";
 
 interface Berita {
   id: string;
@@ -96,7 +96,7 @@ export default function BeritaDetailPage() {
         setBeritaDetail((prev) => (prev ? { ...prev, views: newViews } : prev));
 
         setError(null);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error:", error);
         setError("Gagal memuat berita. Silakan coba kembali.");
         router.push("/berita");
@@ -358,7 +358,7 @@ export default function BeritaDetailPage() {
         >
           {relatedBerita.length > 0 ? (
             relatedBerita.map((item, index) => (
-              <NewsCard key={`${item.id}-${index}`} item={item} />
+              <RelatedNewsCard key={item.id} item={item} index={index} />
             ))
           ) : (
             <p className="col-span-full text-center text-gray-600">

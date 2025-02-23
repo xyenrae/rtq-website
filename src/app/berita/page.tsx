@@ -8,21 +8,46 @@ import { useKategori } from "@/hooks/santri/berita/useBeritaKategori";
 import LoadMoreSpinner from "@/components/ui/LoadMoreSpinner";
 import { useInView } from "react-intersection-observer";
 
-// Fungsi untuk format tanggal
-const formatDate = (dateString: string) =>
+interface KategoriData {
+  id: string;
+  nama: string;
+}
+
+interface BeritaData {
+  id: string;
+  gambar?: string;
+  judul: string;
+  ringkasan: string;
+  kategori?: KategoriData;
+  created_at: string;
+}
+
+const formatDate = (dateString: string): string =>
   new Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(
     new Date(dateString)
   );
 
-// Animation variants untuk preview
 const previewVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   exit: { opacity: 0, y: -20 },
 };
 
-// Komponen PreviewBerita
-const PreviewBerita = ({ previewBerita }: { previewBerita: any }) => {
+const transformKategori = (k: KategoriData): KategoriData => ({
+  id: k.id,
+  nama: k.nama,
+});
+
+const transformBerita = (b: BeritaData): BeritaData => ({
+  id: b.id,
+  gambar: b.gambar,
+  judul: b.judul,
+  ringkasan: b.ringkasan,
+  kategori: b.kategori ? transformKategori(b.kategori) : undefined,
+  created_at: b.created_at,
+});
+
+const PreviewBerita = ({ previewBerita }: { previewBerita: BeritaData }) => {
   if (!previewBerita) return null;
   return (
     <AnimatePresence mode="wait">
@@ -83,7 +108,6 @@ const PreviewBerita = ({ previewBerita }: { previewBerita: any }) => {
   );
 };
 
-// Komponen CategoryFilter (khusus untuk memilih kategori)
 const CategoryFilter = ({
   selectedCategory,
   setSelectedCategory,
@@ -91,7 +115,7 @@ const CategoryFilter = ({
 }: {
   selectedCategory: string;
   setSelectedCategory: (cat: string) => void;
-  kategori: any[];
+  kategori: KategoriData[];
 }) => {
   return (
     <section className="relative shadow-sm">
@@ -103,20 +127,20 @@ const CategoryFilter = ({
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="sm:hidden w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-green-500 outline-none"
           >
-            <option value="Semua">Semua</option>
+            {/* Nilai kosong mewakili "Semua" */}
+            <option value="">Semua</option>
             {kategori.map((item) => (
               <option key={item.id} value={item.id}>
                 {item.nama}
               </option>
             ))}
           </select>
-
           {/* Tombol untuk desktop */}
           <div className="hidden sm:flex flex-wrap gap-3 justify-center">
             <button
-              onClick={() => setSelectedCategory("Semua")}
+              onClick={() => setSelectedCategory("")}
               className={`px-4 py-2 rounded-lg transition-all ${
-                selectedCategory === "Semua"
+                selectedCategory === ""
                   ? "bg-green-600 text-white"
                   : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
               }`}
@@ -143,18 +167,15 @@ const CategoryFilter = ({
   );
 };
 
-// Komponen NewsCard untuk grid berita
+// Animation variants untuk NewsCard
 const newsCardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-const NewsCard = ({ item }: { item: any }) => {
-  const [ref, inView] = useInView({
-    triggerOnce: true,
-    threshold: 0.1,
-  });
-
+// Komponen NewsCard
+const NewsCard = ({ item }: { item: BeritaData }) => {
+  const [ref, inView] = useInView({ triggerOnce: true, threshold: 0.1 });
   return (
     <motion.div
       ref={ref}
@@ -193,22 +214,28 @@ const NewsCard = ({ item }: { item: any }) => {
   );
 };
 
-// Halaman utama BeritaPage
 export default function BeritaPage() {
-  const [selectedCategory, setSelectedCategory] = useState("Semua");
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const { berita, isLoading, setPage, hasMore } = useBerita(selectedCategory);
   const { kategori } = useKategori();
+
+  const transformedBerita: BeritaData[] = berita.map((b: BeritaData) =>
+    transformBerita(b)
+  );
+  const transformedKategori: KategoriData[] = kategori.map((k: KategoriData) =>
+    transformKategori(k)
+  );
 
   const [ref, inView] = useInView({ threshold: 0 });
   useEffect(() => {
     if (inView && hasMore && !isLoading) {
-      setPage((prev) => prev + 1);
+      setPage((prev: number) => prev + 1);
     }
   }, [inView, hasMore, isLoading, setPage]);
 
-  const previewBerita = berita.length > 0 ? berita[0] : null;
-  const newsGrid = berita.slice(1);
-  console.log(berita);
+  const previewBerita: BeritaData | null =
+    transformedBerita.length > 0 ? transformedBerita[0] : null;
+  const newsGrid: BeritaData[] = transformedBerita.slice(1);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -219,7 +246,7 @@ export default function BeritaPage() {
       <CategoryFilter
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
-        kategori={kategori}
+        kategori={transformedKategori}
       />
 
       {/* Grid Berita */}
@@ -238,7 +265,7 @@ export default function BeritaPage() {
         </div>
 
         {/* Empty state */}
-        {!isLoading && berita.length === 0 && (
+        {!isLoading && transformedBerita.length === 0 && (
           <div className="text-center py-20">
             <h3 className="text-xl text-gray-600">
               Tidak ada berita untuk kategori ini.

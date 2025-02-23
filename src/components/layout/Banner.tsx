@@ -1,11 +1,7 @@
 "use client";
 import Image from "next/image";
-import { useUser } from "@/context/UserContext";
 
 export default function Banner() {
-  const { user } = useUser();
-  if (user) return null;
-
   return (
     <div className="bg-green-500 text-white text-center p-2 flex justify-center">
       <Image

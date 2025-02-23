@@ -1,4 +1,3 @@
-// File: /app/dashboard/page.tsx atau /pages/dashboard.tsx (sesuaikan struktur proyekmu)
 "use client";
 
 import { motion } from "framer-motion";
@@ -8,22 +7,26 @@ import {
   FiImage,
   FiFileText,
   FiMessageSquare,
-  FiUserPlus,
   FiCamera,
 } from "react-icons/fi";
-import { useDashboard } from "@/hooks/admin/dashboard/useDashboard";
+import {
+  useDashboard,
+  VisitorDataPoint,
+  ContentDataPoint,
+} from "@/hooks/admin/dashboard/useDashboard";
 import StatCard from "@/components/StatCard";
 import Link from "next/link";
 
+// Dynamic import untuk chart dengan type assertion
 const LineChart = dynamic(() => import("@/components/LineChart"), {
   ssr: false,
   loading: () => <div className="h-64 bg-gray-50 rounded-xl animate-pulse" />,
-});
+}) as React.ComponentType<{ data: VisitorDataPoint[] }>;
 
 const BarChart = dynamic(() => import("@/components/BarChart"), {
   ssr: false,
   loading: () => <div className="h-64 bg-gray-50 rounded-xl animate-pulse" />,
-});
+}) as React.ComponentType<{ data: ContentDataPoint[] }>;
 
 export default function Dashboard() {
   const { stats, recentActivity, isLoading, visitorData, contentData } =

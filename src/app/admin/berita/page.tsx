@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -19,12 +18,16 @@ import {
 } from "react-icons/fi";
 import { useNews } from "@/hooks/admin/berita/useNews";
 import Image from "next/image";
-import { toast } from "react-toastify";
 import { supabase } from "@/lib/supabase/client";
+
+// Definisikan tipe Category agar tidak menggunakan any
+interface Category {
+  id: string;
+  nama: string;
+}
 
 const NewsTable = () => {
   const {
-    searchTerm,
     setSearchTerm,
     currentPage,
     setCurrentPage,
@@ -50,14 +53,18 @@ const NewsTable = () => {
     setSelectedCategory,
   } = useNews();
 
-  const [categories, setCategories] = useState<any[]>([]);
+  // Gunakan tipe Category[] bukan any[]
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       const { data, error } = await supabase
         .from("berita_kategori")
         .select("*");
-      if (!error) setCategories(data || []);
+      if (!error) {
+        // Jika data tidak ada, gunakan array kosong
+        setCategories(data || []);
+      }
     };
     fetchCategories();
   }, []);
@@ -399,7 +406,7 @@ const NewsTable = () => {
                                   if (file) {
                                     try {
                                       await handleImageUpload(file);
-                                    } catch (error) {
+                                    } catch {
                                       setImagePreview(null);
                                     }
                                   }

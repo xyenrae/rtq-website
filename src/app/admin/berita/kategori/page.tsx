@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiPlus,
@@ -17,7 +17,6 @@ import { toast } from "react-toastify";
 
 const KategoriTable: React.FC = () => {
   const {
-    searchTerm,
     setSearchTerm,
     currentPage,
     setCurrentPage,
@@ -39,12 +38,9 @@ const KategoriTable: React.FC = () => {
     error,
   } = useKategori();
 
-  const [localError, setLocalError] = useState<string | null>(null);
-
   useEffect(() => {
     if (error) {
       toast.error(error);
-      setLocalError(null);
     }
   }, [error]);
 

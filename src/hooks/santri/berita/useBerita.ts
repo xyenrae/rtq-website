@@ -2,12 +2,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 
-// Define the Kategori interface
+// Define the Kategori interface dengan properti id dan nama
 interface Kategori {
+  id: string;
   nama: string;
 }
 
-// Define the Berita interface based on the provided fields
+// Define the Berita interface
 interface Berita {
   id: string;
   judul: string;
@@ -19,18 +20,18 @@ interface Berita {
   waktu_baca: number;
   created_at: string;
   updated_at: string;
-  kategori: Kategori; // This matches the "kategori:kategori_id (nama)" in your query
+  kategori: Kategori; // Mengandung id dan nama
 }
 
-export function useBerita(selectedCategory: string = "Semua") {
+export function useBerita(selectedCategory: string = "") {
   const [berita, setBerita] = useState<Berita[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const pageSize = 6; // Reduced for better UX
+  const pageSize = 6; // Ukuran halaman
 
+  // Reset state saat kategori berubah
   useEffect(() => {
-    // Reset when category changes
     setBerita([]);
     setPage(1);
     setHasMore(true);
@@ -43,11 +44,13 @@ export function useBerita(selectedCategory: string = "Semua") {
         setIsLoading(true);
         let query = supabase
           .from("berita")
-          .select("*, kategori:kategori_id (nama)")
+          // Mengambil data berita beserta data kategori (id dan nama)
+          .select("*, kategori:kategori_id (id, nama)")
           .order("created_at", { ascending: false })
           .range((page - 1) * pageSize, page * pageSize - 1);
 
-        if (selectedCategory !== "Semua") {
+        // Jika ada filter kategori (selectedCategory tidak kosong), tambahkan kondisi filter
+        if (selectedCategory !== "") {
           query = query.eq("kategori_id", selectedCategory);
         }
 

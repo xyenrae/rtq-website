@@ -13,7 +13,7 @@ const formatDate = (dateString: string) => {
 
 export default function Berita() {
   const [isMobile, setIsMobile] = useState(false);
-  const { berita, isLoading } = useBerita("Semua");
+  const { berita, isLoading } = useBerita("");
 
   useEffect(() => {
     setIsMobile(window.innerWidth < 768);

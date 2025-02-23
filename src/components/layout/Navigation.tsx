@@ -3,57 +3,24 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabase/client";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useUser } from "@/context/UserContext";
-import LogoutModal from "@/components/ui/LogoutModal";
-import { FiLogOut } from "react-icons/fi"; // Icon untuk logout
-import { ChevronDown } from "lucide-react"; // Icon ChevronDown dari lucide-react
-
-const formatName = (name: string): string =>
-  name
-    .split(" ")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
 
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, setUser } = useUser();
-  const userFullName = user?.user_metadata.full_name
-    ? formatName(user.user_metadata.full_name)
-    : null;
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
-  const router = useRouter();
 
+  // Update status scroll untuk menyesuaikan tampilan navigasi
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 0);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setIsDropdownOpen(false);
-    toast.success("Anda telah berhasil logout.");
-    router.push("/");
-  };
-
+  // Tutup mobile menu saat klik di luar
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
-        setIsDropdownOpen(false);
-      }
       if (
         mobileMenuRef.current &&
         !mobileMenuRef.current.contains(event.target as Node) &&
@@ -69,12 +36,6 @@ export default function Navigation() {
 
   return (
     <>
-      {/* Modal Konfirmasi Logout */}
-      <LogoutModal
-        isOpen={isLogoutModalOpen}
-        onClose={() => setIsLogoutModalOpen(false)}
-        onConfirm={handleLogout}
-      />
       <nav
         className={`bg-white sticky top-0 z-50 transition-all duration-300 ${
           isScrolled ? "py-2 shadow-md" : "py-3"
@@ -126,7 +87,7 @@ export default function Navigation() {
                 />
                 <NavLink
                   href="/pendaftaran"
-                  label={userFullName ? "Data Diri" : "Pendaftaran"}
+                  label="Pendaftaran"
                   isScrolled={isScrolled}
                 />
                 <NavLink
@@ -187,7 +148,7 @@ export default function Navigation() {
                   />
                   <MobileNavLink
                     href="/pendaftaran"
-                    label={userFullName ? "Data Diri" : "Pendaftaran"}
+                    label="Pendaftaran"
                     onClick={() => setIsMobileMenuOpen(false)}
                   />
                   <MobileNavLink
