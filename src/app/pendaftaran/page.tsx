@@ -132,14 +132,17 @@ const RegistrationPage = () => {
           </div>
 
           {/* Image Section */}
-          <div className="flex-1 order-1 lg:order-2 relative w-full h-[300px] sm:h-[400px] lg:h-[500px] mt-8 lg:mt-0">
-            <Image
-              src="/images/hero-1.svg"
-              alt="Hero Image"
-              fill
-              className="object-center"
-              priority
-            />
+          <div className="flex-1 order-1 lg:order-2 flex justify-center items-center">
+            <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px]">
+              <Image
+                src="/images/hero-1.svg"
+                alt="Hero Image"
+                width={500}
+                height={500}
+                className="w-full h-full object-contain"
+                priority
+              />
+            </div>
           </div>
         </div>
       </motion.div>

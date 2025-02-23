@@ -11,7 +11,7 @@ const programs = [
     id: 1,
     title: "Jilid Pemula",
     desc: "Kitab panduan belajar membaca huruf hijaiyyah dibaca pendek dan berharokat fathah",
-    yrs: 4,
+    yrs: "4-5",
     days: 6,
     hrs: 1.1,
   },
@@ -19,7 +19,7 @@ const programs = [
     id: 2,
     title: "Jilid 1",
     desc: "Kitab panduan belajar baca huruf hijaiyyah berharakat Fathah, pengenalan nama huruf & angka Arab",
-    yrs: 5,
+    yrs: "5-6",
     days: 6,
     hrs: 1.1,
   },
@@ -27,7 +27,7 @@ const programs = [
     id: 3,
     title: "Jilid 2",
     desc: "Kitab panduan belajar baca harakat Kasrah, Dhammah, Mad, huruf Lin, serta pengenalan Sukun!",
-    yrs: 6,
+    yrs: "6-7",
     days: 6,
     hrs: 1.1,
   },
@@ -35,7 +35,7 @@ const programs = [
     id: 4,
     title: "Jilid 3",
     desc: "Kitab panduan belajar harakat ganda (Fathatain, Kasratain, Dammatain), Tasydid, Qolqolah, Ghunnah",
-    yrs: 7,
+    yrs: "7-8",
     days: 6,
     hrs: 1.1,
   },
@@ -43,7 +43,7 @@ const programs = [
     id: 5,
     title: "Jilid 4",
     desc: "Kitab panduan belajar bacaan lafaz Allah, hukum Mim/Nun Sukun & Tanwin, jenis Mad (Jaiz, Wajib, Lazim)",
-    yrs: 8,
+    yrs: "8-9",
     days: 6,
     hrs: 1.1,
   },
@@ -51,7 +51,7 @@ const programs = [
     id: 6,
     title: "Jilid 5",
     desc: "Kitab panduan belajar tanda Waqof, bacaan Sukun-Idgham, hukum Tafkhim-Tarqiq, tanda baca Rosm Utsmani",
-    yrs: 9,
+    yrs: "9-10",
     days: 6,
     hrs: 1.1,
   },
@@ -59,7 +59,7 @@ const programs = [
     id: 7,
     title: "Jilid 6",
     desc: "Kitab panduan belajar hukum Mad, Hamzah Washol, bacaan khusus (Isymam, Imalah, Saktah), bacaan Shod-Sin",
-    yrs: 10,
+    yrs: "10-11",
     days: 6,
     hrs: 1.1,
   },
@@ -67,7 +67,7 @@ const programs = [
     id: 8,
     title: "Jilid 7",
     desc: "Kitab panduan belajar hukum tajwid: ta’awudz & basmalah, tanwin/nun sukun, mim sukun, ghunnah, mad",
-    yrs: 11,
+    yrs: "11-12",
     days: 6,
     hrs: 1.1,
   },
@@ -75,7 +75,7 @@ const programs = [
     id: 9,
     title: "Yanbu'a Tahajji",
     desc: "Panduan untuk mengajarkan anak agar bisa menulis huruf arab, angka arab serta arab pegon",
-    yrs: 11,
+    yrs: "8-12",
     days: 6,
     hrs: 1.1,
   },
@@ -105,10 +105,10 @@ export default function CardSliderJilid() {
           forceToAxis: true,
           sensitivity: 0.5,
         }}
-        loop={true} // Aktifkan infinite scroll
+        loop={true}
         autoplay={{
-          delay: 3000, // Durasi autoplay (3 detik)
-          disableOnInteraction: false, // Tetap autoplay meskipun user berinteraksi
+          delay: 3000,
+          disableOnInteraction: false,
         }}
         breakpoints={{
           0: {

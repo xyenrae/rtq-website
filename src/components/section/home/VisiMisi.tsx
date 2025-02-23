@@ -43,7 +43,8 @@ export default function VisiMisi() {
               Memberikan pendidikan agama Islam yang berkualitas dan menyeluruh.
             </li>
             <li>
-              Membangun karakter yang baik melalui kegiatan dakwah dan sosial.
+              Mengembangkan pemahaman mendalam tentang nilai-nilai Al-Qur&#39;an
+              untuk diaplikasikan dalam kehidupan nyata.
             </li>
           </ul>
         </div>

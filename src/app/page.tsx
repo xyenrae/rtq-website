@@ -2,12 +2,12 @@
 import ProgramMembaca from "@/components/section/home/ProgramMembaca";
 import ProgramKami from "@/components/section/home/ProgramKami";
 import KenaliKami from "@/components/section/home/KenaliKami";
-import ProgramUnggulan from "@/components/section/home/ProgramUnggulan";
 import VisiMisi from "@/components/section/home/VisiMisi";
 import Guru from "@/components/section/home/Guru";
 import Berita from "@/components/section/home/Berita";
 import Hero from "@/components/section/home/Hero";
 import { motion } from "framer-motion";
+import KelasUnggulan from "@/components/section/home/KelasUnggulan";
 
 const sectionVariants = {
   hidden: { opacity: 0, y: -20 },
@@ -22,16 +22,15 @@ export default function Home() {
         <Hero />
       </section>
 
-      {/* Program Unggulan Section */}
+      {/* Kelas Unggulan Section */}
       <motion.section
-        id="program-section"
-        className="container mt-32 !overflow-hidden"
+        className="mt-32 !overflow-hidden"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
         variants={sectionVariants}
       >
-        <ProgramUnggulan />
+        <KelasUnggulan />
       </motion.section>
 
       {/* Program Kami Section */}
@@ -47,6 +46,7 @@ export default function Home() {
 
       {/* Program Membaca Section */}
       <motion.section
+        id="program-section"
         className="mt-32"
         initial="hidden"
         whileInView="visible"
@@ -69,6 +69,7 @@ export default function Home() {
 
       {/* Visi Misi Section */}
       <motion.section
+        className="mt-12"
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
