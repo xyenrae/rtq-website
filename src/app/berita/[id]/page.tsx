@@ -6,8 +6,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Eye, Calendar, ChevronLeft, Clock } from "lucide-react";
-import { FaInstagram, FaLinkedin, FaShare, FaTwitter } from "react-icons/fa";
-import RelatedNewsCard from "@/components/card/RelatedNewsCard";
+import { FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { useKategori } from "@/hooks/santri/berita/useBeritaKategori";
+import ShareDropdown from "@/components/ui/ShareDropdown";
+import CardRelatedBerita from "@/components/card/CardRelatedBerita";
 
 interface Berita {
   id: string;
@@ -16,9 +18,12 @@ interface Berita {
   konten: string;
   views: number;
   gambar?: string;
-  kategori?: string;
+  kategori_id: string; // Diubah dari optional menjadi wajib
   ringkasan?: string;
-  waktu_baca?: number;
+  waktu_baca: number; // Diubah dari optional menjadi wajib
+  kategori?: {
+    nama: string;
+  };
 }
 
 const formatDate = (dateString: string) => {
@@ -43,6 +48,9 @@ export default function BeritaDetailPage() {
   const [relatedBerita, setRelatedBerita] = useState<Berita[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Ambil data kategori dari hook useKategori
+  const { kategori } = useKategori();
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -76,16 +84,17 @@ export default function BeritaDetailPage() {
         if (detailRes.data?.kategori_id) {
           const relatedRes = await supabase
             .from("berita")
-            .select("*")
+            .select("*, kategori:berita_kategori(nama)")
             .eq("kategori_id", detailRes.data.kategori_id)
             .neq("id", id)
             .limit(3);
 
           if (relatedRes.error) throw relatedRes.error;
           setRelatedBerita(relatedRes.data);
+          console.log("related: ", relatedRes.data);
         }
 
-        // Update views dengan memanggil fungsi RPC untuk increment secara atomik
+        // Update views melalui fungsi RPC untuk increment secara atomik
         const { data: newViews, error: rpcError } = await supabase.rpc(
           "increment_views",
           { row_id: id }
@@ -115,7 +124,7 @@ export default function BeritaDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 w-screen overflow-hidden">
       {/* Navigation */}
-      <nav className=" top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
+      <nav className="top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
         <div className="container mx-auto px-4 py-4">
           <Link
             href="/berita"
@@ -128,7 +137,7 @@ export default function BeritaDetailPage() {
       </nav>
 
       {/* Main Content */}
-      <div className="lg:container lg:px-4 py-8 ">
+      <div className="lg:container lg:px-4 py-8">
         <div className="grid grid-cols-12 gap-8">
           <div className="col-span-12 lg:col-span-9 space-y-8">
             {/* Main Article */}
@@ -139,7 +148,7 @@ export default function BeritaDetailPage() {
               className="w-full"
             >
               <div className="rounded-2xl shadow-sm overflow-hidden border border-gray-100 w-full">
-                {/* Hero Image with Parallax Effect */}
+                {/* Hero Image */}
                 {beritaDetail.gambar && (
                   <motion.div
                     className="relative h-[560px] w-full group overflow-hidden"
@@ -155,7 +164,6 @@ export default function BeritaDetailPage() {
                       className="object-cover transform group-hover:scale-105 transition-transform duration-700 ease-out"
                       priority
                     />
-                    {/* <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" /> */}
                   </motion.div>
                 )}
 
@@ -164,33 +172,34 @@ export default function BeritaDetailPage() {
                   <div className="bg-white container py-8 rounded-2xl rounded-br-none">
                     <header className="mb-4">
                       <div className="flex justify-between gap-4 mb-6">
-                        <div className="flex">
-                          {beritaDetail.kategori && (
+                        <div className="flex items-center space-x-4">
+                          {/* Tampilkan kategori menggunakan data dari useKategori */}
+                          {beritaDetail.kategori_id && (
                             <motion.span
                               initial={{ scale: 0.9 }}
                               animate={{ scale: 1 }}
                               className="px-4 py-2 bg-green-600 text-white rounded-full text-sm font-medium shadow-sm"
                             >
-                              {beritaDetail.kategori}
+                              {
+                                kategori.find(
+                                  (k) => k.id === beritaDetail.kategori_id
+                                )?.nama
+                              }
                             </motion.span>
                           )}
                           {/* Interactive Time Widget */}
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2 text-gray-600">
-                              <Calendar className="w-5 h-5" />
-                              <span className="font-medium">
-                                {new Date(
-                                  beritaDetail.created_at
-                                ).toLocaleDateString("id-ID", {
-                                  weekday: "long",
-                                  day: "numeric",
-                                  month: "long",
-                                  year: "numeric",
-                                })}
-                              </span>
-                            </div>
-
-                            <div className="hidden lg:flex h-5 w-0.5 bg-gray-300 rounded-full" />
+                          <div className="flex items-center space-x-2 text-gray-600">
+                            <Calendar className="w-5 h-5" />
+                            <span className="font-medium">
+                              {new Date(
+                                beritaDetail.created_at
+                              ).toLocaleDateString("id-ID", {
+                                weekday: "long",
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })}
+                            </span>
                           </div>
                           <div className="hidden lg:flex items-center space-x-1.5 text-gray-600 ml-2">
                             <Eye className="w-5 h-5" />
@@ -233,7 +242,7 @@ export default function BeritaDetailPage() {
                       </motion.h1>
                     </header>
 
-                    {/* Content with Interactive Elements */}
+                    {/* Article Content */}
                     <div className="prose prose-xl max-w-none text-gray-700 leading-relaxed">
                       {beritaDetail.konten
                         .split("\n")
@@ -245,10 +254,8 @@ export default function BeritaDetailPage() {
                             transition={{ delay: index * 0.05 }}
                             className="relative group mb-8"
                           >
-                            <p className="text-lg leading-8 text-gray-700 ">
+                            <p className="text-lg leading-8 text-gray-700">
                               {paragraph}
-
-                              {/* Hover Annotation */}
                               <button className="absolute -left-8 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-gray-400 hover:text-gray-600">
                                 <span className="text-2xl">·</span>
                               </button>
@@ -257,13 +264,10 @@ export default function BeritaDetailPage() {
                         ))}
                     </div>
                     <div className="flex justify-end">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        className="flex items-center space-x-2 text-gray-600 hover:text-green-600"
-                      >
-                        <FaShare className="w-5 h-5" />
-                        <span>Bagikan</span>
-                      </motion.button>
+                      <ShareDropdown
+                        title={beritaDetail.judul}
+                        url={window.location.href}
+                      />
                     </div>
                   </div>
                 </div>
@@ -285,7 +289,6 @@ export default function BeritaDetailPage() {
                         <p className="text-gray-600">RTQ AL-Hikmah</p>
                       </div>
                     </div>
-
                     <div className="flex items-center space-x-4">
                       <motion.button
                         whileHover={{ y: -2 }}
@@ -312,9 +315,8 @@ export default function BeritaDetailPage() {
             </motion.article>
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar: Latest News */}
           <aside className="col-span-12 lg:col-span-3 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)] overflow-y-auto space-y-8 pb-8">
-            {/* Latest News */}
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -357,14 +359,14 @@ export default function BeritaDetailPage() {
           transition={{ duration: 0.5, delay: 0.3 }}
         >
           {relatedBerita.length > 0 ? (
-            relatedBerita.map((item, index) => (
-              <RelatedNewsCard key={item.id} item={item} index={index} />
+            relatedBerita.map((item) => (
+              <CardRelatedBerita key={item.id} item={item} />
             ))
           ) : (
             <p className="col-span-full text-center text-gray-600">
               Tidak ada berita untuk kategori ini.
             </p>
-          )}{" "}
+          )}
         </motion.section>
       </div>
     </div>
@@ -381,7 +383,6 @@ const SkeletonLoader = () => (
         </div>
       </div>
     </nav>
-
     <div className="container mx-auto px-4 py-8">
       <div className="grid lg:grid-cols-4 gap-8">
         <div className="lg:col-span-3">
@@ -404,7 +405,6 @@ const SkeletonLoader = () => (
             </div>
           </div>
         </div>
-
         <aside className="space-y-8">
           {[...Array(2)].map((_, sectionIndex) => (
             <div
