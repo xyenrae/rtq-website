@@ -1,182 +1,140 @@
-"use client";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
-import { motion } from "framer-motion";
-import dynamic from "next/dynamic";
-import {
-  FiUsers,
-  FiImage,
-  FiFileText,
-  FiMessageSquare,
-  FiCamera,
-} from "react-icons/fi";
-import {
-  useDashboard,
-  VisitorDataPoint,
-  ContentDataPoint,
-} from "@/hooks/admin/dashboard/useDashboard";
-import StatCard from "@/components/StatCard";
-import Link from "next/link";
-
-// Dynamic import untuk chart dengan type assertion
-const LineChart = dynamic(() => import("@/components/LineChart"), {
-  ssr: false,
-  loading: () => <div className="h-64 bg-gray-50 rounded-xl animate-pulse" />,
-}) as React.ComponentType<{ data: VisitorDataPoint[] }>;
-
-const BarChart = dynamic(() => import("@/components/BarChart"), {
-  ssr: false,
-  loading: () => <div className="h-64 bg-gray-50 rounded-xl animate-pulse" />,
-}) as React.ComponentType<{ data: ContentDataPoint[] }>;
-
-export default function Dashboard() {
-  const { stats, recentActivity, isLoading, visitorData, contentData } =
-    useDashboard();
-
-  return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-800">Dashboard Admin</h1>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <StatCard
-            icon={<FiUsers className="w-6 h-6 text-blue-600" />}
-            title="Total Santri"
-            value={stats.santri}
-            loading={isLoading}
-          />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <StatCard
-            icon={<FiImage className="w-6 h-6 text-green-600" />}
-            title="Total Gambar"
-            value={stats.gambar}
-            loading={isLoading}
-          />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <StatCard
-            icon={<FiFileText className="w-6 h-6 text-purple-600" />}
-            title="Total Berita"
-            value={stats.berita}
-            loading={isLoading}
-          />
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <StatCard
-            icon={<FiMessageSquare className="w-6 h-6 text-red-600" />}
-            title="Total Pesan"
-            value={stats.pesan}
-            loading={isLoading}
-          />
-        </motion.div>
-      </div>
-
-      {/* Chart Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-white p-6 rounded-xl shadow-sm"
-        >
-          <h2 className="text-lg font-semibold mb-4">
-            Statistik Pengunjung Bulanan
-          </h2>
-          <div className="h-64">
-            <LineChart data={visitorData} />
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="bg-white p-6 rounded-xl shadow-sm"
-        >
-          <h2 className="text-lg font-semibold mb-4">Distribusi Konten</h2>
-          <div className="h-64">
-            <BarChart data={contentData} />
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Recent Activity & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white p-6 rounded-xl shadow-sm"
-        >
-          <h2 className="text-lg font-semibold mb-4">Aktivitas Terakhir</h2>
-          <div className="space-y-4">
-            {recentActivity.length > 0 ? (
-              recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{activity.title}</p>
-                    <p className="text-xs text-gray-500">
-                      {activity.timestamp}
-                    </p>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-sm">
-                Tidak ada aktivitas terbaru.
-              </p>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="bg-white p-6 rounded-xl shadow-sm space-y-4"
-        >
-          <h2 className="text-lg font-semibold">Aksi Cepat</h2>
-          <Link
-            href="/admin/berita/tambah"
-            className="w-full flex items-center space-x-2 p-3 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            <FiFileText className="w-5 h-5 text-purple-600" />
-            <span>Tambah Berita</span>
-          </Link>
-          <Link
-            href="/admin/galeri/tambah"
-            className="w-full flex items-center space-x-2 p-3 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            <FiCamera className="w-5 h-5 text-green-600" />
-            <span>Tambah Galeri</span>
-          </Link>
-          <Link
-            href="/admin/pesan"
-            className="w-full flex items-center space-x-2 p-3 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            <FiMessageSquare className="w-5 h-5 text-red-600" />
-            <span>Lihat Pesan Masuk</span>
-          </Link>
-        </motion.div>
-      </div>
-    </div>
-  );
+// Tipe untuk statistik
+interface Stats {
+  santri: number;
+  gambar: number;
+  berita: number;
+  pesan: number;
 }
+
+// Tipe untuk data pengunjung per bulan
+export interface VisitorDataPoint {
+  month: string;
+  visitors: number;
+}
+
+// Tipe untuk distribusi konten
+export interface ContentDataPoint {
+  category: string;
+  count: number;
+}
+
+// Tipe untuk data visitor yang diambil dari Supabase
+interface Visitor {
+  created_at: string;
+}
+
+// Tipe untuk aktivitas terbaru (meskipun saat ini tidak ada data aktivitas, kita definisikan agar nanti bisa digunakan)
+export interface Activity {
+  title: string;
+  timestamp: string;
+}
+
+export const useDashboard = () => {
+  const [stats, setStats] = useState<Stats>({
+    santri: 0,
+    gambar: 0,
+    berita: 0,
+    pesan: 0,
+  });
+  // recentActivity dideklarasikan sebagai state, meskipun belum ada data aktivitas
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [visitorData, setVisitorData] = useState<VisitorDataPoint[]>([]);
+  const [contentData, setContentData] = useState<ContentDataPoint[]>([]);
+
+  const fetchStats = async (): Promise<Stats> => {
+    const { count: santri } = await supabase
+      .from("santri")
+      .select("*", { count: "exact", head: true });
+    const { count: gambar } = await supabase
+      .from("gallery")
+      .select("*", { count: "exact", head: true });
+    const { count: berita } = await supabase
+      .from("berita")
+      .select("*", { count: "exact", head: true });
+    const { count: pesan } = await supabase
+      .from("pesan")
+      .select("*", { count: "exact", head: true });
+    return {
+      santri: santri || 0,
+      gambar: gambar || 0,
+      berita: berita || 0,
+      pesan: pesan || 0,
+    };
+  };
+
+  const fetchVisitorStats = async (): Promise<VisitorDataPoint[]> => {
+    const { data, error } = await supabase
+      .from<"visitors", Visitor>("visitors")
+      .select("created_at")
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.error("Error fetching visitor stats:", error);
+      return [];
+    }
+    // Group data berdasarkan bulan
+    const monthlyStats: Record<string, number> = {};
+    data?.forEach((curr: Visitor) => {
+      const month = new Date(curr.created_at).toLocaleString("id-ID", {
+        month: "long",
+        year: "numeric",
+      });
+      monthlyStats[month] = (monthlyStats[month] || 0) + 1;
+    });
+    return Object.entries(monthlyStats).map(([month, count]) => ({
+      month,
+      visitors: count,
+    }));
+  };
+
+  const fetchContentStats = async (): Promise<ContentDataPoint[]> => {
+    const { count: gambar } = await supabase
+      .from("gallery")
+      .select("*", { count: "exact", head: true });
+    const { count: berita } = await supabase
+      .from("posts")
+      .select("*", { count: "exact", head: true });
+    const { count: kegiatan } = await supabase
+      .from("events")
+      .select("*", { count: "exact", head: true });
+    return [
+      { category: "Galeri", count: gambar || 0 },
+      { category: "Berita", count: berita || 0 },
+      { category: "Kegiatan", count: kegiatan || 0 },
+    ];
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const statsData = await fetchStats();
+        const visitors = await fetchVisitorStats();
+        const contents = await fetchContentStats();
+
+        setStats(statsData);
+        setVisitorData(visitors);
+        setContentData(contents);
+        // Jika ada data aktivitas terbaru, setRecentActivity bisa diupdate di sini.
+        // Misalnya: setRecentActivity([{ title: "Aktivitas A", timestamp: "..." }]);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      }
+      setIsLoading(false);
+    };
+
+    loadData();
+  }, []);
+
+  return {
+    stats,
+    recentActivity,
+    isLoading,
+    visitorData,
+    contentData,
+    setRecentActivity,
+  };
+};

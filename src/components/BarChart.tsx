@@ -1,47 +1,140 @@
-// components/BarChart.tsx
-"use client";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase/client";
 
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Bar } from "react-chartjs-2";
+// Tipe untuk statistik
+interface Stats {
+  santri: number;
+  gambar: number;
+  berita: number;
+  pesan: number;
+}
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+// Tipe untuk data pengunjung per bulan
+export interface VisitorDataPoint {
+  month: string;
+  visitors: number;
+}
 
-export default function BarChart({ data }) {
-  const chartData = {
-    labels: data.map((item) => item.category),
-    datasets: [
-      {
-        label: "Jumlah Konten",
-        data: data.map((item) => item.count),
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.5)",
-          "rgba(54, 162, 235, 0.5)",
-          "rgba(255, 206, 86, 0.5)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-        ],
-        borderWidth: 1,
-      },
-    ],
+// Tipe untuk distribusi konten
+export interface ContentDataPoint {
+  category: string;
+  count: number;
+}
+
+// Tipe untuk data visitor yang diambil dari Supabase
+interface Visitor {
+  created_at: string;
+}
+
+// Tipe untuk aktivitas terbaru (meskipun saat ini tidak ada data aktivitas, kita definisikan agar nanti bisa digunakan)
+export interface Activity {
+  title: string;
+  timestamp: string;
+}
+
+export const useDashboard = () => {
+  const [stats, setStats] = useState<Stats>({
+    santri: 0,
+    gambar: 0,
+    berita: 0,
+    pesan: 0,
+  });
+  // recentActivity dideklarasikan sebagai state dengan tipe Activity[]
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [visitorData, setVisitorData] = useState<VisitorDataPoint[]>([]);
+  const [contentData, setContentData] = useState<ContentDataPoint[]>([]);
+
+  const fetchStats = async (): Promise<Stats> => {
+    const { count: santri } = await supabase
+      .from("santri")
+      .select("*", { count: "exact", head: true });
+    const { count: gambar } = await supabase
+      .from("gallery")
+      .select("*", { count: "exact", head: true });
+    const { count: berita } = await supabase
+      .from("berita")
+      .select("*", { count: "exact", head: true });
+    const { count: pesan } = await supabase
+      .from("pesan")
+      .select("*", { count: "exact", head: true });
+    return {
+      santri: santri || 0,
+      gambar: gambar || 0,
+      berita: berita || 0,
+      pesan: pesan || 0,
+    };
   };
 
-  return <Bar data={chartData} />;
-}
+  const fetchVisitorStats = async (): Promise<VisitorDataPoint[]> => {
+    const { data, error } = await supabase
+      .from<"visitors", Visitor>("visitors")
+      .select("created_at")
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.error("Error fetching visitor stats:", error);
+      return [];
+    }
+    // Group data berdasarkan bulan
+    const monthlyStats: Record<string, number> = {};
+    data?.forEach((curr: Visitor) => {
+      const month = new Date(curr.created_at).toLocaleString("id-ID", {
+        month: "long",
+        year: "numeric",
+      });
+      monthlyStats[month] = (monthlyStats[month] || 0) + 1;
+    });
+    return Object.entries(monthlyStats).map(([month, count]) => ({
+      month,
+      visitors: count,
+    }));
+  };
+
+  const fetchContentStats = async (): Promise<ContentDataPoint[]> => {
+    const { count: gambar } = await supabase
+      .from("gallery")
+      .select("*", { count: "exact", head: true });
+    const { count: berita } = await supabase
+      .from("posts")
+      .select("*", { count: "exact", head: true });
+    const { count: kegiatan } = await supabase
+      .from("events")
+      .select("*", { count: "exact", head: true });
+    return [
+      { category: "Galeri", count: gambar || 0 },
+      { category: "Berita", count: berita || 0 },
+      { category: "Kegiatan", count: kegiatan || 0 },
+    ];
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const statsData = await fetchStats();
+        const visitors = await fetchVisitorStats();
+        const contents = await fetchContentStats();
+
+        setStats(statsData);
+        setVisitorData(visitors);
+        setContentData(contents);
+        // Jika ada data aktivitas terbaru, setRecentActivity bisa diupdate di sini.
+        // Misalnya: setRecentActivity([{ title: "Aktivitas A", timestamp: "..." }]);
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
+      }
+      setIsLoading(false);
+    };
+
+    loadData();
+  }, []);
+
+  return {
+    stats,
+    recentActivity,
+    isLoading,
+    visitorData,
+    contentData,
+    setRecentActivity,
+  };
+};
