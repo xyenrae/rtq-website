@@ -8,6 +8,8 @@ export interface GaleriImage {
   galeri_kategori_id: string;
   created_at: string;
   galeri_nama: string;
+  width: number;
+  height: number;
 }
 
 interface SupabaseGaleriData {
@@ -16,6 +18,8 @@ interface SupabaseGaleriData {
   galeri_kategori_id: string;
   created_at: string;
   galeri_kategori: { nama: string } | null;
+  width: number;
+  height: number;
 }
 
 export function useGaleri() {

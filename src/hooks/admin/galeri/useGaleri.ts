@@ -3,13 +3,16 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "react-toastify";
 import { z } from "zod";
+import { getImageSize } from "react-image-size"; // pastikan library ini sudah terinstall
 
-// Interface untuk item galeri
+// Interface untuk item galeri (sudah termasuk width dan height)
 export interface GalleryItem {
   id: string;
   galeri_kategori_id: string;
   image: string;
   created_at: string;
+  width: number;
+  height: number;
   galeri_kategori?: {
     nama: string;
   };
@@ -21,10 +24,12 @@ interface SortConfig {
   direction: "asc" | "desc";
 }
 
-// Zod schema untuk validasi data form
+// Zod schema untuk validasi data form (sudah menambahkan width dan height)
 export const galleryItemSchema = z.object({
   galeri_kategori_id: z.string().min(1, "Kategori harus dipilih"),
   image: z.string().min(1, "Gambar harus diupload"),
+  width: z.number().gt(0, "Lebar gambar harus lebih dari 0"),
+  height: z.number().gt(0, "Tinggi gambar harus lebih dari 0"),
 });
 
 // Custom hook untuk mengelola galeri
@@ -43,10 +48,12 @@ export function useGallery() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const itemsPerPage = 12;
 
-  // Form state
+  // Form state; pastikan menambahkan width dan height
   const formInitState = {
     galeri_kategori_id: "",
     image: "",
+    width: 0,
+    height: 0,
   };
   const [formData, setFormData] = useState<Partial<GalleryItem>>(formInitState);
 
@@ -164,8 +171,10 @@ export function useGallery() {
     }
   };
 
-  // Fungsi untuk mengupload gambar
+  // Fungsi untuk mengupload gambar dan otomatis mendapatkan width & height menggunakan react-image-size
   const handleImageUpload = async (file: File) => {
+    // Tampilkan toast loading dan simpan id-nya
+    const toastId = toast.loading("Sedang mengupload gambar...");
     try {
       const preview = URL.createObjectURL(file);
       setImagePreview(preview);
@@ -182,10 +191,26 @@ export function useGallery() {
       if (!publicUrl || publicUrl.trim() === "") {
         throw new Error("Gambar URL kosong");
       }
-      setFormData((prev) => ({ ...prev, image: publicUrl }));
+      // Menggunakan react-image-size untuk mendapatkan dimensi gambar
+      const { width, height } = await getImageSize(publicUrl);
+      // Update formData dengan image URL serta width dan height
+      setFormData((prev) => ({ ...prev, image: publicUrl, width, height }));
+      // Update toast menjadi sukses
+      toast.update(toastId, {
+        render: "Gambar berhasil diupload",
+        type: "success",
+        isLoading: false,
+        autoClose: 3000,
+      });
       return publicUrl;
     } catch {
-      toast.error("Gagal mengupload gambar");
+      // Update toast menjadi error
+      toast.update(toastId, {
+        render: "Gagal mengupload gambar",
+        type: "error",
+        isLoading: false,
+        autoClose: 3000,
+      });
       throw new Error("Gagal mengupload gambar");
     }
   };

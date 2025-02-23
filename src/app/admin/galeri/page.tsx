@@ -379,6 +379,7 @@ const GalleryTable = () => {
                             <input
                               type="file"
                               className="hidden"
+                              accept="image/*"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) handleImageUpload(file);
