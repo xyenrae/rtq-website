@@ -1,8 +1,7 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import {
-  FaPhone,
   FaWhatsapp,
   FaMapPin,
   FaClock,
@@ -10,9 +9,11 @@ import {
   FaBuilding,
   FaUsers,
 } from "react-icons/fa";
+import { MdOutlineEmail } from "react-icons/md";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { supabase } from "@/lib/supabase/client";
 
 // Variants untuk animasi hero section
 const heroVariants = {
@@ -52,6 +53,29 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({ children, className }) => {
 };
 
 const RegistrationPage = () => {
+  const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [email, setEmail] = useState("");
+
+  // Mengambil nomor WhatsApp dan email dari Supabase
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data, error } = await supabase
+        .from("settings")
+        .select("phone_number, email")
+        .limit(1);
+
+      if (error) {
+        console.error("Error fetching settings:", error);
+      } else {
+        const settings = data[0];
+        setWhatsappNumber(settings?.phone_number);
+        setEmail(settings?.email);
+      }
+    };
+
+    fetchSettings();
+  }, []);
+
   const steps = [
     {
       icon: <FaMapPin className="w-8 h-8 mb-4" />,
@@ -135,7 +159,7 @@ const RegistrationPage = () => {
           <div className="flex-1 order-1 lg:order-2 flex justify-center items-center">
             <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px]">
               <Image
-                src="/images/hero-1.svg"
+                src="/images/hero-3.svg"
                 alt="Hero Image"
                 width={500}
                 height={500}
@@ -159,7 +183,7 @@ const RegistrationPage = () => {
               key={index}
               className="bg-white p-8 rounded-2xl shadow-lg transition-shadow hover:shadow-xl"
             >
-              <div className="text-green-600 flex justify-center">
+              <div className="text-green-500 flex justify-center">
                 {step.icon}
               </div>
               <div className="text-center md:text-start">
@@ -181,7 +205,7 @@ const RegistrationPage = () => {
 
           <div className="flex justify-center gap-6">
             <a
-              href="https://wa.me/6281234567890"
+              href={whatsappNumber ? `https://wa.me/${whatsappNumber}` : "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 bg-white text-green-600 px-6 py-3 rounded-full hover:bg-green-50 transition-colors"
@@ -191,11 +215,11 @@ const RegistrationPage = () => {
             </a>
 
             <a
-              href="tel:+6281234567890"
+              href={email ? `mailto:${email}` : "#"}
               className="flex items-center gap-2 bg-white text-green-600 px-6 py-3 rounded-full hover:bg-green-50 transition-colors"
             >
-              <FaPhone className="w-5 h-5" />
-              Telepon
+              <MdOutlineEmail className="w-5 h-5" />
+              Email
             </a>
           </div>
         </AnimatedCard>

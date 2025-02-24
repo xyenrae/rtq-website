@@ -14,7 +14,7 @@ export default function ProgramKami() {
         <div className="flex-1 flex justify-center items-center">
           <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[500px] lg:h-[500px]">
             <Image
-              src="/images/hero-1.svg"
+              src="/images/hero-2.svg"
               alt="Hero Image"
               width={500}
               height={500}

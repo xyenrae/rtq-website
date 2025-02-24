@@ -49,16 +49,16 @@ export default function CardSliderGuru() {
         className="!pb-12"
       >
         {gurus.map((guru) => (
-          <SwiperSlide key={guru.id} className="!w-[200px] !h-auto">
-            <div className="overflow-hidden bg-white shadow-md rounded-lg">
+          <SwiperSlide key={guru.id} className="!w-[300px] !h-auto">
+            <div className="overflow-hidden shadow-md rounded-lg">
               <div className="relative flex flex-col w-full h-full">
                 {/* Gambar Guru */}
                 <Image
                   src="/images/gallery-1.png"
                   alt={guru.name}
-                  width={200}
-                  height={100}
-                  className="object-cover rounded-t-lg"
+                  width={300}
+                  height={400}
+                  className="object-cover"
                   sizes="(max-width: 768px) 100vw, 33vw"
                 />
                 {/* Konten: Nama dan Peran */}

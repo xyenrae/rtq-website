@@ -15,15 +15,14 @@ export default function KontakPage() {
     const fetchSettings = async () => {
       const { data, error } = await supabase
         .from("settings")
-        .select("whatsapp_number")
+        .select("phone_number")
         .limit(1);
 
       if (error) {
         console.error(error);
       } else {
-        const number = data[0]?.whatsapp_number;
+        const number = data[0]?.phone_number;
         setWhatsappNumber(number);
-        console.log("Nomor WhatsApp:", number);
       }
     };
 
