@@ -6,7 +6,7 @@ import {
   useContext,
   ReactNode,
 } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 interface User {
   id: string;
@@ -25,6 +25,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -39,7 +40,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
     );
     return () => authListener.subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   return (
     <UserContext.Provider value={{ user, setUser }}>

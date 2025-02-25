@@ -13,7 +13,7 @@ import { MdOutlineEmail } from "react-icons/md";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 // Variants untuk animasi hero section
 const heroVariants = {
@@ -55,6 +55,7 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({ children, className }) => {
 const RegistrationPage = () => {
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [email, setEmail] = useState("");
+  const supabase = createClient();
 
   // Mengambil nomor WhatsApp dan email dari Supabase
   useEffect(() => {
@@ -74,7 +75,7 @@ const RegistrationPage = () => {
     };
 
     fetchSettings();
-  }, []);
+  }, [supabase]);
 
   const steps = [
     {

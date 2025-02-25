@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { toast } from "react-toastify";
 
 export interface Kategori {
@@ -26,6 +26,8 @@ export function useKategori() {
   const [formData, setFormData] = useState<Kategori>(formInitState);
 
   const itemsPerPage = 10;
+
+  const supabase = createClient();
 
   const requestSort = (key: keyof Kategori) => {
     let direction: "asc" | "desc" = "asc";
@@ -80,7 +82,7 @@ export function useKategori() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm]);
+  }, [searchTerm, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

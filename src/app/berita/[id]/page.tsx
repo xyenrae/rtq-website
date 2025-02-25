@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -48,6 +48,7 @@ export default function BeritaDetailPage() {
   const [relatedBerita, setRelatedBerita] = useState<Berita[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
   // Ambil data kategori dari hook useKategori
   const { kategori } = useKategori();
@@ -115,7 +116,7 @@ export default function BeritaDetailPage() {
     };
 
     if (id) fetchAllData();
-  }, [id, router]);
+  }, [id, router, supabase]);
 
   if (isLoading) return <SkeletonLoader />;
   if (error) return <ErrorMessage message={error} />;

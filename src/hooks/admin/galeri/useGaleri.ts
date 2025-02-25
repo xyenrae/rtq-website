@@ -1,9 +1,9 @@
 "use client";
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
 import { getImageSize } from "react-image-size"; // pastikan library ini sudah terinstall
+import { createClient } from "@/utils/supabase/client";
 
 // Interface untuk item galeri (sudah termasuk width dan height)
 export interface GalleryItem {
@@ -48,6 +48,8 @@ export function useGallery() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const itemsPerPage = 12;
 
+  const supabase = createClient();
+
   // Form state; pastikan menambahkan width dan height
   const formInitState = {
     galeri_kategori_id: "",
@@ -58,7 +60,7 @@ export function useGallery() {
   const [formData, setFormData] = useState<Partial<GalleryItem>>(formInitState);
 
   // Fungsi untuk mengambil data galeri dari Supabase (join dengan kategori)
-  const fetchGallery = async () => {
+  const fetchGallery = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("galeri")
@@ -69,10 +71,9 @@ export function useGallery() {
     } catch {
       toast.error("Gagal memuat galeri");
     }
-  };
-
+  }, [supabase]);
   // Fungsi untuk mengambil data kategori
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("galeri_kategori")
@@ -82,14 +83,12 @@ export function useGallery() {
     } catch {
       toast.error("Gagal memuat kategori");
     }
-  };
-
+  }, [supabase]);
   // Ambil data galeri dan kategori saat komponen dirender atau saat kategori berubah
   useEffect(() => {
     fetchGallery();
     fetchCategories();
-  }, [selectedCategory]);
-
+  }, [selectedCategory, fetchGallery, fetchCategories]);
   // Fungsi untuk pengurutan data
   const requestSort = (key: keyof GalleryItem) => {
     let direction: "asc" | "desc" = "asc";
@@ -191,11 +190,8 @@ export function useGallery() {
       if (!publicUrl || publicUrl.trim() === "") {
         throw new Error("Gambar URL kosong");
       }
-      // Menggunakan react-image-size untuk mendapatkan dimensi gambar
       const { width, height } = await getImageSize(publicUrl);
-      // Update formData dengan image URL serta width dan height
       setFormData((prev) => ({ ...prev, image: publicUrl, width, height }));
-      // Update toast menjadi sukses
       toast.update(toastId, {
         render: "Gambar berhasil diupload",
         type: "success",

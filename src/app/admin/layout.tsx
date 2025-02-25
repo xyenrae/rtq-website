@@ -13,14 +13,16 @@ import {
 } from "react-icons/fi";
 import { FaNewspaper, FaImage } from "react-icons/fa";
 import { ChevronDown } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
+import { usePathname } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import LogoutModal from "@/components/ui/LogoutModal";
+import { useSearchParams } from "next/navigation";
 
 interface NavigationItem {
   name: string;
-  href?: string; // dijadikan optional jika ada children
+  href?: string;
   icon?: React.ReactNode;
   children?: NavigationItem[];
 }
@@ -30,9 +32,23 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
+  const supabase = createClient();
   const router = useRouter();
+  const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const searchParams = useSearchParams();
+
+  const message = searchParams.get("message");
+
+  useEffect(() => {
+    if (message === "success") {
+      toast.success("Selamat datang kembali!");
+    }
+    if (message === "unauthorized") {
+      toast.error("Unauthorized!");
+      toast.info("Silahkan login terlebih dahulu!");
+    }
+  }, [message]);
 
   const [openSubMenu, setOpenSubMenu] = useState(
     pathname.startsWith("/admin/pendaftaran")
@@ -107,8 +123,8 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    toast.success("Anda telah berhasil logout.");
     router.push("/");
+    toast.success("Berhasil Logout!");
   };
 
   return (

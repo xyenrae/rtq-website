@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 export interface GaleriImage {
   id: string;
@@ -25,6 +25,7 @@ interface SupabaseGaleriData {
 export function useGaleri() {
   const [galeri, setGaleri] = useState<GaleriImage[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchGaleri = async () => {
@@ -54,7 +55,7 @@ export function useGaleri() {
       }
     };
     fetchGaleri();
-  }, []);
+  }, [supabase]);
 
   return { galeri, loading };
 }

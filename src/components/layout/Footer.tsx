@@ -6,7 +6,7 @@ import Image from "next/image";
 import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
 import { MdLocationOn, MdPhone, MdEmail } from "react-icons/md";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 interface FooterLinkProps {
   href: string;
@@ -53,6 +53,7 @@ export default function Footer() {
   const [facebookLink, setFacebookLink] = useState("");
   const [instagramLink, setInstagramLink] = useState("");
   const [youtubeLink, setYoutubeLink] = useState("");
+  const supabase = createClient();
 
   // Mengambil data settings dari Supabase
   useEffect(() => {
@@ -77,7 +78,7 @@ export default function Footer() {
     };
 
     fetchSettings();
-  }, []);
+  }, [supabase]);
 
   return (
     <footer className="pt-16 pb-8">

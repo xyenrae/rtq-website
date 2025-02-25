@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { toast } from "react-toastify";
 
 export interface GalleryCategory {
@@ -12,7 +12,7 @@ export interface GalleryCategory {
 export function useGalleryCategory() {
   const [categories, setCategories] = useState<GalleryCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showModal, setShowModal] = useState(false);
@@ -28,6 +28,8 @@ export function useGalleryCategory() {
 
   const itemsPerPage = 10;
 
+  const supabase = createClient();
+
   const fetchCategories = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -40,13 +42,13 @@ export function useGalleryCategory() {
       const { data, error } = await query;
       if (error) throw error;
       setCategories(data || []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal memuat kategori");
+    } catch (error) {
       toast.error("Gagal memuat kategori");
+      throw error;
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm]);
+  }, [searchTerm, supabase]);
 
   const requestSort = (key: keyof GalleryCategory) => {
     let direction: "asc" | "desc" = "asc";

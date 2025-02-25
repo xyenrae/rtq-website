@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { toast } from "react-toastify";
 
 export interface News {
@@ -46,6 +46,7 @@ export const useNews = () => {
 
   const [formData, setFormData] = useState(formInitState);
   const itemsPerPage = 8;
+  const supabase = createClient();
 
   // Calculate reading time based on content length
   const calculateReadingTime = (content: string): number => {
@@ -72,7 +73,7 @@ export const useNews = () => {
     } catch {
       toast.error("Gagal memuat berita");
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, supabase]);
 
   useEffect(() => {
     fetchNews();

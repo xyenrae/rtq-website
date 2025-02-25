@@ -1,9 +1,10 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createClient } from "@/utils/supabase/client";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
@@ -12,53 +13,50 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
-  // Mengecek apakah user sudah login sebelumnya
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message");
+
+  useEffect(() => {
+    if (message === "success") {
+      toast.success("Selamat datang kembali!");
+    }
+    if (message === "unauthorized") {
+      toast.error("Unauthorized!");
+      toast.info("Silahkan login terlebih dahulu!");
+    }
+  }, [message]);
+
   useEffect(() => {
     const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) {
-        router.push("/admin");
-      }
+      const { data } = await supabase.auth.getSession();
+      if (data.session) router.replace("/admin");
     };
     checkSession();
   }, [router, supabase]);
 
-  // Fungsi login yang sudah dioptimalkan
-  const handleLogin = useCallback(
-    async (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      setIsLoading(true);
-      setError("");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) throw error;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-        // Cek apakah user berhasil login
-        if (data.session) {
-          toast.success("Selamat datang kembali!");
-          router.push("/admin");
-        } else {
-          throw new Error("Login gagal, coba lagi.");
-        }
-      } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Terjadi kesalahan saat login.";
-        setError(message);
-        toast.error(message);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [email, password, router, supabase]
-  );
+      if (error) throw error;
+
+      router.push("/admin");
+      toast.success("Selamat datang kembali!");
+    } catch {
+      toast.error("Login gagal. Periksa email/password Anda.");
+      setError("Error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">

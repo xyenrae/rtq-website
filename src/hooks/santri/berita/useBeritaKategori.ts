@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 export interface BeritaKategori {
   id: string;
@@ -11,6 +11,7 @@ export function useKategori() {
   const [kategori, setKategori] = useState<BeritaKategori[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     const fetchKategori = async () => {
@@ -27,7 +28,7 @@ export function useKategori() {
     };
 
     fetchKategori();
-  }, []);
+  }, [supabase]);
 
   return { kategori, isLoading, error };
 }

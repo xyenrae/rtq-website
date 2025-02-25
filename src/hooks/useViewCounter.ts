@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 export const useViewCounter = (beritaId: string) => {
+  const supabase = createClient();
+
   useEffect(() => {
     const incrementViews = async () => {
       // Get current views
@@ -23,5 +25,5 @@ export const useViewCounter = (beritaId: string) => {
     };
 
     incrementViews();
-  }, [beritaId]);
+  }, [beritaId, supabase]);
 };

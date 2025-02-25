@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 export interface GaleriKategori {
   id: string;
@@ -10,6 +10,7 @@ export interface GaleriKategori {
 export function useGaleriKategori() {
   const [kategori, setKategori] = useState<GaleriKategori[]>([]);
   const [loading, setLoading] = useState(true);
+  const supabase = createClient();
 
   useEffect(() => {
     async function fetchKategori() {
@@ -24,7 +25,7 @@ export function useGaleriKategori() {
       setLoading(false);
     }
     fetchKategori();
-  }, []);
+  }, [supabase]);
 
   return { kategori, loading };
 }

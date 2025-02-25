@@ -1,37 +1,65 @@
+// middleware.ts
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { createMiddlewareClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next();
+  const response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
 
-  const supabase = createMiddlewareClient({ req: request, res: response });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookies) {
+          cookies.forEach(({ name, value, options }) => {
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            });
+          });
+        },
+      },
+    }
+  );
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const { pathname } = request.nextUrl;
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (session) {
-    if (!pathname.startsWith("/admin")) {
-      const url = new URL("/admin", request.url);
-      url.searchParams.set(
-        "message",
-        "Silakan logout terlebih dahulu untuk mengakses halaman publik."
+  // Proteksi rute admin
+  if (request.nextUrl.pathname.startsWith("/admin")) {
+    if (!user) {
+      return NextResponse.redirect(
+        new URL(
+          `/login?message=unauthorized&redirect=${request.nextUrl.pathname}`,
+          request.url
+        )
       );
-      return NextResponse.redirect(url);
     }
-  } else {
-    if (pathname.startsWith("/admin")) {
-      const url = new URL("/login", request.url);
-      url.searchParams.set("message", "Anda harus login terlebih dahulu.");
-      return NextResponse.redirect(url);
-    }
+    return response;
+  }
+
+  // Redirect user yang sudah login dari halaman publik
+  if (user && !request.nextUrl.pathname.startsWith("/login")) {
+    const url = new URL("/admin", request.url);
+    url.searchParams.set("message", "success");
+    return NextResponse.redirect(url);
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+  ],
 };

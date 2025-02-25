@@ -5,7 +5,6 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "@/context/UserContext";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
-import ToastHandler from "@/components/ToastHandler";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -46,7 +45,6 @@ export default function RootLayout({
           theme="light"
         />
         <UserProvider>
-          <ToastHandler />
           <ConditionalLayout>{children}</ConditionalLayout>
         </UserProvider>
       </body>

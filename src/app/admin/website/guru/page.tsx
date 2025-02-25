@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FiPlus,
@@ -12,29 +11,19 @@ import {
   FiArrowDown,
   FiX,
   FiImage,
-  FiClock,
-  FiEye,
-  FiCalendar,
 } from "react-icons/fi";
-import { useNews } from "@/hooks/admin/berita/useNews";
 import Image from "next/image";
-import { createClient } from "@/utils/supabase/client";
+import { useGuru } from "@/hooks/admin/guru/useGuru";
 
-// Definisikan tipe Category agar tidak menggunakan any
-interface Category {
-  id: string;
-  nama: string;
-}
-
-const NewsTable = () => {
+const GuruTable = () => {
   const {
     setSearchTerm,
     currentPage,
     setCurrentPage,
     showModal,
     setShowModal,
-    editingNews,
-    setEditingNews,
+    editingTeacher,
+    setEditingTeacher,
     sortConfig,
     requestSort,
     imagePreview,
@@ -42,111 +31,71 @@ const NewsTable = () => {
     formData,
     setFormData,
     itemsPerPage,
-    filteredNews,
+    filteredTeachers,
     totalPages,
-    paginatedNews,
+    paginatedTeachers,
     handleSubmit,
     handleImageUpload,
     handleDelete,
     formInitState,
-    selectedCategory,
-    setSelectedCategory,
-  } = useNews();
-
-  // Gunakan tipe Category[] bukan any[]
-  const [categories, setCategories] = useState<Category[]>([]);
-  const supabase = createClient();
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const { data, error } = await supabase
-        .from("berita_kategori")
-        .select("*");
-      if (!error) {
-        // Jika data tidak ada, gunakan array kosong
-        setCategories(data || []);
-      }
-    };
-    fetchCategories();
-  }, [supabase]);
+  } = useGuru();
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-lg border border-gray-100">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row gap-4 justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Kelola Berita</h1>
+          <h1 className="text-2xl font-bold text-gray-800">Kelola Guru</h1>
           <p className="text-gray-600 mt-1">
-            Total {filteredNews.length} berita ditemukan
+            Total {filteredTeachers.length} guru ditemukan
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex gap-3">
-            <div className="relative">
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="!pr-12 py-2.5 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none"
-              >
-                <option value="Semua">Semua Kategori</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.nama}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="relative flex-1">
-              <FiSearch className="absolute left-3 top-3.5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Cari berita..."
-                className="pl-10 pr-4 py-2.5 border rounded-xl w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+          <div className="relative flex-1">
+            <FiSearch className="absolute left-3 top-3.5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Cari guru..."
+              className="pl-10 pr-4 py-2.5 border rounded-xl w-full focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
           </div>
 
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="bg-green-600 text-white px-4 py-2.5 rounded-xl flex items-center gap-2 hover:bg-green-700 transition-colors"
-            onClick={() => setShowModal(true)}
+            onClick={() => {
+              setShowModal(true);
+              setEditingTeacher(null);
+              setFormData(formInitState);
+              setImagePreview(null);
+            }}
           >
             <FiPlus className="text-lg" />
-            <span>Tambah Baru</span>
+            <span>Tambah Guru</span>
           </motion.button>
         </div>
       </div>
 
       {/* Table */}
-      {filteredNews.length > 0 ? (
+      {filteredTeachers.length > 0 ? (
         <div className="overflow-x-auto rounded-lg border border-gray-200">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                {[
-                  "judul",
-                  "kategori_id",
-                  "created_at",
-                  "views",
-                  "waktu_baca",
-                ].map((key) => (
+                {["nama", "peran"].map((key) => (
                   <th
                     key={key}
                     className="px-5 py-4 text-left text-sm font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                     onClick={() => requestSort(key as keyof typeof formData)}
                   >
                     <div className="flex items-center gap-2">
-                      {key === "waktu_baca"
-                        ? "Waktu Baca"
-                        : key === "created_at"
-                        ? "Tanggal Dibuat"
-                        : key === "kategori_id"
-                        ? "Kategori"
-                        : key.charAt(0).toUpperCase() + key.slice(1)}
+                      {key === "nama" ? "Nama" : "Peran"}
                       {sortConfig?.key === key &&
                         (sortConfig.direction === "asc" ? (
                           <FiArrowUp className="text-green-600" />
@@ -156,89 +105,70 @@ const NewsTable = () => {
                     </div>
                   </th>
                 ))}
+                <th className="px-5 py-4 text-left text-sm font-semibold text-gray-700">
+                  Gambar
+                </th>
                 <th className="px-5 py-4 text-center">Aksi</th>
               </tr>
             </thead>
-
             <tbody className="divide-y divide-gray-200">
-              {paginatedNews.map((item) => {
-                const categoryData = categories.find(
-                  (cat) => cat.id === item.kategori_id
-                );
-                return (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-gray-50 transition-colors group"
-                  >
-                    <td className="px-5 py-4 max-w-xs">
-                      <div className="font-medium text-gray-800 line-clamp-2">
-                        {item.judul}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm">
-                        {categoryData?.nama || "Uncategorized"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-4 text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <FiCalendar className="text-gray-400" />
-                        {new Date(item.created_at).toLocaleDateString("id-ID", {
-                          day: "2-digit",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <FiEye className="text-gray-400" />
-                        {item.views}
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <FiClock className="text-gray-400" />
-                        {item.waktu_baca} menit
-                      </div>
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex justify-center gap-3">
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
-                          onClick={() => {
-                            setEditingNews(item);
-                            setFormData({
-                              ...item,
-                              updated_at: new Date().toISOString(),
-                            });
-                            setShowModal(true);
-                            setImagePreview(item.gambar);
-                          }}
-                        >
-                          <FiEdit size={18} />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
-                          onClick={() => handleDelete(item.id)}
-                        >
-                          <FiTrash size={18} />
-                        </motion.button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+              {paginatedTeachers.map((teacher) => (
+                <tr
+                  key={teacher.id}
+                  className="hover:bg-gray-50 transition-colors group"
+                >
+                  <td className="px-5 py-4">
+                    <div className="font-medium text-gray-800">
+                      {teacher.nama}
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-gray-600">{teacher.peran}</td>
+                  <td className="px-5 py-4">
+                    {teacher.image_url ? (
+                      <Image
+                        src={teacher.image_url}
+                        alt={teacher.nama}
+                        width={80}
+                        height={80}
+                        className="object-cover rounded-lg"
+                      />
+                    ) : (
+                      <span className="text-gray-400">Tidak ada gambar</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-4">
+                    <div className="flex justify-center gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
+                        onClick={() => {
+                          setEditingTeacher(teacher);
+                          setFormData(teacher);
+                          setShowModal(true);
+                          setImagePreview(teacher.image_url);
+                        }}
+                      >
+                        <FiEdit size={18} />
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="text-red-600 hover:text-red-700 p-2 rounded-lg hover:bg-red-50"
+                        onClick={() => handleDelete(teacher.id)}
+                      >
+                        <FiTrash size={18} />
+                      </motion.button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       ) : (
         <div className="text-center py-12">
-          <p className="text-gray-500">Tidak ada data berita ditemukan</p>
+          <p className="text-gray-500">Tidak ada data guru ditemukan</p>
         </div>
       )}
 
@@ -246,8 +176,8 @@ const NewsTable = () => {
       <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
         <div className="text-gray-600">
           Menampilkan {(currentPage - 1) * itemsPerPage + 1} -{" "}
-          {Math.min(currentPage * itemsPerPage, filteredNews.length)} dari{" "}
-          {filteredNews.length}
+          {Math.min(currentPage * itemsPerPage, filteredTeachers.length)} dari{" "}
+          {filteredTeachers.length}
         </div>
 
         <div className="flex items-center gap-2">
@@ -300,16 +230,16 @@ const NewsTable = () => {
               initial={{ y: 50 }}
               animate={{ y: 0 }}
               exit={{ y: 50 }}
-              className="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             >
               <div className="p-6 border-b border-gray-200 flex justify-between items-center">
                 <h3 className="text-xl font-semibold">
-                  {editingNews ? "Edit Berita" : "Buat Berita Baru"}
+                  {editingTeacher ? "Edit Guru" : "Buat Guru Baru"}
                 </h3>
                 <button
                   onClick={() => {
                     setShowModal(false);
-                    setEditingNews(null);
+                    setEditingTeacher(null);
                     setFormData(formInitState);
                     setImagePreview(null);
                   }}
@@ -324,57 +254,30 @@ const NewsTable = () => {
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Judul Berita
+                        Nama Guru
                       </label>
                       <input
                         type="text"
                         required
                         className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        value={formData.judul}
+                        value={formData.nama}
                         onChange={(e) =>
-                          setFormData({ ...formData, judul: e.target.value })
+                          setFormData({ ...formData, nama: e.target.value })
                         }
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
-                        Kategori
+                        Peran Guru
                       </label>
-                      <select
+                      <input
+                        type="text"
                         required
                         className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        value={formData.kategori_id}
+                        value={formData.peran}
                         onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            kategori_id: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="">Pilih Kategori</option>
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.nama}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Ringkasan
-                      </label>
-                      <textarea
-                        required
-                        rows={3}
-                        className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                        value={formData.ringkasan}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            ringkasan: e.target.value,
-                          })
+                          setFormData({ ...formData, peran: e.target.value })
                         }
                       />
                     </div>
@@ -437,21 +340,6 @@ const NewsTable = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Konten Berita
-                  </label>
-                  <textarea
-                    required
-                    rows={6}
-                    className="w-full p-3 border rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    value={formData.konten}
-                    onChange={(e) =>
-                      setFormData({ ...formData, konten: e.target.value })
-                    }
-                  />
-                </div>
-
                 <div className="flex justify-end gap-4 pt-6">
                   <motion.button
                     type="button"
@@ -460,7 +348,7 @@ const NewsTable = () => {
                     className="px-6 py-2.5 text-gray-600 hover:bg-gray-100 rounded-xl"
                     onClick={() => {
                       setShowModal(false);
-                      setEditingNews(null);
+                      setEditingTeacher(null);
                       setFormData(formInitState);
                       setImagePreview(null);
                     }}
@@ -473,7 +361,7 @@ const NewsTable = () => {
                     whileTap={{ scale: 0.95 }}
                     className="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
                   >
-                    {editingNews ? "Simpan Perubahan" : "Publikasikan Berita"}
+                    {editingTeacher ? "Simpan Perubahan" : "Tambah Guru"}
                   </motion.button>
                 </div>
               </form>
@@ -485,4 +373,4 @@ const NewsTable = () => {
   );
 };
 
-export default NewsTable;
+export default GuruTable;

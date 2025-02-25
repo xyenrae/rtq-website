@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 
 // Define the Kategori interface dengan properti id dan nama
 interface Kategori {
@@ -28,7 +28,8 @@ export function useBerita(selectedCategory: string = "") {
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const pageSize = 6; // Ukuran halaman
+  const pageSize = 6;
+  const supabase = createClient();
 
   // Reset state saat kategori berubah
   useEffect(() => {
@@ -70,7 +71,7 @@ export function useBerita(selectedCategory: string = "") {
     };
 
     fetchBerita();
-  }, [page, selectedCategory]);
+  }, [page, selectedCategory, supabase]);
 
   return { berita, isLoading, setPage, hasMore };
 }

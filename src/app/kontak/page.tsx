@@ -1,9 +1,10 @@
 "use client";
-import { supabase } from "@/lib/supabase/client";
+import { createClient } from "@/utils/supabase/client";
 import { useState, useEffect, FormEvent } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 
 export default function KontakPage() {
+  const supabase = createClient();
   const [formData, setFormData] = useState({
     fullName: "",
     message: "",
@@ -27,7 +28,7 @@ export default function KontakPage() {
     };
 
     fetchSettings();
-  }, []);
+  }, [supabase]);
 
   const generateWhatsAppMessage = (name: string, message: string) => {
     const template = `Assalamu'alaikum Warahmatullahi Wabarakatuh,
