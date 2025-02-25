@@ -3,14 +3,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import {
-  FiHome,
-  FiSettings,
-  FiMenu,
-  FiX,
-  FiGlobe,
-  FiLogOut,
-} from "react-icons/fi";
+import { FiHome, FiSettings, FiMenu, FiX, FiLogOut } from "react-icons/fi";
+import { SiGoogleclassroom } from "react-icons/si";
+import { IoPeople } from "react-icons/io5";
 import { FaNewspaper, FaImage } from "react-icons/fa";
 import { ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -37,7 +32,6 @@ export default function AdminLayout({
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const searchParams = useSearchParams();
-
   const message = searchParams.get("message");
 
   useEffect(() => {
@@ -50,11 +44,9 @@ export default function AdminLayout({
     }
   }, [message]);
 
+  // Hanya submenu untuk Berita, Galeri, dan (jika ada) Pendaftaran
   const [openSubMenu, setOpenSubMenu] = useState(
     pathname.startsWith("/admin/pendaftaran")
-  );
-  const [openWebsiteSubMenu, setOpenWebsiteSubMenu] = useState(
-    pathname.startsWith("/admin/website")
   );
   const [openBeritaSubMenu, setOpenBeritaSubMenu] = useState(
     pathname.startsWith("/admin/berita")
@@ -83,15 +75,6 @@ export default function AdminLayout({
     }
   }, [pathname]);
 
-  // Update submenu kelola website saat path berubah
-  useEffect(() => {
-    if (pathname.startsWith("/admin/website")) {
-      setOpenWebsiteSubMenu(true);
-    } else {
-      setOpenWebsiteSubMenu(false);
-    }
-  }, [pathname]);
-
   const navigation: NavigationItem[] = [
     { name: "Dashboard", href: "/admin", icon: <FiHome /> },
     {
@@ -110,14 +93,8 @@ export default function AdminLayout({
         { name: "Kategori Galeri", href: "/admin/galeri/kategori" },
       ],
     },
-    {
-      name: "Kelola Website",
-      icon: <FiGlobe />,
-      children: [
-        { name: "Guru", href: "/admin/website/guru" },
-        { name: "Program", href: "/admin/website/program" },
-      ],
-    },
+    { name: "Guru", href: "/admin/guru", icon: <IoPeople /> },
+    { name: "Kelas", href: "/admin/kelas", icon: <SiGoogleclassroom /> },
     { name: "Pengaturan", href: "/admin/pengaturan", icon: <FiSettings /> },
   ];
 
@@ -156,8 +133,6 @@ export default function AdminLayout({
                       onClick={() =>
                         item.name === "Pendaftaran"
                           ? setOpenSubMenu(!openSubMenu)
-                          : item.name === "Kelola Website"
-                          ? setOpenWebsiteSubMenu(!openWebsiteSubMenu)
                           : item.name === "Berita"
                           ? setOpenBeritaSubMenu(!openBeritaSubMenu)
                           : item.name === "Galeri" &&
@@ -175,10 +150,6 @@ export default function AdminLayout({
                             ? openSubMenu
                               ? "rotate-180"
                               : ""
-                            : item.name === "Kelola Website"
-                            ? openWebsiteSubMenu
-                              ? "rotate-180"
-                              : ""
                             : item.name === "Berita"
                             ? openBeritaSubMenu
                               ? "rotate-180"
@@ -191,23 +162,6 @@ export default function AdminLayout({
                       />
                     </div>
                     {item.name === "Pendaftaran" && openSubMenu && (
-                      <div className="ml-6 space-y-1">
-                        {item.children.map((child) => (
-                          <Link
-                            key={child.name}
-                            href={child.href!}
-                            className={`flex items-center p-2 rounded-lg transition-colors ${
-                              pathname === child.href
-                                ? "bg-green-100 text-green-600 border-l-4 border-green-500"
-                                : "text-gray-600 hover:bg-gray-100"
-                            }`}
-                          >
-                            {child.name}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                    {item.name === "Kelola Website" && openWebsiteSubMenu && (
                       <div className="ml-6 space-y-1">
                         {item.children.map((child) => (
                           <Link
