@@ -1,7 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -12,48 +12,66 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
+  // Mengecek apakah user sudah login sebelumnya
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        router.push("/admin");
+      }
+    };
+    checkSession();
+  }, [router, supabase]);
 
-    try {
-      const { data, error: signInError } =
-        await supabase.auth.signInWithPassword({
+  // Fungsi login yang sudah dioptimalkan
+  const handleLogin = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-      if (signInError) throw signInError;
-      const userRole = data.user?.app_metadata?.role;
-      router.push(userRole === "admin" ? "/admin" : "/");
-      toast.success("Selamat datang kembali!");
-    } catch (err: unknown) {
-      let message = "Login gagal. Periksa kredensial Anda.";
-      if (err instanceof Error) {
-        message = err.message;
-        setError(err.message);
+        if (error) throw error;
+
+        // Cek apakah user berhasil login
+        if (data.session) {
+          toast.success("Selamat datang kembali!");
+          router.push("/admin");
+        } else {
+          throw new Error("Login gagal, coba lagi.");
+        }
+      } catch (err) {
+        const message =
+          err instanceof Error ? err.message : "Terjadi kesalahan saat login.";
+        setError(message);
+        toast.error(message);
+      } finally {
+        setIsLoading(false);
       }
-      toast.error(message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [email, password, router, supabase]
+  );
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-md p-8">
-        {/* Header */}
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold text-gray-800">
             Masuk ke Akun Anda
           </h1>
           <p className="mt-2 text-sm text-gray-600">
-            Silahkan login ke akun anda untuk melanjutkan ke halaman Admin.
+            Silahkan login untuk mengakses halaman Admin.
           </p>
         </div>
 
-        {/* Form Login */}
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label
