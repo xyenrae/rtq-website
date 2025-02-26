@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { FiHome, FiSettings, FiMenu, FiX, FiLogOut } from "react-icons/fi";
-import { SiGoogleclassroom } from "react-icons/si";
 import { IoPeople } from "react-icons/io5";
 import { FaNewspaper, FaImage } from "react-icons/fa";
 import { ChevronDown } from "lucide-react";
@@ -94,7 +93,6 @@ export default function AdminLayout({
       ],
     },
     { name: "Guru", href: "/admin/guru", icon: <IoPeople /> },
-    { name: "Kelas", href: "/admin/kelas", icon: <SiGoogleclassroom /> },
     { name: "Pengaturan", href: "/admin/pengaturan", icon: <FiSettings /> },
   ];
 
