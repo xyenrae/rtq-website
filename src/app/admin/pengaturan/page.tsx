@@ -28,7 +28,14 @@ const PengaturanPage = () => {
 
   useEffect(() => {
     if (settings) {
-      setFormData(settings);
+      setFormData({
+        email: settings.email || "",
+        alamat: settings.alamat || "",
+        phone_number: settings.phone_number || "",
+        link_facebook: settings.link_facebook || "",
+        link_youtube: settings.link_youtube || "",
+        link_instagram: settings.link_instagram || "",
+      });
     }
   }, [settings]);
 

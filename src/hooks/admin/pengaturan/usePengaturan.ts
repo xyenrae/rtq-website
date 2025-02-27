@@ -23,8 +23,19 @@ export const usePengaturan = () => {
         .from("settings")
         .select("*")
         .single();
+
       if (error) throw error;
-      setSettings(data);
+
+      const normalizedData = {
+        email: data.email || "",
+        alamat: data.alamat || "",
+        phone_number: data.phone_number || "",
+        link_facebook: data.link_facebook || "",
+        link_youtube: data.link_youtube || "",
+        link_instagram: data.link_instagram || "",
+      };
+
+      setSettings(normalizedData);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Gagal memuat pengaturan");
     } finally {

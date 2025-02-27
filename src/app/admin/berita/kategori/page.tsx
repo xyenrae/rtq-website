@@ -59,7 +59,7 @@ const KategoriTable: React.FC = () => {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <FiSearch className="absolute left-3 top-3.5 text-gray-400" />
+            <FiSearch className="absolute left-3 top-6 text-gray-400" />
             <input
               type="text"
               placeholder="Cari kategori..."
