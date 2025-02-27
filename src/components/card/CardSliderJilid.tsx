@@ -88,7 +88,7 @@ const colorClasses = [
   "bg-purple-400",
   "bg-pink-400",
   "bg-green-400",
-  "bg-blue-400",
+  "bg-green-400",
   "bg-slate-400",
   "bg-stone-400",
 ];

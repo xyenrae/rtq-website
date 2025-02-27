@@ -34,7 +34,7 @@ interface StatCardProps {
   title: string;
   value: string;
   icon: React.ReactNode;
-  color: "purple" | "emerald" | "blue" | "gray";
+  color: "purple" | "emerald" | "green" | "gray";
 }
 
 export interface ViewData {
@@ -157,8 +157,8 @@ const DashboardPage: React.FC = () => {
         <StatCard
           title="Pengunjung Minggu Ini"
           value={stats.viewsThisWeek.toLocaleString("id-ID")}
-          icon={<Activity className="w-5 h-5 text-blue-500" />}
-          color="blue"
+          icon={<Activity className="w-5 h-5 text-green-500" />}
+          color="green"
         />
       </motion.div>
 
@@ -229,8 +229,8 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => {
         return "from-purple-50 to-purple-100";
       case "emerald":
         return "from-emerald-50 to-emerald-100";
-      case "blue":
-        return "from-blue-50 to-blue-100";
+      case "green":
+        return "from-green-50 to-green-100";
       default:
         return "from-gray-50 to-gray-100";
     }

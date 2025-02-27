@@ -205,7 +205,7 @@ const GalleryTable = () => {
                         <motion.button
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
-                          className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
+                          className="text-green-600 hover:text-green-700 p-2 rounded-lg hover:bg-green-50"
                           onClick={() => {
                             setEditingItem(item);
                             setFormData(cleanItem);

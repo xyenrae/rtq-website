@@ -134,7 +134,7 @@ const RegistrationPage = () => {
         <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-20">
           {/* Text Section */}
           <div className="flex-1 order-2 lg:order-1 relative z-10">
-            <div className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left">
+            <div className="max-w-2xl mx-auto lg:mx-0 sm:text-center lg:text-left">
               <div className="mb-6">
                 <span className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
                   Yanbu&#39;a Islami
@@ -228,7 +228,7 @@ const RegistrationPage = () => {
 
       {/* Additional Info Section */}
       <section className="container mx-auto px-4 pb-20">
-        <div className="text-center max-w-4xl mx-auto">
+        <div className="sm:text-center max-w-4xl mx-auto">
           <h3 className="text-3xl font-semibold text-gray-700 mb-4">
             Informasi Tambahan
           </h3>
