@@ -5,6 +5,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { UserProvider } from "@/context/UserContext";
 import ConditionalLayout from "@/components/layout/ConditionalLayout";
+import Tracker from "@/components/Tracker";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -32,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${fredoka.variable} ${notoSans.variable}`}>
       <body className="bg-gray-50 !w-screen !overflow-x-hidden">
+        <Tracker />
         <ToastContainer
           position="top-right"
           autoClose={3000}

@@ -34,7 +34,7 @@ export default function AdminLayout({
   const message = searchParams.get("message");
 
   useEffect(() => {
-    if (message === "success") {
+    if (message === "authorized") {
       toast.success("Selamat datang kembali!");
     }
     if (message === "unauthorized") {

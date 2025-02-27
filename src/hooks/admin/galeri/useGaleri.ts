@@ -145,9 +145,11 @@ export function useGallery() {
     }
     try {
       if (editingItem) {
+        const { ...cleanData } = formData;
+
         const { error } = await supabase
           .from("galeri")
-          .update(formData)
+          .update(cleanData)
           .eq("id", editingItem.id);
         if (error) throw error;
         toast.success("Item berhasil diperbarui");

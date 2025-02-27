@@ -166,6 +166,12 @@ const GalleryTable = () => {
                 const categoryData = categories.find(
                   (cat) => cat.id === item.galeri_kategori_id
                 );
+                const cleanItem = {
+                  galeri_kategori_id: item.galeri_kategori_id,
+                  image: item.image,
+                  width: item.width,
+                  height: item.height,
+                };
                 return (
                   <tr
                     key={item.id}
@@ -202,7 +208,7 @@ const GalleryTable = () => {
                           className="text-blue-600 hover:text-blue-700 p-2 rounded-lg hover:bg-blue-50"
                           onClick={() => {
                             setEditingItem(item);
-                            setFormData(item);
+                            setFormData(cleanItem);
                             setImagePreview(item.image);
                             setShowModal(true);
                           }}

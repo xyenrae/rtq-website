@@ -51,7 +51,7 @@ export async function middleware(request: NextRequest) {
   // Redirect user yang sudah login dari halaman publik
   if (user && !request.nextUrl.pathname.startsWith("/login")) {
     const url = new URL("/admin", request.url);
-    url.searchParams.set("message", "success");
+    url.searchParams.set("message", "authorized");
     return NextResponse.redirect(url);
   }
 
