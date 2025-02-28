@@ -236,7 +236,7 @@ const RegistrationPage = () => {
       icon: <FaClipboardCheck className="w-6 h-6" />,
       title: "Program Imtihan",
       description:
-        "Program evaluasi resmi dari Yayasan Arwaniyyah Kudus sebagai syarat kelulusan santri dari RTQ AL-Hikmah. Imtihan menandakan santri telah menyelesaikan seluruh program dan berhak mengikuti wisuda",
+        "Program evaluasi resmi dari Yayasan Lajnah Muroqobah Yanbu'a (LMY) sebagai syarat kelulusan santri dari RTQ AL-Hikmah. Imtihan menandakan santri telah menyelesaikan seluruh program dan berhak mengikuti wisuda",
     },
     {
       icon: <GiGraduateCap className="w-10 h-10" />,
