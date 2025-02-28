@@ -8,12 +8,15 @@ import {
   FaInfoCircle,
   FaBuilding,
   FaUsers,
+  FaClipboardCheck,
 } from "react-icons/fa";
+import { GiGraduateCap } from "react-icons/gi";
 import { MdOutlineEmail } from "react-icons/md";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { createClient } from "@/utils/supabase/client";
+import { ChevronDown } from "lucide-react";
 
 // Variants untuk animasi hero section
 const heroVariants = {
@@ -21,10 +24,17 @@ const heroVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
 };
 
-// Variants untuk animasi pada AnimatedCard
+// Variants untuk animasi pada AnimatedCard - durasi ditingkatkan untuk kehalusan
 const newsCardVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: "easeOut",
+    },
+  },
 };
 
 interface AnimatedCardProps {
@@ -37,6 +47,7 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({ children, className }) => {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.1,
+    rootMargin: "0px 0px -50px 0px",
   });
 
   return (
@@ -50,6 +61,104 @@ const AnimatedCard: React.FC<AnimatedCardProps> = ({ children, className }) => {
       {children}
     </motion.div>
   );
+};
+
+interface CollapsibleInfoProps {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  isOpen: boolean;
+  onToggle: () => void;
+}
+
+// Perbaikan animasi pada collapse content dengan timing dan easing yang lebih smooth
+const collapsibleContentVariants = {
+  hidden: {
+    height: 0,
+    opacity: 0,
+    transition: {
+      height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
+      opacity: { duration: 0.3 },
+    },
+  },
+  visible: {
+    height: "auto",
+    opacity: 1,
+    transition: {
+      height: { duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] },
+      opacity: { duration: 0.3, delay: 0.1 },
+    },
+  },
+};
+
+const CollapsibleInfo: React.FC<CollapsibleInfoProps> = ({
+  icon,
+  title,
+  description,
+  isOpen,
+  onToggle,
+}) => {
+  return (
+    <AnimatedCard className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300">
+      <div
+        className={`flex items-center justify-between p-5 cursor-pointer transition-all duration-300 ${
+          isOpen
+            ? "bg-green-500 text-white hover:bg-green-600"
+            : "hover:bg-gray-50"
+        }`}
+        onClick={onToggle}
+      >
+        <div className="flex items-center">
+          <div className={`mr-4 ${isOpen ? "text-white" : "text-green-600"}`}>
+            {icon}
+          </div>
+          <h4
+            className={`text-lg font-semibold ${
+              isOpen ? "text-white" : "text-gray-700"
+            }`}
+          >
+            {title}
+          </h4>
+        </div>
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+        >
+          <ChevronDown
+            className={isOpen ? "text-white" : "text-gray-500"}
+            size={20}
+          />
+        </motion.div>
+      </div>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            key="content"
+            initial="hidden"
+            animate="visible"
+            exit="hidden"
+            variants={collapsibleContentVariants}
+            className="overflow-hidden border-t border-gray-100 bg-gray-50"
+          >
+            <div className="p-5">
+              <p className="text-gray-600">{description}</p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </AnimatedCard>
+  );
+};
+
+// Variants untuk container dengan efek stagger yang lebih halus
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.15,
+      delayChildren: 0.1,
+    },
+  },
 };
 
 const RegistrationPage = () => {
@@ -81,50 +190,72 @@ const RegistrationPage = () => {
     {
       icon: <FaMapPin className="w-8 h-8 mb-4" />,
       title: "Kunjungi Lembaga Kami",
-      description: "Datang langsung ke lokasi RTQ kami selama jam kerja",
+      description:
+        "Datang langsung ke lokasi RTQ kami selama jam kerja (13.30 - 16.30)",
     },
     {
       icon: <FaInfoCircle className="w-8 h-8 mb-4" />,
-      title: "Konsultasi dengan Guru",
-      description: "Tim guru kami akan menjelaskan program dan jadwal belajar",
+      title: "Konsultasi & Tes Kemampuan Baca Santri",
+      description:
+        "Ustadzah akan menjelaskan program membaca, melakukan tes kemampuan baca santri, dan menentukan jilid yang sesuai berdasarkan hasil tes.",
     },
     {
       icon: <FaClock className="w-8 h-8 mb-4" />,
-      title: "Mulai Belajar",
-      description: "Ikuti jadwal yang telah ditentukan dan mulai pembelajaran",
+      title: "Mulai Membaca Jilid",
+      description:
+        "Ikuti jadwal yang telah ditentukan dan mulai pembelajaran dengan membaca jilid yang telah ditetapkan",
     },
   ];
 
   const infoItems = [
     {
-      icon: <FaInfoCircle className="w-10 h-10" />,
+      icon: <FaInfoCircle className="w-6 h-6" />,
       title: "Penjelasan Program",
       description:
-        "Dapatkan penjelasan detail mengenai program belajar kami dari para ahli.",
+        "Santri belajar membaca Al-Qur'an dengan sistem kartu prestasi. Setiap halaman yang dibaca dicatat di kartu, dan jika sudah sampai halaman terakhir, akan diadakan tashih (evaluasi) untuk naik ke jilid berikutnya",
     },
     {
-      icon: <FaBuilding className="w-10 h-10" />,
+      icon: <FaBuilding className="w-6 h-6" />,
       title: "Fasilitas Pembelajaran",
       description:
-        "Kunjungi fasilitas lengkap dan modern yang mendukung proses belajar.",
+        "Lembaga kami memiliki 2 lantai dengan total 5 ruang belajar, dan juga terdapat tempat wudhu, toilet, dan kantin. Setiap ruang dilengkapi kipas angin dan meja belajar yang nyaman",
     },
     {
-      icon: <FaUsers className="w-10 h-10" />,
-      title: "Tim Pengajar Profesional",
+      icon: <FaUsers className="w-6 h-6" />,
+      title: "Ustadzah yang Telah Berpengalaman",
       description:
-        "Bertemu dengan pengajar berpengalaman dan ramah yang siap mendampingi Anda.",
+        "Ustadzah kami dengan sabar membimbing santri, memberikan contoh bacaan, dan menyesuaikan metode agar santri lebih mudah memahami",
     },
     {
-      icon: <FaClock className="w-10 h-10" />,
-      title: "Jadwal yang Fleksibel",
+      icon: <FaClock className="w-6 h-6" />,
+      title: "Jadwal Belajar",
       description:
-        "Atur jadwal belajar sesuai dengan kebutuhan dan ketersediaan Anda.",
+        "Kegiatan belajar dilaksanakan Sabtu-Kamis (Jumat libur). Jam pertama (13.30-14.45) untuk jilid 0-3, dan jam kedua (15.00-16.25) untuk jilid 4-7 dan Al-Qur'an",
+    },
+    {
+      icon: <FaClipboardCheck className="w-6 h-6" />,
+      title: "Program Imtihan",
+      description:
+        "Program evaluasi resmi dari Yayasan Arwaniyyah Kudus sebagai syarat kelulusan santri dari RTQ AL-Hikmah. Imtihan menandakan santri telah menyelesaikan seluruh program dan berhak mengikuti wisuda",
+    },
+    {
+      icon: <GiGraduateCap className="w-10 h-10" />,
+      title: "Wisuda",
+      description:
+        "Wisuda merupakan acara resmi untuk merayakan kelulusan dan penyelesaian seluruh program di RTQ AL-Hikmah",
     },
   ];
 
+  // Set default active index ke 0 sehingga indeks pertama terbuka secara default
+  const [activeIndex, setActiveIndex] = useState<number | null>(0);
+
+  const handleToggle = (index: number) => {
+    setActiveIndex(activeIndex === index ? null : index);
+  };
+
   return (
     <div className="min-h-screen">
-      {/* Hero Section dengan Framer Motion */}
+      {/* Hero Section */}
       <motion.div
         className="container mx-auto px-4 py-16"
         variants={heroVariants}
@@ -151,7 +282,7 @@ const RegistrationPage = () => {
               </h1>
               <p className="text-lg md:text-xl text-gray-600 mb-8">
                 Bimbingan membaca Al-Qur&#39;an untuk anak usia dini dengan
-                metode yang menyenangkan dan islami
+                metode Yanbu&#39;a
               </p>
             </div>
           </div>
@@ -226,34 +357,35 @@ const RegistrationPage = () => {
         </AnimatedCard>
       </section>
 
-      {/* Additional Info Section */}
+      {/* Additional Info Section with improved animation */}
       <section className="container mx-auto px-4 pb-20">
-        <div className="sm:text-center max-w-4xl mx-auto">
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <h3 className="text-3xl font-semibold text-gray-700 mb-4">
             Informasi Tambahan
           </h3>
-          <p className="text-gray-600 mb-8">
-            Setelah datang ke lembaga, Anda akan mendapatkan pengalaman belajar
-            yang lengkap dan menyenangkan melalui:
+          <p className="text-gray-600 mb-6">
+            Klik pada item berikut untuk melihat informasi lebih detail tentang
+            program kami
           </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {infoItems.map((item, index) => (
-              <AnimatedCard
-                key={index}
-                className="flex items-start bg-white p-6 rounded-xl shadow-md transition-transform hover:scale-105"
-              >
-                <div className="text-green-600 mr-8">{item.icon}</div>
-                <div className="text-left">
-                  <h4 className="text-xl font-semibold text-gray-700">
-                    {item.title}
-                  </h4>
-                  <p className="text-gray-600 mt-2">{item.description}</p>
-                </div>
-              </AnimatedCard>
-            ))}
-          </div>
         </div>
+
+        <motion.div
+          className="max-w-3xl mx-auto space-y-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {infoItems.map((item, index) => (
+            <CollapsibleInfo
+              key={index}
+              icon={item.icon}
+              title={item.title}
+              description={item.description}
+              isOpen={activeIndex === index}
+              onToggle={() => handleToggle(index)}
+            />
+          ))}
+        </motion.div>
       </section>
     </div>
   );
