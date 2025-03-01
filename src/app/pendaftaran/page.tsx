@@ -16,7 +16,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { createClient } from "@/utils/supabase/client";
-import { ChevronDown } from "lucide-react";
+import { FiChevronDown } from "react-icons/fi";
 
 // Variants untuk animasi hero section
 const heroVariants = {
@@ -124,7 +124,7 @@ const CollapsibleInfo: React.FC<CollapsibleInfoProps> = ({
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
-          <ChevronDown
+          <FiChevronDown
             className={isOpen ? "text-white" : "text-gray-500"}
             size={20}
           />
@@ -268,7 +268,7 @@ const RegistrationPage = () => {
             <div className="max-w-2xl mx-auto lg:mx-0 sm:text-center lg:text-left">
               <div className="mb-6">
                 <span className="inline-block bg-green-100 text-green-700 px-4 py-2 rounded-full text-sm font-semibold shadow-sm">
-                  Yanbu&#39;a Islami
+                  Yanbu'a Islami
                 </span>
               </div>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
@@ -281,8 +281,8 @@ const RegistrationPage = () => {
                 RTQ Al-Hikmah
               </h1>
               <p className="text-lg md:text-xl text-gray-600 mb-8">
-                Bimbingan membaca Al-Qur&#39;an untuk anak usia dini dengan
-                metode Yanbu&#39;a
+                Bimbingan membaca Al-Qur'an untuk anak usia dini dengan metode
+                Yanbu'a
               </p>
             </div>
           </div>

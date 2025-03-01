@@ -3,16 +3,15 @@ import React, { useEffect, useState } from "react";
 import { useDashboard } from "@/hooks/admin/dashboard/useDashboard";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2,
-  CalendarDays,
-  CalendarCheck,
-  Calendar,
-  TrendingUp,
-  Users,
-  Activity,
-} from "lucide-react";
+  FiLoader,
+  FiCalendar,
+  FiCheckSquare,
+  FiTrendingUp,
+  FiUsers,
+  FiActivity,
+  FiRefreshCw,
+} from "react-icons/fi";
 import { toast } from "react-toastify";
-import { FiRefreshCw } from "react-icons/fi";
 import {
   ResponsiveContainer,
   BarChart,
@@ -77,7 +76,7 @@ const DashboardPage: React.FC = () => {
   if (loading && !stats.chartData.length) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <Loader2 className="animate-spin h-12 w-12 text-emerald-600 mb-4" />
+        <FiLoader className="animate-spin h-12 w-12 text-emerald-600 mb-4" />
         <p className="text-gray-600 font-medium">Memuat data dashboard...</p>
       </div>
     );
@@ -118,19 +117,19 @@ const DashboardPage: React.FC = () => {
         <TimeRangeButton
           active={stats.timeRange === "daily"}
           onClick={() => handleTimeRangeChange("daily")}
-          icon={<CalendarDays className="w-4 h-4" />}
+          icon={<FiCalendar className="w-4 h-4" />}
           label="7 Hari Terakhir"
         />
         <TimeRangeButton
           active={stats.timeRange === "weekly"}
           onClick={() => handleTimeRangeChange("weekly")}
-          icon={<CalendarCheck className="w-4 h-4" />}
+          icon={<FiCheckSquare className="w-4 h-4" />}
           label="4 Minggu Terakhir"
         />
         <TimeRangeButton
           active={stats.timeRange === "monthly"}
           onClick={() => handleTimeRangeChange("monthly")}
-          icon={<Calendar className="w-4 h-4" />}
+          icon={<FiCalendar className="w-4 h-4" />}
           label="12 Bulan Terakhir"
         />
       </motion.div>
@@ -145,19 +144,19 @@ const DashboardPage: React.FC = () => {
         <StatCard
           title="Total Pengunjung"
           value={stats.totalViews.toLocaleString("id-ID")}
-          icon={<Users className="w-5 h-5 text-purple-500" />}
+          icon={<FiUsers className="w-5 h-5 text-purple-500" />}
           color="purple"
         />
         <StatCard
           title="Pengunjung Hari Ini"
           value={stats.viewsToday.toLocaleString("id-ID")}
-          icon={<TrendingUp className="w-5 h-5 text-emerald-500" />}
+          icon={<FiTrendingUp className="w-5 h-5 text-emerald-500" />}
           color="emerald"
         />
         <StatCard
           title="Pengunjung Minggu Ini"
           value={stats.viewsThisWeek.toLocaleString("id-ID")}
-          icon={<Activity className="w-5 h-5 text-green-500" />}
+          icon={<FiActivity className="w-5 h-5 text-green-500" />}
           color="green"
         />
       </motion.div>
@@ -184,7 +183,7 @@ const DashboardPage: React.FC = () => {
           <div className="w-full h-[300px] md:h-[350px]">
             {loading ? (
               <div className="w-full h-full flex flex-col items-center justify-center">
-                <Loader2 className="w-8 h-8 mb-3 text-emerald-500 animate-spin" />
+                <FiLoader className="w-8 h-8 mb-3 text-emerald-500 animate-spin" />
                 <p className="text-gray-500">Memuat data chart...</p>
               </div>
             ) : (

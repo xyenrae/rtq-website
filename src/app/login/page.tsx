@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "react-toastify";
-import { Eye, EyeOff } from "lucide-react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function Login() {
   const [email, setEmail] = useState<string>("");
@@ -97,7 +97,7 @@ export default function Login() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-6 text-gray-400 hover:text-emerald-600 transition-colors"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </button>
             </div>
           </div>

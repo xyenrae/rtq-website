@@ -2,10 +2,16 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { FiHome, FiSettings, FiMenu, FiX, FiLogOut } from "react-icons/fi";
+import {
+  FiHome,
+  FiSettings,
+  FiMenu,
+  FiX,
+  FiLogOut,
+  FiChevronDown,
+} from "react-icons/fi";
 import { IoPeople } from "react-icons/io5";
 import { FaNewspaper, FaImage } from "react-icons/fa";
-import { ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
@@ -185,7 +191,7 @@ export default function AdminLayout({
                           <span className="text-lg mr-3">{item.icon}</span>
                           <span>{item.name}</span>
                         </div>
-                        <ChevronDown
+                        <FiChevronDown
                           className={`transition-transform duration-200 ${
                             (item.name === "Berita" && openBeritaSubMenu) ||
                             (item.name === "Galeri" && openGaleriSubMenu) ||

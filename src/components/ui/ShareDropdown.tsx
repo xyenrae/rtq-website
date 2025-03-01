@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Printer, X, ChevronDown } from "lucide-react";
+import { FiCopy, FiPrinter, FiX, FiChevronDown } from "react-icons/fi";
 import {
   FaTwitter,
   FaShare,
@@ -8,6 +8,7 @@ import {
   FaWhatsapp,
   FaLinkedin,
 } from "react-icons/fa";
+import Image from "next/image";
 
 type ShareDropdownProps = {
   title: string;
@@ -74,7 +75,7 @@ const ShareDropdown: React.FC<ShareDropdownProps> = ({ title, url }) => {
       >
         <FaShare className="w-5 h-5" />
         <span className="hidden sm:inline">Bagikan</span>
-        <ChevronDown
+        <FiChevronDown
           className={`w-4 h-4 transition-transform duration-300 ${
             isOpen ? "rotate-180" : ""
           }`}
@@ -99,7 +100,7 @@ const ShareDropdown: React.FC<ShareDropdownProps> = ({ title, url }) => {
                   onClick={() => setIsOpen(false)}
                   className="text-gray-400 hover:text-gray-600"
                 >
-                  <X className="w-4 h-4" />
+                  <FiX className="w-4 h-4" />
                 </button>
               </div>
 
@@ -152,7 +153,7 @@ const ShareDropdown: React.FC<ShareDropdownProps> = ({ title, url }) => {
                   onClick={handleCopyLink}
                   className="w-full flex items-center space-x-2 p-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  <Copy className="w-5 h-5" />
+                  <FiCopy className="w-5 h-5" />
                   <span className="text-sm">Salin Link</span>
                 </motion.button>
 
@@ -162,7 +163,7 @@ const ShareDropdown: React.FC<ShareDropdownProps> = ({ title, url }) => {
                   onClick={handlePrint}
                   className="w-full flex items-center space-x-2 p-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
                 >
-                  <Printer className="w-5 h-5" />
+                  <FiPrinter className="w-5 h-5" />
                   <span className="text-sm">Cetak PDF</span>
                 </motion.button>
               </div>

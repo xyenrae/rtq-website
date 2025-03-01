@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { FiChevronDown } from "react-icons/fi";
 import Image from "next/image";
 import { motion } from "framer-motion";
 
@@ -63,7 +63,7 @@ export default function KenaliKami() {
                 >
                   {item.title}
                 </h3>
-                <ChevronDown
+                <FiChevronDown
                   className={`text-gray-600 transform transition-transform ${
                     activeIndex === index ? "rotate-180" : ""
                   }`}

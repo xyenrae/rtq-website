@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Eye, Calendar, ChevronLeft, Clock } from "lucide-react";
+import { FiEye, FiCalendar, FiChevronLeft, FiClock } from "react-icons/fi";
 import { FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
 import { useKategori } from "@/hooks/santri/berita/useBeritaKategori";
 import ShareDropdown from "@/components/ui/ShareDropdown";
@@ -18,9 +18,9 @@ interface Berita {
   konten: string;
   views: number;
   gambar?: string;
-  kategori_id: string; // Diubah dari optional menjadi wajib
+  kategori_id: string;
   ringkasan?: string;
-  waktu_baca: number; // Diubah dari optional menjadi wajib
+  waktu_baca: number;
   kategori?: {
     nama: string;
   };
@@ -131,7 +131,7 @@ export default function BeritaDetailPage() {
             href="/berita"
             className="inline-flex items-center text-gray-600 hover:text-green-600 transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 mr-2" />
+            <FiChevronLeft className="w-5 h-5 mr-2" />
             Kembali ke Berita
           </Link>
         </div>
@@ -190,7 +190,7 @@ export default function BeritaDetailPage() {
                           )}
                           {/* Interactive Time Widget */}
                           <div className="flex items-center space-x-2 text-gray-600">
-                            <Calendar className="w-5 h-5" />
+                            <FiCalendar className="w-5 h-5" />
                             <span className="font-medium">
                               {new Date(
                                 beritaDetail.created_at
@@ -203,7 +203,7 @@ export default function BeritaDetailPage() {
                             </span>
                           </div>
                           <div className="hidden lg:flex items-center space-x-1.5 text-gray-600 ml-2">
-                            <Eye className="w-5 h-5" />
+                            <FiEye className="w-5 h-5" />
                             <span className="font-medium">
                               {beritaDetail.views}
                             </span>
@@ -212,7 +212,7 @@ export default function BeritaDetailPage() {
 
                         <div className="hidden lg:flex items-center space-x-3">
                           <div className="flex items-center space-x-1.5 text-gray-600">
-                            <Clock className="w-5 h-5" />
+                            <FiClock className="w-5 h-5" />
                             <span className="font-medium">
                               {estimateReadTime(beritaDetail.konten)} min read
                             </span>
@@ -221,13 +221,13 @@ export default function BeritaDetailPage() {
                       </div>
                       <div className="flex -mt-4 mb-4 lg:hidden justify-between">
                         <div className="flex items-center space-x-1.5 text-gray-600">
-                          <Clock className="w-5 h-5" />
+                          <FiClock className="w-5 h-5" />
                           <span className="font-medium">
                             {estimateReadTime(beritaDetail.konten)} min read
                           </span>
                         </div>
                         <div className="flex lg:hidden items-center space-x-1.5 text-gray-600 ml-2">
-                          <Eye className="w-5 h-5" />
+                          <FiEye className="w-5 h-5" />
                           <span className="font-medium">
                             {beritaDetail.views}
                           </span>
@@ -338,7 +338,7 @@ export default function BeritaDetailPage() {
                         {item.judul}
                       </h3>
                       <p className="text-sm text-gray-500 mt-2 flex items-center">
-                        <Calendar className="w-4 h-4 mr-1" />
+                        <FiCalendar className="w-4 h-4 mr-1" />
                         {formatDate(item.created_at)}
                       </p>
                     </div>

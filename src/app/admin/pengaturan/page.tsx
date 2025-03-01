@@ -1,16 +1,14 @@
 "use client";
 import { usePengaturan } from "@/hooks/admin/pengaturan/usePengaturan";
 import {
-  Loader2,
-  Save,
-  Mail,
-  Home,
-  Phone,
-  Facebook,
-  Youtube,
-  Instagram,
-  Settings,
-} from "lucide-react";
+  FiLoader,
+  FiSave,
+  FiMail,
+  FiHome,
+  FiPhone,
+  FiSettings,
+} from "react-icons/fi";
+import { FaFacebook, FaYoutube, FaInstagram } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -51,7 +49,7 @@ const PengaturanPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="animate-spin h-12 w-12 text-gray-600" />
+        <FiLoader className="animate-spin h-12 w-12 text-gray-600" />
       </div>
     );
   }
@@ -60,7 +58,7 @@ const PengaturanPage = () => {
     <div className="p-8 mx-auto">
       <ToastContainer />
       <div className="text-3xl font-bold text-gray-800 mb-8 flex items-center gap-2">
-        <Settings className="w-8 h-8" />
+        <FiSettings className="w-8 h-8" />
         Pengaturan Website
       </div>
 
@@ -69,7 +67,7 @@ const PengaturanPage = () => {
           {/* Email */}
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-50">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Mail className="inline-block mr-2 h-5 w-5" />
+              <FiMail className="inline-block mr-2 h-5 w-5" />
               Email
             </label>
             <input
@@ -84,7 +82,7 @@ const PengaturanPage = () => {
           {/* Phone Number */}
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-50">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Phone className="inline-block mr-2 h-5 w-5" />
+              <FiPhone className="inline-block mr-2 h-5 w-5" />
               Nomor Telepon
             </label>
             <input
@@ -92,14 +90,14 @@ const PengaturanPage = () => {
               name="phone_number"
               value={formData.phone_number}
               onChange={handleChange}
-              className="mt-1 "
+              className="mt-1"
             />
           </div>
 
           {/* Address */}
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-50 md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Home className="inline-block mr-2 h-5 w-5" />
+              <FiHome className="inline-block mr-2 h-5 w-5" />
               Alamat
             </label>
             <input
@@ -107,7 +105,7 @@ const PengaturanPage = () => {
               name="alamat"
               value={formData.alamat}
               onChange={handleChange}
-              className="mt-1 "
+              className="mt-1"
             />
           </div>
 
@@ -119,7 +117,7 @@ const PengaturanPage = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Facebook className="inline-block mr-2 h-5 w-5" />
+                  <FaFacebook className="inline-block mr-2 h-5 w-5" />
                   Facebook
                 </label>
                 <input
@@ -127,13 +125,13 @@ const PengaturanPage = () => {
                   name="link_facebook"
                   value={formData.link_facebook}
                   onChange={handleChange}
-                  className="mt-1 "
+                  className="mt-1"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Youtube className="inline-block mr-2 h-5 w-5" />
+                  <FaYoutube className="inline-block mr-2 h-5 w-5" />
                   YouTube
                 </label>
                 <input
@@ -141,13 +139,13 @@ const PengaturanPage = () => {
                   name="link_youtube"
                   value={formData.link_youtube}
                   onChange={handleChange}
-                  className="mt-1 "
+                  className="mt-1"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Instagram className="inline-block mr-2 h-5 w-5" />
+                  <FaInstagram className="inline-block mr-2 h-5 w-5" />
                   Instagram
                 </label>
                 <input
@@ -155,7 +153,7 @@ const PengaturanPage = () => {
                   name="link_instagram"
                   value={formData.link_instagram}
                   onChange={handleChange}
-                  className="mt-1 "
+                  className="mt-1"
                 />
               </div>
             </div>
@@ -166,7 +164,7 @@ const PengaturanPage = () => {
           type="submit"
           className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
-          <Save className="w-5 h-5" />
+          <FiSave className="w-5 h-5" />
           Simpan Perubahan
         </button>
       </form>
