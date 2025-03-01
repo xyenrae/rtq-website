@@ -1,16 +1,11 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
+import { createClient } from "@/utils/supabase/client";
 
 export async function incrementViews(newsId: string) {
-  // Buat Supabase client
-  const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+  const supabase = createClient();
 
-  // Panggil fungsi RPC yang telah kita buat di database
-  const { data, error } = await supabaseClient.rpc("increment_views", {
+  const { data, error } = await supabase.rpc("increment_views", {
     row_id: newsId,
   });
 
