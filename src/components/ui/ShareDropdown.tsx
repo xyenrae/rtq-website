@@ -8,7 +8,6 @@ import {
   FaWhatsapp,
   FaLinkedin,
 } from "react-icons/fa";
-import Image from "next/image";
 
 type ShareDropdownProps = {
   title: string;
