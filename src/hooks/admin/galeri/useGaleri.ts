@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { z } from "zod";
-import { getImageSize } from "react-image-size"; // pastikan library ini sudah terinstall
+import { getImageSize } from "react-image-size";
 import { createClient } from "@/utils/supabase/client";
 
 // Interface untuk item galeri (sudah termasuk width dan height)
@@ -62,16 +62,26 @@ export function useGallery() {
   // Fungsi untuk mengambil data galeri dari Supabase (join dengan kategori)
   const fetchGallery = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from("galeri")
         .select("*, galeri_kategori:galeri_kategori_id(nama)")
         .order("created_at", { ascending: false });
+
+      // Tambahkan filter berdasarkan kategori jika selectedCategory bukan "all"
+      if (selectedCategory !== "all") {
+        query = query.eq("galeri_kategori_id", selectedCategory);
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
       setGalleryItems(data || []);
-    } catch {
+    } catch (error) {
       toast.error("Gagal memuat galeri");
+      console.error("Error fetching gallery:", error);
     }
-  }, [supabase]);
+  }, [supabase, selectedCategory]); // Tambahkan selectedCategory sebagai dependency
+
   // Fungsi untuk mengambil data kategori
   const fetchCategories = useCallback(async () => {
     try {
@@ -80,15 +90,18 @@ export function useGallery() {
         .select("id, nama");
       if (error) throw error;
       setCategories(data || []);
-    } catch {
+    } catch (error) {
       toast.error("Gagal memuat kategori");
+      console.error("Error fetching categories:", error);
     }
   }, [supabase]);
+
   // Ambil data galeri dan kategori saat komponen dirender atau saat kategori berubah
   useEffect(() => {
     fetchGallery();
     fetchCategories();
   }, [selectedCategory, fetchGallery, fetchCategories]);
+
   // Fungsi untuk pengurutan data
   const requestSort = (key: keyof GalleryItem) => {
     let direction: "asc" | "desc" = "asc";
@@ -133,6 +146,11 @@ export function useGallery() {
     currentPage * itemsPerPage
   );
 
+  // Reset halaman ke 1 saat kategori berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory, searchTerm]);
+
   // Fungsi untuk submit form (tambah atau edit)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,8 +181,9 @@ export function useGallery() {
       setFormData(formInitState);
       setImagePreview(null);
       await fetchGallery();
-    } catch {
+    } catch (error) {
       toast.error("Gagal menyimpan data");
+      console.error("Error saving data:", error);
       if (formData.image) {
         const filePath = formData.image.split("/").pop();
         await supabase.storage.from("galeri-images").remove([filePath || ""]);
@@ -201,7 +220,7 @@ export function useGallery() {
         autoClose: 3000,
       });
       return publicUrl;
-    } catch {
+    } catch (error) {
       // Update toast menjadi error
       toast.update(toastId, {
         render: "Gagal mengupload gambar",
@@ -209,6 +228,7 @@ export function useGallery() {
         isLoading: false,
         autoClose: 3000,
       });
+      console.error("Error uploading image:", error);
       throw new Error("Gagal mengupload gambar");
     }
   };
@@ -230,8 +250,9 @@ export function useGallery() {
       if (error) throw error;
       toast.success("Item berhasil dihapus");
       await fetchGallery();
-    } catch {
+    } catch (error) {
       toast.error("Gagal menghapus item");
+      console.error("Error deleting item:", error);
     }
   };
 
