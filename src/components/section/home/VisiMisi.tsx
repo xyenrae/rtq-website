@@ -19,12 +19,6 @@ export default function VisiMisi() {
       <div className="bg-yellow-400 w-full absolute bottom-0 h-4 z-20"></div>
       <div className="bg-green-500 opacity-90 w-full h-full absolute inset-0 z-10"></div>
       <div className="absolute inset-0">
-        <Image
-          src="/images/gallery-1.png"
-          alt="Visi Misi Background"
-          fill
-          className="object-cover object-center"
-        />
       </div>
 
       <div className="relative z-20 container flex flex-col sm:items-center">
